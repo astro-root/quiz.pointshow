@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Lucky Shot</title>
+  <style>
+    body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
+    .settings { background: #fff; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+    .settings input { width: 60px; margin: 0 10px; }
+    .settings button { padding: 6px 12px; margin-left: 10px; }
+    .players { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .player { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 140px; display: flex; flex-direction: column; align-items: center; }
+    .player .name {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      font-size: 16px;
+      margin-bottom: 6px;
+      height: 100px;
+      border: none;
+      background: transparent;
+      width: 20px;
+    }
+    .player .current-points {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 8px 0;
+    }
+    .player .score { font-weight: bold; font-size: 32px; margin: 4px 0; }
+    .player .status { font-size: 16px; height: 24px; color: #333; margin-bottom: 6px; }
+    .player .actions { display: flex; flex-direction: column; gap: 4px; }
+    .player .actions button { padding: 6px 10px; }
+    #nextBtn { display: block; margin: 20px auto; padding: 8px 16px; }
+    .disabled { opacity: 0.5; pointer-events: none; }
+  </style>
+</head>
+<body>
+    <h1>Lucky Shot</h1>
+  <div class="settings">
+    最大ポイント: <input type="number" id="maxPoint" value="10">
+    プレイヤー数: <input type="number" id="playerCount" value="6" min="1" max="20">
+    勝ち抜け: <input type="number" id="winScore" value="50">
+    失格: <input type="number" id="loseScore" value="-20">
+    <button id="setupBtn">設定</button>
+    <button id="resetAllBtn">リセット</button>
+  </div>
+  <div class="players" id="playersContainer"></div>
+  <button id="nextBtn">次の問題</button>
+  <script>
+    const setupBtn = document.getElementById('setupBtn');
+    const resetAllBtn = document.getElementById('resetAllBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const container = document.getElementById('playersContainer');
+    let players = [];
+    let winScore = 50, loseScore = -20;
+
+    setupBtn.addEventListener('click', setupGame);
+    resetAllBtn.addEventListener('click', () => setupGame());
+    nextBtn.addEventListener('click', newQuestion);
+
+    function setupGame() {
+      const count = parseInt(document.getElementById('playerCount').value);
+      winScore = parseInt(document.getElementById('winScore').value);
+      loseScore = parseInt(document.getElementById('loseScore').value);
+      container.innerHTML = '';
+      players = [];
+      for (let i = 0; i < count; i++) {
+        const div = document.createElement('div'); div.className = 'player';
+        const inp = document.createElement('input');
+        inp.type = 'text'; inp.placeholder = `プレイヤー${i+1}`; inp.className = 'name';
+        const score = document.createElement('div'); score.className = 'score'; score.textContent = '0';
+        const status = document.createElement('div'); status.className = 'status'; status.textContent = '';
+        const pointsDisplay = document.createElement('div'); pointsDisplay.className = 'current-points'; pointsDisplay.textContent = '-';
+        const actions = document.createElement('div'); actions.className = 'actions';
+        const btnC = document.createElement('button'); btnC.textContent = '◯ 正解';
+        const btnW = document.createElement('button'); btnW.textContent = '× 誤答';
+        const btnU = document.createElement('button'); btnU.textContent = '戻る';
+        const history = [];
+        btnC.onclick = () => answer(i, true);
+        btnW.onclick = () => answer(i, false);
+        btnU.onclick = () => undo(i);
+        actions.append(btnC, btnW, btnU);
+        div.append(inp, score, status, pointsDisplay, actions);
+        container.append(div);
+        players.push({ inp, score, status, pointsDisplay, actions, btnC, btnW, btnU, scoreVal: 0, correctPt: 0, wrongPt: 0, history });
+      }
+      newQuestion();
+    }
+
+    function newQuestion() {
+      const m = parseInt(document.getElementById('maxPoint').value);
+      players.forEach(p => {
+        const correctPt = Math.floor(Math.random() * m) + 1;
+        const wrongPt = Math.floor(Math.random() * m) + 1;
+        p.correctPt = correctPt;
+        p.wrongPt = wrongPt;
+        p.pointsDisplay.textContent = `◯${correctPt} / ×${wrongPt}`;
+        p.btnC.classList.remove('disabled');
+        p.btnW.classList.remove('disabled');
+      });
+    }
+
+    function answer(idx, isCorrect) {
+      const p = players[idx];
+      p.history.push({ scoreVal: p.scoreVal });
+      if (isCorrect) p.scoreVal += p.correctPt;
+      else p.scoreVal -= p.wrongPt;
+      p.score.textContent = p.scoreVal;
+      if (p.scoreVal >= winScore) {
+        p.status.textContent = '勝ち抜け！'; disablePlayer(p);
+      } else if (p.scoreVal <= loseScore) {
+        p.status.textContent = '失格'; disablePlayer(p);
+      }
+      setTimeout(newQuestion, 200);
+    }
+
+    function undo(idx) {
+      const p = players[idx]; if (p.history.length === 0) return;
+      const prev = p.history.pop(); p.scoreVal = prev.scoreVal;
+      p.score.textContent = p.scoreVal;
+      p.status.textContent = '';
+      p.btnC.classList.remove('disabled'); p.btnW.classList.remove('disabled');
+    }
+
+    function disablePlayer(p) {
+      p.btnC.classList.add('disabled'); p.btnW.classList.add('disabled'); p.btnU.classList.add('disabled');
+    }
+
+    setupGame();
+  </script>
+</body>
+</html>

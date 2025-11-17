@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Ex Round：3 Wave</title>
+<style>
+  :root{
+    --bg:#0b0b0d;
+    --accent:#ffd400;
+    --muted:#9aa3a6;
+    --lose-top:#1e6fb7;
+    --lose-bottom:#8b8b8b;
+    --card-bg:#07110a;
+  }
+  /* 画面全体に収める設定 */
+  html,body{height:100vh;margin:0;background:var(--bg);color:#fff;font-family:"Noto Sans JP",sans-serif;overflow:hidden;}
+  header{
+    display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#042347;border-bottom:3px solid #041e3a;flex:0 0 60px;
+  }
+  .hdr-left{display:flex;gap:14px;align-items:center}
+  .title{font-weight:700;font-size:18px}
+  .qcount{font-size:16px}
+  .hdr-right{display:flex;gap:8px;align-items:center}
+  .meta-box{background:#0e1420;padding:6px 10px;border-radius:6px;font-weight:700}
+  .small-input{width:56px;padding:6px;border-radius:6px;border:1px solid #233;background:#0d1620;color:#fff}
+  .container{padding:10px;box-sizing:border-box;height:calc(100vh - 60px);display:flex;flex-direction:column;}
+  .controls{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+  .controls label{font-size:13px;color:var(--muted)}
+  /* 横一列、折り返さずに必ず収める（カード幅を JS で調整） */
+  .positions-area{
+    display:flex;
+    flex-wrap:nowrap;
+    gap:10px;
+    align-items:flex-start;
+    justify-content:flex-start;
+    height:100%;
+    box-sizing:border-box;
+    padding-bottom:6px;
+    overflow:hidden; /* スクロールさせない */
+  }
+  /* カード：幅は JS で決める（min/maxをCSSで） */
+  .card{
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    box-sizing:border-box;
+    height:100%;
+    min-width:72px; /* 最小幅（読みやすさとのトレードオフ） */
+    max-width:300px;
+    background:linear-gradient(var(--card-bg), #07180f);
+    border-radius:6px;
+    padding:0;
+    color:#fff;
+    border:1px solid rgba(255,255,255,0.03);
+  }
+  .card.lost{
+    background: linear-gradient(var(--lose-top), var(--lose-bottom));
+    color:#eef;
+    border:2px solid rgba(255,255,255,0.06);
+  }
+  .paper-rank{height:44px;background:#072b55;text-align:center;padding:6px;font-weight:800;border-top-left-radius:6px;border-top-right-radius:6px;font-size:18px;display:flex;align-items:center;justify-content:center;}
+  .school{height:56px;background:#1e1e1e;text-align:center;padding:6px;font-size:15px;color:#fff;line-height:1.1;font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .name-area{flex:1;display:flex;align-items:center;justify-content:center;padding:6px;min-height:120px}
+  .name-vertical{writing-mode:vertical-rl;text-orientation:mixed;font-size:20px;font-weight:900;letter-spacing:1px}
+  .score-area{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px}
+  .points{width:64px;height:36px;background:#222;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:900;font-size:20px}
+  .wrong{height:18px;color:#ffb3b3;font-weight:800;font-size:14px}
+  /* ボタン群は縦に並べ、被らないよう固定 */
+  .buttons{display:flex;flex-direction:column;gap:6px;padding:8px;flex-shrink:0}
+  .buttons button{padding:8px;border-radius:6px;border:0;background:#173a1f;color:#fff;cursor:pointer;font-size:14px;white-space:nowrap}
+  .buttons .wrongBtn{background:#5a1212}
+  .buttons .undoBtn{background:#2b2b2b}
+  button:disabled{opacity:0.45;cursor:default}
+  .pos-selects{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+  .pos-selects select{background:#081017;color:#fff;padding:6px;border-radius:6px;font-size:13px}
+  /* 小さい幅向けの調整 */
+  @media (max-width:900px){
+    .name-vertical{font-size:14px}
+    .points{width:52px;height:32px;font-size:16px}
+    .paper-rank{font-size:16px;height:40px}
+    .school{font-size:13px;height:48px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="hdr-left">
+    <div class="title">Ex Round：3 Wave</div>
+    <div class="qcount">Q. <span id="qCount" style="font-weight:700">1</span></div>
+  </div>
+
+  <div class="hdr-right">
+    <div class="meta-box" id="peopleOutBox">0 ▶ 1</div>
+    <label style="color:var(--muted);font-size:13px">抜け人数:
+      <input id="numOutInput" class="small-input" type="number" min="0" value="1" />
+    </label>
+    <button id="skipBtn" style="padding:6px 8px;border-radius:6px;border:0;background:#4a4a4a;cursor:pointer">スルー</button>
+    <button id="undoBtn" style="padding:6px 8px;border-radius:6px;border:0;background:#6b3b3b;cursor:pointer">Undo</button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="controls">
+    <label>CSV：
+      <input type="file" id="csvfile" accept=".csv" />
+    </label>
+    <label>参加人数:
+      <input type="number" id="numPlayers" min="1" value="12" style="width:80px" />
+    </label>
+    <button id="setupPositions">リセット</button>
+    <button id="autoAssign">順位を自動割当</button>
+  </div>
+
+  <div id="rankSelectors" class="pos-selects" aria-hidden="false"></div>
+
+  <div class="positions-area" id="positions" aria-live="polite"></div>
+</div>
+
+<script>
+/* ---- CSV parser ---- */
+function parseCSV(text){
+  const lines = text.trim().split(/\r?\n/).map(l=>l.trim()).filter(l=>l!=='');
+  const out = [];
+  for(let i=0;i<lines.length;i++){
+    const row = lines[i].split(',').map(s=>s.trim());
+    if(row.length < 4) continue;
+    const rank = parseInt(row[0],10);
+    if(isNaN(rank)) continue;
+    out.push({ rank: rank, name: row[1], school: row[2], grade: row[3] });
+  }
+  return out;
+}
+function ordinalFixed(n){
+  const v = n % 100;
+  if (v === 11 || v === 12 || v === 13) return n + "th";
+  const rem = n % 10;
+  if (rem === 1) return n + "st";
+  if (rem === 2) return n + "nd";
+  if (rem === 3) return n + "rd";
+  return n + "th";
+}
+
+/* ---- state ---- */
+let csvPlayers = [];
+let numSlots = 12;
+let slots = [];
+let history = []; // 操作履歴（undo用）
+let actionCountThisQ = 0; // スルー/正解/誤答 の合計
+let questionNumber = 1;
+
+/* ---- dom ---- */
+const csvInput = document.getElementById('csvfile');
+const numPlayersInput = document.getElementById('numPlayers');
+const setupBtn = document.getElementById('setupPositions');
+const rankSelectorsDiv = document.getElementById('rankSelectors');
+const positionsDiv = document.getElementById('positions');
+const autoAssignBtn = document.getElementById('autoAssign');
+const qCountSpan = document.getElementById('qCount');
+const peopleOutBox = document.getElementById('peopleOutBox');
+const numOutInput = document.getElementById('numOutInput');
+const skipBtn = document.getElementById('skipBtn');
+const undoBtn = document.getElementById('undoBtn');
+
+csvInput.addEventListener('change', ev=>{
+  const f = ev.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    csvPlayers = parseCSV(e.target.result);
+    csvPlayers.sort((a,b)=>a.rank-b.rank);
+    alert('CSV 読み込み完了: ' + csvPlayers.length + ' 件');
+    renderAllSelectors();
+  };
+  reader.readAsText(f, 'utf-8');
+});
+
+/* 参加人数入力で即時表示更新（スロット再展開はボタンで） */
+numPlayersInput.addEventListener('input', () => {
+  const v = Math.max(1, parseInt(numPlayersInput.value||'1',10));
+  numSlots = v;
+  updatePeopleOutBox();
+});
+
+/* 抜け人数入力で即時表示更新 */
+numOutInput.addEventListener('input', updatePeopleOutBox);
+
+setupBtn.addEventListener('click', ()=>{
+  numSlots = Math.max(1, parseInt(numPlayersInput.value || '1',10));
+  initSlots(numSlots);
+  renderAllSelectors();
+  renderPositions();
+  updateHeader();
+});
+
+autoAssignBtn.addEventListener('click', ()=>{
+  for(let i=0;i<numSlots;i++){
+    const rk = i+1;
+    const sel = document.getElementById('sel_slot_' + i);
+    if(sel){
+      sel.value = rk;
+      onSlotSelectChange(i, rk);
+    }
+  }
+  renderPositions();
+});
+
+skipBtn.addEventListener('click', ()=>{
+  history.push({type:'skip'});
+  actionCountThisQ++;
+  updateHeader();
+});
+
+undoBtn.addEventListener('click', ()=>{
+  if(history.length===0){ alert('履歴がありません。'); return; }
+  const entry = history.pop();
+  restoreEntry(entry);
+  renderPositions();
+  updateHeader();
+});
+
+/* 初期化 */
+function initSlots(n){
+  slots = [];
+  history = [];
+  actionCountThisQ = 0;
+  for(let i=0;i<n;i++){
+    slots.push({ csvIndex: null, points: 0, lose: false, wrongCount: 0 });
+  }
+}
+
+/* セレクタ描画 */
+function renderAllSelectors(){
+  rankSelectorsDiv.innerHTML = '';
+  for(let i=0;i<numSlots;i++){
+    const sel = document.createElement('select');
+    sel.id = 'sel_slot_' + i;
+    const empty = document.createElement('option'); empty.value=''; empty.textContent='—';
+    sel.appendChild(empty);
+    csvPlayers.forEach(p=>{
+      const opt = document.createElement('option');
+      opt.value = p.rank;
+      opt.textContent = `${ordinalFixed(p.rank)} : ${p.name}`;
+      sel.appendChild(opt);
+    });
+    sel.addEventListener('change',(ev)=>{
+      const val = ev.target.value;
+      onSlotSelectChange(i, val ? parseInt(val,10): null);
+    });
+    const wrapper = document.createElement('div');
+    wrapper.style.display='flex'; wrapper.style.alignItems='center'; wrapper.style.gap='6px';
+    wrapper.innerHTML = `<div style="color:var(--muted);font-size:13px">Pos ${i+1}</div>`;
+    wrapper.appendChild(sel);
+    rankSelectorsDiv.appendChild(wrapper);
+  }
+}
+
+/* スロットに順位割当 */
+function onSlotSelectChange(slotIndex, rankValue){
+  if(!rankValue){
+    slots[slotIndex].csvIndex = null;
+    slots[slotIndex].points = 0;
+    slots[slotIndex].lose = false;
+    slots[slotIndex].wrongCount = 0;
+    renderPositions();
+    return;
+  }
+  const idx = csvPlayers.findIndex(p=>p.rank === rankValue);
+  if(idx === -1){ alert('CSV にその順位は存在しません: ' + rankValue); return; }
+  slots[slotIndex].csvIndex = idx;
+  renderPositions();
+}
+
+/* カード描画：カード幅を計算して必ずビューポート幅に収める */
+function renderPositions(){
+  positionsDiv.innerHTML = '';
+
+  // 利用可能幅の計算（左右パディングなどを考慮）
+  const totalGap = 10 * Math.max(0, numSlots - 1); // gap between cards
+  const sidePadding = 20; // header/container padding考慮分
+  const avail = Math.max(200, window.innerWidth - sidePadding);
+  // 算出幅（小さくなりすぎないよう minWidth を設定）
+  const minWidth = 72;
+  let cardWidth = Math.floor((avail - totalGap) / Math.max(1, numSlots));
+  if (cardWidth < minWidth) cardWidth = minWidth; // 最低幅を確保（読みづらい場合はフォント縮小する）
+  // もし計算上 cardWidth * numSlots + gaps > avail（最悪ケース）、縮小フォントで対応は可能だがここでは優先的にカード幅をminWidthに
+  // set each card
+  for(let i=0;i<slots.length;i++){
+    const card = createCard(i);
+    card.style.width = cardWidth + 'px';
+    positionsDiv.appendChild(card);
+  }
+  updateHeader();
+}
+
+/* カード生成 */
+function createCard(i){
+  const s = slots[i];
+  const card = document.createElement('div');
+  card.className = 'card' + (s.lose ? ' lost' : '');
+  const rankText = s.csvIndex !== null ? ordinalFixed(csvPlayers[s.csvIndex].rank) : '—';
+  const schoolText = s.csvIndex !== null ? (csvPlayers[s.csvIndex].school + ' ' + csvPlayers[s.csvIndex].grade) : '';
+  const nameText = s.csvIndex !== null ? csvPlayers[s.csvIndex].name : '（未設定）';
+  const pointsText = s.lose ? 'Lose' : (typeof s.points === 'number' ? s.points : '0');
+
+  card.innerHTML = `
+    <div class="paper-rank">${rankText}</div>
+    <div class="school">${schoolText}</div>
+    <div class="name-area"><div class="name-vertical">${escapeHtml(nameText)}</div></div>
+    <div class="score-area">
+      <div class="points">${pointsText}</div>
+      <div class="wrong">${'×'.repeat(s.wrongCount)}</div>
+    </div>
+    <div class="buttons" id="btns_${i}">
+      <button class="correctBtn">正解</button>
+      <button class="wrongBtn">誤答</button>
+      <button class="undoBtn">戻る</button>
+    </div>
+  `;
+
+  const correctBtn = card.querySelector('.correctBtn');
+  const wrongBtn = card.querySelector('.wrongBtn');
+  const undoBtn = card.querySelector('.undoBtn');
+  if(s.csvIndex === null){
+    correctBtn.disabled = true;
+    wrongBtn.disabled = true;
+    undoBtn.disabled = true;
+  } else {
+    correctBtn.disabled = s.lose;
+    wrongBtn.disabled = s.lose;
+    undoBtn.disabled = false;
+    correctBtn.onclick = ()=>onCorrect(i);
+    wrongBtn.onclick = ()=>onWrong(i);
+    undoBtn.onclick = ()=>onUndoForPlayer(i);
+  }
+  return card;
+}
+
+/* ルール（ご指定通り）
+   - 直前点が 3 のとき：自分は増やさない、他全員を -1（マイナス許容）
+   - 直前点が 2 以下のとき：自分に +1
+   - 誤答 -> Lose（失格）
+*/
+function onCorrect(slotIndex){
+  const s = slots[slotIndex];
+  if(!s || s.csvIndex===null) return;
+  if(s.lose) return;
+  const before = { slotIndex, prevPoints: s.points, prevLose: s.lose, prevWrong: s.wrongCount, affected: [] };
+  const prior = typeof s.points === 'number' ? s.points : 0;
+  if(prior === 3){
+    for(let j=0;j<slots.length;j++){
+      if(j===slotIndex) continue;
+      if(slots[j].csvIndex===null) continue;
+      if(slots[j].lose) continue;
+      before.affected.push({ idx: j, prevPoints: slots[j].points });
+      slots[j].points = (typeof slots[j].points === 'number' ? slots[j].points : 0) - 1;
+    }
+  } else {
+    s.points = prior + 1;
+  }
+  actionCountThisQ++;
+  history.push({ type:'correct', data: before });
+  renderPositions();
+  updateHeader();
+}
+
+function onWrong(slotIndex){
+  const s = slots[slotIndex];
+  if(!s || s.csvIndex===null) return;
+  if(s.lose) return;
+  const before = { slotIndex, prevPoints: s.points, prevLose: s.lose, prevWrong: s.wrongCount };
+  s.wrongCount = (s.wrongCount||0) + 1;
+  s.lose = true;
+  actionCountThisQ++;
+  history.push({ type:'wrong', data: before });
+  renderPositions();
+  updateHeader();
+}
+
+function onUndoForPlayer(slotIndex){
+  for(let k=history.length-1;k>=0;k--){
+    const entry = history[k];
+    if(entry.data && entry.data.slotIndex === slotIndex){
+      history.splice(k,1);
+      restoreEntry(entry);
+      renderPositions();
+      updateHeader();
+      return;
+    }
+  }
+  alert('このプレイヤーに対する履歴が見つかりません。');
+}
+
+function restoreEntry(entry){
+  if(!entry) return;
+  if(entry.type === 'correct'){
+    const d = entry.data;
+    slots[d.slotIndex].points = d.prevPoints;
+    slots[d.slotIndex].lose = d.prevLose;
+    slots[d.slotIndex].wrongCount = d.prevWrong;
+    if(d.affected && d.affected.length){
+      d.affected.forEach(a=>{
+        slots[a.idx].points = a.prevPoints;
+      });
+    }
+    actionCountThisQ = Math.max(0, actionCountThisQ - 1);
+  } else if(entry.type === 'wrong'){
+    const d = entry.data;
+    slots[d.slotIndex].points = d.prevPoints;
+    slots[d.slotIndex].lose = d.prevLose;
+    slots[d.slotIndex].wrongCount = d.prevWrong;
+    actionCountThisQ = Math.max(0, actionCountThisQ - 1);
+  } else if(entry.type === 'skip'){
+    actionCountThisQ = Math.max(0, actionCountThisQ - 1);
+  }
+}
+
+/* ヘッダ更新：問題数 (actionCountThisQ + 1) を表示、参加（非失格）▶抜け人数 を表示 */
+function updateHeader(){
+  qCountSpan.textContent = String(actionCountThisQ + 1);
+  updatePeopleOutBox();
+}
+
+/* 参加（非失格）▶ 抜け人数 を表示 */
+function updatePeopleOutBox(){
+  let alive = 0;
+  for(let i=0;i<slots.length;i++){
+    if(slots[i].csvIndex !== null && !slots[i].lose) alive++;
+  }
+  if(slots.length === 0) alive = Math.max(0, parseInt(numPlayersInput.value || '0',10));
+  const out = Math.max(0, parseInt(numOutInput.value || '1',10));
+  peopleOutBox.textContent = `${alive} ▶ ${out}`;
+}
+
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* 初期化 */
+(function(){
+  initSlots(numSlots);
+  renderAllSelectors();
+  renderPositions();
+  updateHeader();
+  updatePeopleOutBox();
+  // リサイズでカード幅を再計算（必ず一画面に収める）
+  window.addEventListener('resize', renderPositions);
+})();
+</script>
+</body>
+</html>

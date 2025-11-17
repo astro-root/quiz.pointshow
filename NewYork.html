@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>New York</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      padding: 20px;
+    }
+    .settings {
+      background: #fff;
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .settings input {
+      width: 50px;
+      margin: 0 8px;
+      font-size: 14px;
+    }
+    .settings button {
+      padding: 6px 10px;
+      margin-left: 8px;
+      font-size: 14px;
+    }
+    .players {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 16px;
+      justify-items: center;
+    }
+    .player {
+      background: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      max-width: 140px;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .player input.name {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      font-size: 16px;
+      margin-bottom: 10px;
+      width: 40px;
+      height: 100px;
+      padding: 4px;
+      border: none;
+      background: transparent;
+    }
+    .player .score {
+      font-size: 28px;
+      margin: 10px 0;
+      font-weight: bold;
+      color: #333;
+    }
+    .player button {
+      margin: 4px 0;
+      padding: 6px 12px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      transition: background-color 0.2s ease;
+      width: 100%;
+    }
+    .player button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+    <h1>New York</h1>
+  <div class="settings">
+    正解: <input type="number" id="plusPoint" value="1">
+    誤答: <input type="number" id="minusPoint" value="1">
+    参加者数: <input type="number" id="playerCount" value="6" min="1" max="20">
+    <button id="startBtn">開始</button>
+    <button id="resetAllBtn">リセット</button>
+  </div>
+  <div class="players" id="playersContainer"></div>
+  <script>
+    const startBtn = document.getElementById('startBtn');
+    const resetAllBtn = document.getElementById('resetAllBtn');
+    const container = document.getElementById('playersContainer');
+    let players = [];
+
+    startBtn.addEventListener('click', setupGame);
+    resetAllBtn.addEventListener('click', () => {
+      players.forEach(player => {
+        player.scoreVal = 0;
+        player.history = [];
+        player.score.textContent = '0';
+      });
+    });
+
+    function setupGame() {
+      const count = parseInt(document.getElementById('playerCount').value);
+      const m = parseInt(document.getElementById('plusPoint').value);
+      const n = parseInt(document.getElementById('minusPoint').value);
+      container.innerHTML = '';
+      players = [];
+
+      for (let i = 0; i < count; i++) {
+        const div = document.createElement('div');
+        div.className = 'player';
+
+        const name = document.createElement('input');
+        name.type = 'text';
+        name.placeholder = `参加者${i+1}`;
+        name.className = 'name';
+
+        const score = document.createElement('div');
+        score.className = 'score';
+        score.textContent = '0';
+
+        const btnC = document.createElement('button');
+        btnC.textContent = '正解';
+
+        const btnW = document.createElement('button');
+        btnW.textContent = '誤答';
+
+        const btnU = document.createElement('button');
+        btnU.textContent = '戻る';
+
+        const history = [];
+        let scoreVal = 0;
+
+        btnC.onclick = () => {
+          history.push(scoreVal);
+          scoreVal += m;
+          score.textContent = scoreVal;
+        };
+
+        btnW.onclick = () => {
+          history.push(scoreVal);
+          scoreVal -= n;
+          score.textContent = scoreVal;
+        };
+
+        btnU.onclick = () => {
+          if (history.length > 0) {
+            scoreVal = history.pop();
+            score.textContent = scoreVal;
+          }
+        };
+
+        div.append(name, score, btnC, btnW, btnU);
+        container.append(div);
+
+        players.push({ scoreVal, score, history });
+      }
+    }
+
+    setupGame();
+  </script>
+</body>
+</html>

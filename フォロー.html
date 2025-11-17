@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>クイズフォローサイト</title>
+  <style>
+    :root{
+      --bg:#000;
+      --text:#fff;
+      --accent:#ffd700;
+      --muted:#bbb;
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", sans-serif;
+    }
+    .wrap{
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:32px;
+      box-sizing:border-box;
+      gap:24px;
+    }
+    .controls{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    input[type=file]{
+      color:var(--text);
+      background:transparent;
+    }
+    button{
+      background:#222;
+      color:var(--text);
+      border:1px solid #444;
+      padding:8px 14px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:14px;
+    }
+    button:disabled{opacity:0.35; cursor:default}
+
+    .card{
+      width:100%;
+      max-width:1100px;
+      text-align:center;
+      padding:28px 24px;
+      box-sizing:border-box;
+    }
+
+    .question{
+      font-weight:600;
+      line-height:1.2;
+      margin-bottom:18px;
+      font-size:clamp(28px,6vw,50px);
+      color:var(--text);
+      word-break:break-word;
+    }
+    .answer{
+      font-weight:500;
+      font-size:clamp(16px,3.6vw,40px);
+      color:var(--accent);
+      margin-bottom:10px;
+    }
+    .alt{
+      margin-bottom:30px;
+      font-size:clamp(14px,3vw,30px);
+      color:var(--text);
+      opacity:0.95;
+    }
+    .meta{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .nav{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      margin-top:10px;
+    }
+    .footer-note{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:8px;
+    }
+    textarea{
+      min-width:320px;
+      max-width:900px;
+      width:100%;
+      min-height:80px;
+      background:#111;
+      color:var(--text);
+      border:1px solid #333;
+      padding:8px;
+      border-radius:6px;
+    }
+    .hint{color:var(--muted); font-size:13px}
+    .jump-area{display:flex; gap:8px; align-items:center}
+    input[type=number]{
+      width:110px; padding:6px; border-radius:6px; border:1px solid #333; background:#111; color:var(--text)
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="controls">
+      <label style="color:var(--text);">CSVを選択： <input id="file" type="file" accept=".csv,text/csv" /></label>
+      <button id="btn-paste">CSVを貼り付けて読み込む</button>
+      <button id="btn-clear">内容をクリア</button>
+    </div>
+
+    <div class="card" id="card">
+      <div class="question" id="question">CSVを読み込んでください</div>
+      <div class="answer" id="answer" style="visibility:hidden">—</div>
+      <div class="alt" id="alt" style="visibility:hidden">—</div>
+
+      <div class="nav">
+        <button id="back" disabled>戻る</button>
+        <button id="next" disabled>次へ</button>
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap">
+        <div class="jump-area">
+          <label for="jumpNum" class="hint">問題番号：</label>
+          <input id="jumpNum" type="number" min="1" placeholder="例: 3" />
+          <button id="jumpBtn">移動</button>
+        </div>
+        <div class="meta" id="meta">0 / 0</div>
+      </div>
+    <div id="pasteArea" style="display:none; width:100%; max-width:900px">
+      <textarea id="csvtext" placeholder="ここにCSVの内容を貼り付けてから下の『読み込む』を押してください"></textarea>
+      <div style="display:flex; gap:8px; margin-top:8px; justify-content:flex-end">
+        <button id="loadText">読み込む</button>
+        <button id="cancelText">キャンセル</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function parseCSV(text){
+      const rows=[];
+      let cur='';
+      let row=[];
+      let inQuotes=false;
+      for(let i=0;i<text.length;i++){
+        const ch=text[i];
+        if(inQuotes){
+          if(ch==='"'){
+            if(i+1<text.length && text[i+1]==='"'){
+              cur += '"';
+              i++;
+            } else {
+              inQuotes=false;
+            }
+          } else {
+            cur += ch;
+          }
+        } else {
+          if(ch==='"'){
+            inQuotes=true;
+          } else if(ch===','){
+            row.push(cur);
+            cur='';
+          } else if(ch==='\r'){
+          } else if(ch==='\n'){
+            row.push(cur);
+            rows.push(row);
+            row=[];
+            cur='';
+          } else {
+            cur += ch;
+          }
+        }
+      }
+      if(inQuotes){
+      }
+      if(cur!=='' || row.length>0){
+        row.push(cur);
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    const fileInput=document.getElementById('file');
+    const questionEl=document.getElementById('question');
+    const answerEl=document.getElementById('answer');
+    const altEl=document.getElementById('alt');
+    const nextBtn=document.getElementById('next');
+    const backBtn=document.getElementById('back');
+    const metaEl=document.getElementById('meta');
+    const btnPaste=document.getElementById('btn-paste');
+    const pasteArea=document.getElementById('pasteArea');
+    const csvtext=document.getElementById('csvtext');
+    const loadText=document.getElementById('loadText');
+    const cancelText=document.getElementById('cancelText');
+    const btnClear=document.getElementById('btn-clear');
+    const jumpNum=document.getElementById('jumpNum');
+    const jumpBtn=document.getElementById('jumpBtn');
+
+    let data=[];
+    let idx=0;
+
+    function showItem(i){
+      if(!data || data.length===0){
+        questionEl.textContent='CSVを読み込んでください';
+        answerEl.style.visibility='hidden';
+        altEl.style.visibility='hidden';
+        metaEl.textContent='0 / 0';
+        nextBtn.disabled=true; backBtn.disabled=true;
+        return;
+      }
+      if(i === -1){
+        questionEl.textContent = '読み込み完了';
+        answerEl.style.visibility='hidden';
+        altEl.style.visibility='hidden';
+        metaEl.textContent = '0 / ' + data.length;
+        backBtn.disabled = true;
+        nextBtn.disabled = false;
+        idx = -1;
+        return;
+      }
+      i=Math.max(0, Math.min(i, data.length-1));
+      idx=i;
+      const item=data[i];
+      questionEl.textContent = (item.q && item.q.trim()!=='') ? item.q : '（問題文が空です）';
+      answerEl.textContent = (item.a && item.a.trim()!=='') ? item.a : '';
+      altEl.textContent = (item.alt && item.alt.trim()!=='') ? item.alt : '';
+      answerEl.style.visibility = (item.a && item.a.trim()!=='') ? 'visible' : 'hidden';
+      altEl.style.visibility = (item.alt && item.alt.trim()!=='') ? 'visible' : 'hidden';
+      metaEl.textContent = (i+1) + ' / ' + data.length;
+      backBtn.disabled = (i<=0);
+      nextBtn.disabled = (i>=data.length-1);
+    }
+
+    function loadFromText(text){
+      if(text && text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+      const rows = parseCSV(text);
+      const mapped=[];
+      for(let r=0;r<rows.length;r++){
+        const row = rows[r].map(c=>c.trim());
+        if(row.every(c=>c==='')) continue;
+        mapped.push(row);
+      }
+      if(mapped.length===0){
+        alert('CSVにデータが見つかりませんでした。');
+        return;
+      }
+      const first = mapped[0];
+      if(first[0] && (first[0].includes('問題') || first[0].includes('問')) && (first[1] && (first[1].includes('解答')||first[1].includes('答')))){
+        mapped.shift();
+      }
+
+      data = mapped.map(row=>({ q: row[0]||'', a: row[1]||'', alt: row[2]||'' }));
+      idx = -1;
+      showItem(-1);
+    }
+
+    fileInput.addEventListener('change', (e)=>{
+      const f = e.target.files[0];
+      if(!f) return;
+      const reader = new FileReader();
+      reader.onload = function(ev){
+        loadFromText(ev.target.result);
+        fileInput.value = '';
+      };
+      reader.readAsText(f, 'utf-8');
+    });
+
+    nextBtn.addEventListener('click', ()=>{
+      if(idx === -1){
+        if(data.length>0) showItem(0);
+        return;
+      }
+      if(idx < data.length-1){ showItem(idx+1); }
+    });
+    backBtn.addEventListener('click', ()=>{
+      if(idx > 0){ showItem(idx-1); }
+    });
+    jumpBtn.addEventListener('click', ()=>{
+      const n = parseInt(jumpNum.value, 10);
+      if(!data || data.length===0){ alert('先にCSVを読み込んでください。'); return; }
+      if(isNaN(n)) { alert('正しい問題番号を入力してください。'); return; }
+      const target = n - 1;
+      if(target < 0 || target >= data.length){ alert('問題番号が範囲外です（1〜' + data.length + '）。'); return; }
+      showItem(target);
+    });
+    window.addEventListener('keydown', (e)=>{
+      if(e.key === 'ArrowRight'){ if(!nextBtn.disabled) nextBtn.click(); }
+      if(e.key === 'ArrowLeft'){ if(!backBtn.disabled) backBtn.click(); }
+    });
+    btnPaste.addEventListener('click', ()=>{
+      pasteArea.style.display = pasteArea.style.display === 'none' ? 'block' : 'none';
+      if(pasteArea.style.display==='block') csvtext.focus();
+    });
+    loadText.addEventListener('click', ()=>{
+      const t = csvtext.value;
+      if(!t || t.trim()==='') { alert('テキストが空です'); return; }
+      loadFromText(t);
+      csvtext.value='';
+      pasteArea.style.display='none';
+    });
+    cancelText.addEventListener('click', ()=>{ csvtext.value=''; pasteArea.style.display='none'; });
+
+    btnClear.addEventListener('click', ()=>{
+      data=[]; idx=0; showItem(0);
+    });
+    window.addEventListener('dragover', (e)=>{ e.preventDefault(); e.dataTransfer.dropEffect='copy'; });
+    window.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if(f){
+        const reader = new FileReader();
+        reader.onload = ev => {
+          loadFromText(ev.target.result);
+        };
+        reader.readAsText(f, 'utf-8');
+      }
+    });
+
+    showItem(0);
+  </script>
+</body>
+</html>

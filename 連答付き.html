@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>連答付き</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f8f9fa;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 40px;
+      margin-bottom: 20px;
+    }
+    .settings {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .settings input {
+      font-size: 18px;
+      width: 60px;
+      text-align: center;
+      margin: 0 10px;
+    }
+    .scoreboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 24px;
+      justify-items: center;
+    }
+    .column {
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 180px;
+    }
+    .name-input {
+      font-size: 22px;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .correct-count {
+      font-size: 52px;
+      margin: 10px 0;
+      color: green;
+      font-weight: bold;
+    }
+    .wrong-count {
+      font-size: 28px;
+      color: red;
+      margin-bottom: 10px;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .btn {
+      font-size: 20px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    .status {
+      font-weight: bold;
+      font-size: 22px;
+      color: blue;
+    }
+  </style>
+</head>
+<body>
+  <h1>連答付き</h1>
+  <div class="settings">
+    勝ち抜け：<input type="number" id="maxCorrectInput" value="5">問　
+    失格：<input type="number" id="maxWrongInput" value="2">問
+    <button id="resetAll" class="btn">リセット</button>
+  </div>
+  <div class="scoreboard" id="scoreboard"></div>
+  <script>
+    const scoreboard = document.getElementById("scoreboard");
+    const resetAllBtn = document.getElementById("resetAll");
+    const maxCorrectInput = document.getElementById("maxCorrectInput");
+    const maxWrongInput = document.getElementById("maxWrongInput");
+    const players = 10;
+
+    function createPlayerColumn() {
+      const col = document.createElement("div");
+      col.className = "column";
+      col.innerHTML = `
+        <input type="text" class="name-input" placeholder="名前">
+        <div class="correct-count">0</div>
+        <div class="wrong-count"></div>
+        <div class="buttons">
+          <button class="btn btn-correct">正解</button>
+          <button class="btn btn-wrong">誤答</button>
+          <button class="btn btn-undo">戻る</button>
+        </div>
+        <div class="status"></div>
+      `;
+
+      let correct = 0;
+      let wrong = 0;
+      let streak = 0;
+      let history = [];
+
+      const correctCount = col.querySelector(".correct-count");
+      const wrongCount = col.querySelector(".wrong-count");
+      const status = col.querySelector(".status");
+      const correctBtn = col.querySelector(".btn-correct");
+      const wrongBtn = col.querySelector(".btn-wrong");
+      const undoBtn = col.querySelector(".btn-undo");
+
+      function updateDisplay() {
+        correctCount.textContent = correct;
+        wrongCount.textContent = "×".repeat(wrong);
+        const maxCorrect = parseInt(maxCorrectInput.value);
+        const maxWrong = parseInt(maxWrongInput.value);
+        status.textContent = correct >= maxCorrect ? "勝ち抜け！" : wrong >= maxWrong ? "失格" : "";
+      }
+
+      correctBtn.addEventListener("click", () => {
+        const maxCorrect = parseInt(maxCorrectInput.value);
+        const maxWrong = parseInt(maxWrongInput.value);
+        if (correct >= maxCorrect || wrong >= maxWrong) return;
+        history.push({ correct, wrong, streak });
+        streak++;
+        correct += (streak === 2) ? 2 : 1;
+        if (streak >= 3) streak = 1;
+        updateDisplay();
+      });
+
+      wrongBtn.addEventListener("click", () => {
+        const maxCorrect = parseInt(maxCorrectInput.value);
+        const maxWrong = parseInt(maxWrongInput.value);
+        if (correct >= maxCorrect || wrong >= maxWrong) return;
+        history.push({ correct, wrong, streak });
+        wrong++;
+        streak = 0;
+        updateDisplay();
+      });
+
+      undoBtn.addEventListener("click", () => {
+        const last = history.pop();
+        if (last) {
+          correct = last.correct;
+          wrong = last.wrong;
+          streak = last.streak;
+          updateDisplay();
+        }
+      });
+
+      col.reset = () => {
+        correct = 0;
+        wrong = 0;
+        streak = 0;
+        history = [];
+        updateDisplay();
+      };
+
+      scoreboard.appendChild(col);
+      return col;
+    }
+
+    const columns = [];
+    for (let i = 0; i < players; i++) {
+      columns.push(createPlayerColumn());
+    }
+
+    resetAllBtn.addEventListener("click", () => {
+      columns.forEach(col => col.reset());
+    });
+  </script>
+</body>
+</html>

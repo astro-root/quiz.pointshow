@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>アタサバ</title>
+  <style>
+    body { margin: 0; font-family: sans-serif; background: #111; color: #eee; }
+    .header, .settings, #status { background: #003366; }
+    .header { display: flex; align-items: center; padding: 10px 20px; }
+    .header h1 { margin: 0; font-size: 1.5em; color: #fff; flex: 1; }
+    .settings { display: flex; align-items: center; gap: 15px; padding: 10px 20px; }
+    .settings label { color: #fff; font-size: 1em; }
+    .settings input { width: 40px; padding: 4px 6px; border: none; border-radius: 4px; }
+    .settings button { background: #D7263D; color: #fff; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+    .players { padding: 10px; }
+    .players table { width: 100%; border-collapse: collapse; }
+    .players th, .players td { border: 1px solid #002F2A; text-align: center; }
+    .players th.top { background: #002F2A; color: #fff; font-size: 0.8em; padding: 4px; }
+    .players th.name { background: #014D40; padding: 8px; height: 120px; }
+    .players th.name input { writing-mode: vertical-rl; text-orientation: upright; border: none; background: transparent; color: #fff; font-size: 1em; width: 100%; height: 100%; box-sizing: border-box; }
+    .players td.life { background: #014D40; padding: 8px; height: 120px; font-size: 2em; line-height: 120px; }
+    .players td.buttons { background: #014D40; padding: 8px; }
+    .players td.buttons button { border: none; color: #fff; font-size: 0.9em; padding: 6px 10px; margin: 0 2px; border-radius: 4px; cursor: pointer; }
+    .players td.buttons button.correct { background: #4CAF50; }
+    .players td.buttons button.wrong   { background: #F44336; }
+    .players td.buttons button.undo    { background: #9E9E9E; }
+    .players td.out { background: #7A1212 !important; }
+    #status { color: #fff; padding: 10px 20px; font-weight: bold; font-size: 1.2em; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>アタサバ</h1>
+  </div>
+  <div class="settings">
+    <label>初期ライフ: <input type="number" id="initLife" value="20"></label>
+    <label>正解時減少: <input type="number" id="deductOthers" value="1"></label>
+    <label>正解者加点: <input type="number" id="bonusCorrect" value="2"></label>
+    <label>誤答時減少: <input type="number" id="deductSelf" value="3"></label>
+    <label>終了人数: <input type="number" id="minPlayers" value="2"></label>
+    <button id="startBtn">ゲーム開始</button>
+    <button id="resetBtn">リセット</button>
+  </div>
+  <div class="players">
+    <table id="playerTable"></table>
+  </div>
+  <div id="status"></div>
+<script>
+  const maxPlayers = 10;
+  let players = [];
+
+  document.getElementById('startBtn').addEventListener('click', initGame);
+  document.getElementById('resetBtn').addEventListener('click', () => initGame(true));
+
+  function initGame(isReset = false) {
+    const m = +document.getElementById('initLife').value;
+    const n = +document.getElementById('deductOthers').value;
+    const a = +document.getElementById('bonusCorrect').value;
+    const b = +document.getElementById('deductSelf').value;
+    const c = +document.getElementById('minPlayers').value;
+
+    players = [];
+    const table = document.getElementById('playerTable');
+    table.innerHTML = '';
+
+    // No. row
+    const rTop = document.createElement('tr');
+    const rName = document.createElement('tr');
+    for (let i = 0; i < maxPlayers; i++) {
+      const thTop = document.createElement('th'); thTop.className = 'top'; thTop.textContent = `No.${i+1}`;
+      rTop.append(thTop);
+      const thName = document.createElement('th'); thName.className = 'name';
+      const inp = document.createElement('input'); inp.type = 'text'; inp.placeholder = `参加者${i+1}`;
+      thName.append(inp); rName.append(thName);
+      players.push({ inp, life: m, wrongCount: 0, active: true, history: [] });
+    }
+    table.append(rTop, rName);
+
+    // Life row
+    const rLife = document.createElement('tr');
+    players.forEach(p => {
+      const td = document.createElement('td'); td.className = 'life'; td.textContent = p.life;
+      rLife.append(td); p.spLife = td;
+    });
+    table.append(rLife);
+
+    // Wrong row
+    const rWrong = document.createElement('tr');
+    players.forEach(p => {
+      const td = document.createElement('td'); td.className = 'wrong'; td.textContent = '';
+      rWrong.append(td); p.spWrong = td;
+    });
+    table.append(rWrong);
+
+    // Buttons row
+    const rBtn = document.createElement('tr');
+    players.forEach((p, idx) => {
+      const td = document.createElement('td'); td.className = 'buttons';
+      const btnC = document.createElement('button'); btnC.textContent = '正解'; btnC.className = 'correct';
+      const btnW = document.createElement('button'); btnW.textContent = '誤答'; btnW.className = 'wrong';
+      const btnU = document.createElement('button'); btnU.textContent = '戻る'; btnU.className = 'undo';
+      btnC.onclick = () => handleCorrect(idx, n, a);
+      btnW.onclick = () => handleWrong(idx, b);
+      btnU.onclick = () => handleUndo(idx);
+      td.append(btnC, btnW, btnU); rBtn.append(td); p.spTd = td;
+    });
+    table.append(rBtn);
+
+    updateAll();
+    updateStatus('ゲーム開始！ 残りプレイヤー: ' + maxPlayers);
+  }
+
+  function handleCorrect(idx, n, a) {
+    players.forEach(p => p.history.push({ life: p.life, wrongCount: p.wrongCount, active: p.active }));
+    players.forEach((p, i) => { if (i !== idx && p.active) p.life -= n; });
+    if (players[idx].active) players[idx].life += a;
+    updateAll();
+  }
+
+  function handleWrong(idx, b) {
+    players.forEach(p => p.history.push({ life: p.life, wrongCount: p.wrongCount, active: p.active }));
+    const p = players[idx]; if (!p.active) return;
+    p.life -= b; p.wrongCount++;
+    updateAll();
+  }
+
+  function handleUndo(idx) {
+    const p = players[idx]; if (p.history.length === 0) return;
+    const prev = p.history.pop(); Object.assign(p, prev);
+    updateAll();
+  }
+
+  function updateAll() {
+    players.forEach(p => {
+      if (p.life <= 0) p.active = false;
+      if (!p.active) {
+        p.spLife.textContent = '失格';
+        p.spTd.classList.add('out');
+        p.spWrong.textContent = '';
+        p.inp.disabled = true;
+        p.spTd.querySelectorAll('button').forEach(b => b.disabled = true);
+      } else {
+        p.spLife.textContent = p.life;
+        p.spWrong.textContent = '×'.repeat(p.wrongCount);
+        p.spTd.classList.remove('out');
+        p.inp.disabled = false;
+        p.spTd.querySelectorAll('button').forEach(b => b.disabled = false);
+      }
+    });
+    checkEnd();
+  }
+
+  function checkEnd() {
+    const c = +document.getElementById('minPlayers').value;
+    const alive = players.filter(p => p.active).length;
+    updateStatus(alive <= c ? `ゲームセット！残り ${alive} 人` : `残り ${alive} 人`);
+  }
+
+  function resetAll() {
+    initGame();
+  }
+
+  function updateStatus(msg) {
+    document.getElementById('status').textContent = msg;
+  }
+
+  // 初回起動
+  initGame();
+</script>
+</body>
+</html>

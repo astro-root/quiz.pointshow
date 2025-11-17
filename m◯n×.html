@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>m◯n×</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: "Yu Gothic", sans-serif;
+      background: #111; color: #fff;
+    }
+    .header {
+      background: #003366;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.2rem;
+    }
+    .thresholds {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    .thresholds input {
+      width: 60px;
+      padding: 4px 6px;
+      font-size: 1rem;
+      border-radius: 4px;
+      border: none;
+      text-align: center;
+    }
+    #resetAll {
+      margin-left: 20px;
+      padding: 6px 12px;
+      font-size: 1rem;
+      background: #ea4335;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #fff;
+    }
+    #resetAll:hover { background: #c23321; }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 4px;
+      padding: 4px;
+    }
+    .team-col {
+      background: #004d40;
+      width: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px 8px;
+      position: relative;
+      min-height: 350px;
+    }
+    .team-col .info {
+      background: #00251a;
+      width: 100%;
+      text-align: center;
+      font-size: 0.85rem;
+      padding: 4px 0;
+      margin-bottom: 8px;
+      border-radius: 4px;
+    }
+    .team-col .name-input {
+      width: 100%;
+      height: 140px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-align: center;
+      border: none;
+      background: transparent;
+      color: #fff;
+      margin-bottom: 12px;
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+    }
+    .team-col .name-input:focus {
+      outline: 2px dashed #fff;
+    }
+    .status {
+      position: absolute;
+      top: 6px; right: 6px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .team-col.win .status {
+      display: block;
+      background: #ffeb3b; color: #000;
+    }
+    .team-col.lose .status {
+      display: block;
+      background: #e53935; color: #fff;
+    }
+    .correct-count {
+      font-size: 2.6rem;
+      font-weight: bold;
+      margin: 10px 0 6px;
+      line-height: 1;
+    }
+    .wrong-count {
+      font-size: 1.8rem;
+      color: #e53935;
+      height: 1.8em;
+      line-height: 1.8em;
+      margin-bottom: 12px;
+    }
+    .actions {
+      display: flex;
+      gap: 6px;
+      margin-top: auto;
+      width: 100%;
+    }
+    .actions button {
+      flex: 1;
+      padding: 8px 0;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #fff;
+    }
+    .btn-correct { background: #4caf50; }
+    .btn-wrong   { background: #f44336; }
+    .btn-undo    { background: #607d8b; }
+    .actions button:disabled {
+      background: #555; cursor: default;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>m◯n×</div>
+    <div class="thresholds">
+      <label>勝ち抜け <input type="number" id="winThresh" min="1" value="5"></label>
+      <label>失格 <input type="number" id="loseThresh" min="1" value="2"></label>
+      <button id="resetAll">リセット</button>
+    </div>
+  </div>
+
+  <div class="scoreboard" id="scoreboard">
+    <!-- 10人分 -->
+    <script>
+      const container = document.getElementById('scoreboard');
+      for (let i = 1; i <= 10; i++) {
+        container.insertAdjacentHTML('beforeend', `
+        <div class="team-col" data-team="${i}">
+          <div class="status"></div>
+          <div class="info">No.${i}</div>
+          <input class="name-input" type="text" value="参加者${i}">
+          <div class="correct-count">0</div>
+          <div class="wrong-count"></div>
+          <div class="actions">
+            <button class="btn-correct">正解</button>
+            <button class="btn-wrong">誤答</button>
+            <button class="btn-undo" disabled>戻る</button>
+          </div>
+        </div>
+        `);
+      }
+    </script>
+  </div>
+
+  <script>
+    const winInput  = document.getElementById('winThresh');
+    const loseInput = document.getElementById('loseThresh');
+    const resetAll  = document.getElementById('resetAll');
+
+    const historyMap = new Map();
+
+    function init() {
+      const teams = document.querySelectorAll('.team-col');
+      teams.forEach(col => {
+        historyMap.set(col, [{ r:0, w:0 }]);
+        const btnC = col.querySelector('.btn-correct');
+        const btnW = col.querySelector('.btn-wrong');
+        const btnU = col.querySelector('.btn-undo');
+
+        btnC.addEventListener('click', () => apply(col, 1, 0));
+        btnW.addEventListener('click', () => apply(col, 0, 1));
+        btnU.addEventListener('click', () => undo(col));
+      });
+
+      resetAll.addEventListener('click', resetAllTeams);
+      winInput.addEventListener('change', () => document.querySelectorAll('.team-col').forEach(checkStatus));
+      loseInput.addEventListener('change', () => document.querySelectorAll('.team-col').forEach(checkStatus));
+    }
+
+    function apply(col, dr, dw) {
+      const cntR = col.querySelector('.correct-count');
+      const cntW = col.querySelector('.wrong-count');
+      const prev = { r: parseInt(cntR.textContent,10), w: cntW.textContent.length };
+      historyMap.get(col).push(prev);
+      col.querySelector('.btn-undo').disabled = false;
+
+      cntR.textContent = prev.r + dr;
+      cntW.textContent = '×'.repeat(prev.w + dw);
+      checkStatus(col);
+    }
+
+    function undo(col) {
+      const hist = historyMap.get(col);
+      if (hist.length <= 1) return;
+      hist.pop();
+      const { r, w } = hist[hist.length - 1];
+      col.querySelector('.correct-count').textContent = r;
+      col.querySelector('.wrong-count').textContent   = '×'.repeat(w);
+
+      col.querySelectorAll('button:not(.btn-undo)').forEach(b=>b.disabled=false);
+      col.classList.remove('win','lose');
+      col.querySelector('.status').style.display = 'none';
+      if (hist.length === 1) col.querySelector('.btn-undo').disabled = true;
+    }
+
+    function checkStatus(col) {
+      const right = parseInt(col.querySelector('.correct-count').textContent,10);
+      const wrong = col.querySelector('.wrong-count').textContent.length;
+      const winTh  = parseInt(winInput.value, 10);
+      const loseTh = parseInt(loseInput.value, 10);
+      const st     = col.querySelector('.status');
+
+      st.style.display = 'none';
+      col.classList.remove('win','lose');
+      col.querySelectorAll('button:not(.btn-undo)').forEach(b=>b.disabled=false);
+
+      if (right >= winTh) {
+        st.textContent = '勝ち抜け';
+        col.classList.add('win');
+        st.style.display = 'block';
+        lock(col);
+      } else if (wrong >= loseTh) {
+        st.textContent = '失格';
+        col.classList.add('lose');
+        st.style.display = 'block';
+        lock(col);
+      }
+    }
+
+    function resetAllTeams() {
+      document.querySelectorAll('.team-col').forEach(col => {
+        col.querySelector('.correct-count').textContent = '0';
+        col.querySelector('.wrong-count').textContent   = '';
+        col.classList.remove('win','lose');
+        col.querySelector('.status').style.display = 'none';
+        col.querySelectorAll('button').forEach(b=>b.disabled=false);
+        historyMap.set(col, [{ r:0, w:0 }]);
+        col.querySelector('.btn-undo').disabled = true;
+      });
+    }
+
+    function lock(col) {
+      col.querySelectorAll('button:not(.btn-undo)').forEach(b=>b.disabled=true);
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
