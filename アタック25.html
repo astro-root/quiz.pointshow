@@ -9,8 +9,7 @@
   --bg:#040405; --panel:#0d1113; --card:#0a0b0d; --muted:#99a2a8;
   --p1:#ff4d4f; --p2:#3aa0ff; --p3:#fafafa; --p4:#38d98a;
   --cand-opacity:0.30;
-  --cell-size:120px; /* ここでマスの大きさを調整（変更可） */
-  --gap:12px;
+  --cell-size:120px; --gap:12px;
 }
 html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:system-ui,"Hiragino Kaku Gothic ProN","メイリオ",sans-serif}
 .wrap{max-width:1280px;margin:18px auto;padding:14px;display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:start}
@@ -27,7 +26,6 @@ h1{font-size:24px;margin:0;font-weight:800}
 /* マス */
 .cell{width:var(--cell-size);height:var(--cell-size);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:45px;color:#ffffff;border:2px solid rgba(255,255,255,0.4);position:relative;cursor:pointer;user-select:none;overflow:hidden;transition:background-color 200ms, transform 140ms, box-shadow 140ms;}
 .cell.empty{background:linear-gradient(180deg,#0d0f11,#0b0c0e);color:var(--muted);border:1px solid rgba(255,255,255,0.03)}
-/* 獲得済み（濃い・判別しやすく） */
 .cell.p1{background:linear-gradient(180deg,#ff8b8c,#ff4d4f);color:#fff;border:2px solid rgba(255,77,79,0.22)}
 .cell.p2{background:linear-gradient(180deg,#97d3ff,#3aa0ff);color:#001a2b;border:2px solid rgba(58,160,255,0.22)}
 .cell.p3{background:linear-gradient(180deg,#ffffff,#f0f0f0);color:#0b0b0b;border:2px solid rgba(255,255,255,0.06)}
@@ -67,15 +65,23 @@ h1{font-size:24px;margin:0;font-weight:800}
 .playerInput{background:transparent;border:1px dashed rgba(255,255,255,0.04);color:#fff;padding:8px;border-radius:8px;font-size:32px;width:180px}
 .scoreBig{font-size:44px;font-weight:900}
 .metaSmall{color:var(--muted);font-size:14px}
+
+/* 誤答 & Skip を見やすく大きくするためのスタイル */
+.playerStats{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:6px}
+.playerStats .stat{display:flex;flex-direction:column;align-items:flex-start}
+.playerStats .stat .label{font-size:14px;color:var(--muted);font-weight:700}
+.playerStats .stat .value{font-size:20px;font-weight:900;color:#ffffff;margin-top:4px}
+
+/* 下のボタン行（注記を削除したのでボタンだけ右寄せ） */
+.boardControls{display:flex;justify-content:flex-end;gap:12px;align-items:center;margin-top:8px}
+
+/* ボタン等 */
 .btns{display:flex;gap:8px}
 button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 14px;border-radius:10px;color:#fff;cursor:pointer;font-weight:700}
 button.primary{background:linear-gradient(90deg,#2563eb,#3b82f6);border:none}
 .undobtn{padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04)}
 .note{color:var(--muted);font-size:13px;margin-top:6px}
-
-/* 下部のボタン行を強調して揃える */
-.boardControls{display:flex;justify-content:flex-end;gap:12px;align-items:center;margin-top:8px}
-.sideSpacer{flex:1} /* サイドの余白を伸ばすためのスペーサー */
+.sideSpacer{flex:1}
 </style>
 </head>
 <body>
@@ -89,11 +95,9 @@ button.primary{background:linear-gradient(90deg,#2563eb,#3b82f6);border:none}
     </header>
 
     <div class="boardCard">
-      <!-- ボードは上部に、操作群は下部に寄せる -->
       <div id="board" class="board" aria-label="Attack25"></div>
 
       <div class="boardControls">
-        <div style="color:var(--muted);font-size:13px;margin-right:auto">※挟める場合は必ず挟める所を選ぶ</div>
         <button onclick="resetBoard()">リセット</button>
         <button class="undobtn" id="undoBtn" onclick="undo()">1つ戻る</button>
       </div>
@@ -106,9 +110,9 @@ button.primary{background:linear-gradient(90deg,#2563eb,#3b82f6);border:none}
             <input id="playerName1" class="playerInput" value="P1">
             <div style="text-align:right"><div class="metaSmall">獲得マス</div><div class="scoreBig" id="score1">0</div></div>
           </div>
-          <div style="display:flex;justify-content:space-between">
-            <div class="metaSmall">誤答: <span id="wrong1">0</span></div>
-            <div class="metaSmall">Skip: <span id="skip1">0</span></div>
+          <div class="playerStats">
+            <div class="stat"><div class="label">誤答</div><div class="value" id="wrong1">0</div></div>
+            <div class="stat"><div class="label">Skip</div><div class="value" id="skip1">0</div></div>
           </div>
           <div class="btns"><button onclick="selectPlayer(1)">正解</button><button onclick="markWrong(1)">誤答</button></div>
         </div>
@@ -118,9 +122,9 @@ button.primary{background:linear-gradient(90deg,#2563eb,#3b82f6);border:none}
             <input id="playerName2" class="playerInput" value="P2">
             <div style="text-align:right"><div class="metaSmall">獲得マス</div><div class="scoreBig" id="score2">0</div></div>
           </div>
-          <div style="display:flex;justify-content:space-between">
-            <div class="metaSmall">誤答: <span id="wrong2">0</span></div>
-            <div class="metaSmall">Skip: <span id="skip2">0</span></div>
+          <div class="playerStats">
+            <div class="stat"><div class="label">誤答</div><div class="value" id="wrong2">0</div></div>
+            <div class="stat"><div class="label">Skip</div><div class="value" id="skip2">0</div></div>
           </div>
           <div class="btns"><button onclick="selectPlayer(2)">正解</button><button onclick="markWrong(2)">誤答</button></div>
         </div>
@@ -130,9 +134,9 @@ button.primary{background:linear-gradient(90deg,#2563eb,#3b82f6);border:none}
             <input id="playerName3" class="playerInput" value="P3">
             <div style="text-align:right"><div class="metaSmall">獲得マス</div><div class="scoreBig" id="score3">0</div></div>
           </div>
-          <div style="display:flex;justify-content:space-between">
-            <div class="metaSmall">誤答: <span id="wrong3">0</span></div>
-            <div class="metaSmall">Skip: <span id="skip3">0</span></div>
+          <div class="playerStats">
+            <div class="stat"><div class="label">誤答</div><div class="value" id="wrong3">0</div></div>
+            <div class="stat"><div class="label">Skip</div><div class="value" id="skip3">0</div></div>
           </div>
           <div class="btns"><button onclick="selectPlayer(3)">正解</button><button onclick="markWrong(3)">誤答</button></div>
         </div>
@@ -142,33 +146,28 @@ button.primary{background:linear-gradient(90deg,#2563eb,#3b82f6);border:none}
             <input id="playerName4" class="playerInput" value="P4">
             <div style="text-align:right"><div class="metaSmall">獲得マス</div><div class="scoreBig" id="score4">0</div></div>
           </div>
-          <div style="display:flex;justify-content:space-between">
-            <div class="metaSmall">誤答: <span id="wrong4">0</span></div>
-            <div class="metaSmall">Skip: <span id="skip4">0</span></div>
+          <div class="playerStats">
+            <div class="stat"><div class="label">誤答</div><div class="value" id="wrong4">0</div></div>
+            <div class="stat"><div class="label">Skip</div><div class="value" id="skip4">0</div></div>
           </div>
           <div class="btns"><button onclick="selectPlayer(4)">正解</button><button onclick="markWrong(4)">誤答</button></div>
         </div>
       </div>
 
-      <!-- ここでサイドの下寄せ部分（進行）を揃える -->
-      <div class="playerCard" style="margin-top:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div class="metaSmall">進行</div>
-          <div><button class="primary" onclick="nextQuestion()">次の問題</button></div>
-        </div>
-      </div>
+      <!-- 右下の進行ブロックは削除しました -->
     </aside>
   </div>
 
 <script>
-/* 既存の機能を維持したロジック（アタック修正済み） */
+/* 既存ロジックそのまま（表示変更のみ） */
 const OWNER_EMPTY = 0;
 let owners = Array(25).fill(0);
 let wrongCount = [0,0,0,0,0];
 let skipTurns = [0,0,0,0,0];
 let currentCorrectPlayer = 0;
-let attackReady = false;
-let mode = 'normal';
+let attackActive = false;
+let attackOwner = 0;
+let mode = 'normal'; // 'normal' | 'choosePanel' | 'attackReplace'
 let actionStack = [];
 const deltas = [[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1],[-1,-1]];
 const boardEl = document.getElementById('board');
@@ -190,21 +189,13 @@ function flippableListIfPlaced(panelIdx, player){
   let result = [];
   for(const d of deltas){
     let tr = r + d[0], tc = c + d[1];
-    const temp = [];
-    let foundOpponent = false;
+    const temp = []; let foundOpponent = false;
     while(inBoard(tr,tc)){
       const idx = rcToIdx(tr,tc);
       const owner = owners[idx];
       if(owner === OWNER_EMPTY) break;
-      if(owner !== player){
-        temp.push(idx);
-        foundOpponent = true;
-      } else {
-        if(foundOpponent){
-          result = result.concat(temp);
-        }
-        break;
-      }
+      if(owner !== player){ temp.push(idx); foundOpponent = true; }
+      else { if(foundOpponent) result = result.concat(temp); break; }
       tr += d[0]; tc += d[1];
     }
   }
@@ -238,8 +229,19 @@ function computeLegal(player){
   return all;
 }
 
-function saveState(){ return {owners: owners.slice(), wrong: wrongCount.slice(), skip: skipTurns.slice(), currentCorrectPlayer, attackReady, mode}; }
-function restoreState(s){ owners = s.owners.slice(); wrongCount = s.wrong.slice(); skipTurns = s.skip.slice(); currentCorrectPlayer = s.currentCorrectPlayer; attackReady = s.attackReady; mode = s.mode; renderBoard(); updateUI(); refreshUndo(); }
+function saveState(){ return {owners: owners.slice(), wrong: wrongCount.slice(), skip: skipTurns.slice(), currentCorrectPlayer, attackActive, attackOwner, mode}; }
+function restoreState(s){
+  owners = s.owners.slice();
+  wrongCount = s.wrong.slice();
+  skipTurns = s.skip.slice();
+  currentCorrectPlayer = s.currentCorrectPlayer;
+  attackActive = s.attackActive;
+  attackOwner = s.attackOwner;
+  mode = s.mode;
+  renderBoard();
+  updateUI();
+  refreshUndo();
+}
 function pushState(){ actionStack.push(saveState()); if(actionStack.length > 400) actionStack.shift(); refreshUndo(); }
 function refreshUndo(){ undoBtn.style.opacity = actionStack.length? '1':'0.4'; undoBtn.style.pointerEvents = actionStack.length? 'auto':'none'; }
 function undo(){ if(actionStack.length === 0) return; const prev = actionStack.pop(); restoreState(prev); }
@@ -278,7 +280,7 @@ function highlightCandidates(){
       }
     });
   }
-  if(mode === 'attackDelete'){
+  if(mode === 'attackReplace'){
     for(let i=0;i<25;i++) if(owners[i] !== OWNER_EMPTY){
       const el = boardEl.querySelector(`[data-idx="${i}"]`);
       if(el) el.classList.add('candidate-allowed');
@@ -286,11 +288,19 @@ function highlightCandidates(){
   }
 }
 
-/* 反転付き配置（Promiseで完了を返す） */
+function refreshAttackActiveFlag(){
+  const rem = remainingPanels();
+  const shouldBeActive = (rem > 0 && rem <= 5 && owners.some(o=>o !== OWNER_EMPTY));
+  attackActive = shouldBeActive;
+  if(!attackActive){
+    if(mode === 'attackReplace') mode = 'normal';
+    attackOwner = 0;
+  }
+}
+
 function applyPlaceWithFlip(panelIdx, player){
   return new Promise(resolve => {
     const flips = flippableListIfPlaced(panelIdx, player);
-    const wasAttackBefore = attackReady;
     owners[panelIdx] = player;
     renderBoard();
     const flipEls = flips.map(i => boardEl.querySelector(`[data-idx="${i}"]`)).filter(Boolean);
@@ -298,25 +308,29 @@ function applyPlaceWithFlip(panelIdx, player){
     setTimeout(() => {
       for(const i of flips) owners[i] = player;
       renderBoard();
-      if(wasAttackBefore){
-        attackReady = false;
-        setTimeout(() => { mode = 'attackDelete'; renderBoard(); updateUI(); alert('アタックチャンス！　消去するパネルを1つクリックしてください。'); resolve(true); }, 140);
+
+      const rem = remainingPanels();
+      refreshAttackActiveFlag();
+
+      if(attackActive && rem > 0 && rem <= 5){
+        attackOwner = player;
+        mode = 'attackReplace';
+        renderBoard();
+        updateUI();
+        alert(`${ownerLabelFor(attackOwner)} のアタックチャンス：盤上の既存パネルを選んで交換してください。`);
       } else {
-        if(remainingPanels() <= 5){
-          attackReady = true;
+        attackOwner = 0;
+        if(rem === 0){
+          attackActive = false;
+          mode = 'normal';
         }
-        resolve(false);
       }
+      resolve();
     }, 300);
   });
 }
 
-function decrementSkipsExcept(actingPlayer){
-  for(let p=1;p<=4;p++){
-    if(p === actingPlayer) continue;
-    if(skipTurns[p] > 0) skipTurns[p]--;
-  }
-}
+function decrementSkipsExcept(actingPlayer){ for(let p=1;p<=4;p++){ if(p === actingPlayer) continue; if(skipTurns[p] > 0) skipTurns[p]--; } }
 
 async function selectPlayer(player){
   if(skipTurns[player] > 0){ alert('Skip中のため操作できません'); return; }
@@ -324,21 +338,18 @@ async function selectPlayer(player){
   currentCorrectPlayer = player;
 
   if(isBoardEmpty()){
-    const wasAttack = await applyPlaceWithFlip(12, player);
+    await applyPlaceWithFlip(12, player);
     decrementSkipsExcept(player);
-    currentCorrectPlayer = 0; mode = 'normal'; renderBoard(); updateUI(); return;
+    currentCorrectPlayer = 0; renderBoard(); updateUI(); return;
   }
 
   const legal = computeLegal(player);
-  if(legal.length === 0){
-    alert('置ける場所がありません（パス）');
-    currentCorrectPlayer = 0; mode = 'normal'; return;
-  }
+  if(legal.length === 0){ alert('置ける場所がありません（パス）'); currentCorrectPlayer = 0; mode = 'normal'; return; }
 
   if(legal.length === 1){
-    const wasAttack = await applyPlaceWithFlip(legal[0], player);
+    await applyPlaceWithFlip(legal[0], player);
     decrementSkipsExcept(player);
-    currentCorrectPlayer = 0; mode = 'normal'; renderBoard(); updateUI(); return;
+    currentCorrectPlayer = 0; renderBoard(); updateUI(); return;
   }
 
   mode = 'choosePanel'; renderBoard(); updateUI();
@@ -352,6 +363,21 @@ function markWrong(player){
   renderBoard(); updateUI();
 }
 
+/* 交換処理 */
+async function doAttackReplaceAt(idx){
+  if(owners[idx] === OWNER_EMPTY){ alert('空きパネルは交換できません'); return; }
+  if(!attackOwner || attackOwner === 0){ alert('交換対象のプレイヤーが未設定です'); return; }
+  pushState();
+  owners[idx] = attackOwner;
+  renderBoard();
+  const el = boardEl.querySelector(`[data-idx="${idx}"]`);
+  if(el){ el.classList.add('flipping'); setTimeout(()=> el.classList.remove('flipping'), 360); }
+  attackActive = false;
+  attackOwner = 0;
+  mode = 'normal';
+  updateUI();
+}
+
 async function onCellClick(e){
   const idx = parseInt(e.currentTarget.dataset.idx, 10);
   if(mode === 'choosePanel'){
@@ -359,85 +385,37 @@ async function onCellClick(e){
     const legal = computeLegal(player);
     if(!legal.includes(idx)){ alert('そのマスは現在選べません'); return; }
     pushState();
-    const wasAttack = await applyPlaceWithFlip(idx, player);
+    await applyPlaceWithFlip(idx, player);
     decrementSkipsExcept(player);
-    currentCorrectPlayer = 0; mode = 'normal'; renderBoard(); updateUI();
+    currentCorrectPlayer = 0;
+    renderBoard(); updateUI();
     return;
-  } else if(mode === 'attackDelete'){
-    if(owners[idx] === OWNER_EMPTY){ alert('既に空きです'); return; }
-    pushState();
-    owners[idx] = OWNER_EMPTY;
-    mode = 'normal'; attackReady = (remainingPanels() <= 5);
-    renderBoard(); updateUI(); return;
+  } else if(mode === 'attackReplace'){
+    await doAttackReplaceAt(idx);
+    return;
   } else {
     // 通常モードは無反応
   }
 }
 
-function nextQuestion(){ pushState(); for(let p=1;p<=4;p++) if(skipTurns[p] > 0) skipTurns[p]--; renderBoard(); updateUI(); }
+function nextQuestion(){ pushState(); for(let p=1;p<=4;p++) if(skipTurns[p] > 0) skipTurns[p]--; renderBoard(); refreshAttackActiveFlag(); updateUI(); }
 
 function updateUI(){
+  refreshAttackActiveFlag();
   remainingEl.textContent = `残り: ${remainingPanels()}`;
-  attackFlagEl.textContent = `アタック: ${attackReady? 'ON（残り5枚から有効）':'OFF'}`;
+  attackFlagEl.textContent = `アタック: ${attackActive? 'ON（残り5枚以下）':'OFF'}`;
   for(let p=1;p<=4;p++){
     document.getElementById('score'+p).textContent = countOwned(p);
+    // 新しい構造では wrong/skip の値は同じ id の要素に入れる
     document.getElementById('wrong'+p).textContent = wrongCount[p] || 0;
     document.getElementById('skip'+p).textContent = skipTurns[p] || 0;
   }
   highlightCandidates(); refreshUndo();
 }
 
-function resetBoard(){ if(!confirm('リセットしますか？')) return; pushState(); owners = Array(25).fill(0); wrongCount=[0,0,0,0,0]; skipTurns=[0,0,0,0,0]; currentCorrectPlayer=0; attackReady=false; mode='normal'; renderBoard(); updateUI(); }
-function saveState(){ return {owners: owners.slice(), wrong: wrongCount.slice(), skip: skipTurns.slice(), currentCorrectPlayer, attackReady, mode}; }
-function restoreState(s){ owners = s.owners.slice(); wrongCount = s.wrong.slice(); skipTurns = s.skip.slice(); currentCorrectPlayer = s.currentCorrectPlayer; attackReady = s.attackReady; mode = s.mode; renderBoard(); updateUI(); refreshUndo(); }
-function pushState(){ actionStack.push(saveState()); if(actionStack.length > 400) actionStack.shift(); refreshUndo(); }
+function resetBoard(){ if(!confirm('リセットしますか？')) return; pushState(); owners = Array(25).fill(0); wrongCount=[0,0,0,0,0]; skipTurns=[0,0,0,0,0]; currentCorrectPlayer=0; attackActive=false; attackOwner=0; mode='normal'; renderBoard(); updateUI(); }
 
-function highlightCandidates(){
-  const cells = boardEl.querySelectorAll('.cell');
-  cells.forEach(c => {
-    c.classList.remove('candidate-allowed','cand-p1','cand-p2','cand-p3','cand-p4');
-    const m = c.querySelector('.candMark'); if(m) m.remove();
-  });
-  if(mode === 'choosePanel' && currentCorrectPlayer){
-    const legal = computeLegal(currentCorrectPlayer);
-    legal.forEach(idx => {
-      const el = boardEl.querySelector(`[data-idx="${idx}"]`);
-      if(el){
-        el.classList.add('candidate-allowed','cand-p'+currentCorrectPlayer);
-        const mark = document.createElement('div'); mark.className = 'candMark p'+currentCorrectPlayer; mark.textContent = '✓';
-        el.appendChild(mark);
-      }
-    });
-  }
-  if(mode === 'attackDelete'){
-    for(let i=0;i<25;i++) if(owners[i] !== OWNER_EMPTY){
-      const el = boardEl.querySelector(`[data-idx="${i}"]`);
-      if(el) el.classList.add('candidate-allowed');
-    }
-  }
-}
-
-function renderBoard(){
-  boardEl.innerHTML = '';
-  for(let i=0;i<25;i++){
-    const div = document.createElement('div'); div.className = 'cell';
-    const o = owners[i];
-    if(o === 0) div.classList.add('empty'); else div.classList.add('p'+o);
-    div.innerHTML = `<div class="num">${i+1}</div>`;
-    div.dataset.idx = i; div.onclick = onCellClick;
-    if(o !== 0){
-      const badge = document.createElement('div'); badge.className = 'ownerBadge p'+o; badge.textContent = ownerLabelFor(o);
-      div.appendChild(badge);
-    }
-    boardEl.appendChild(div);
-  }
-  highlightCandidates();
-}
-
-(function init(){
-  renderBoard(); updateUI();
-  for(let p=1;p<=4;p++) document.getElementById('playerName'+p).addEventListener('input', renderBoard);
-})();
+(function init(){ renderBoard(); updateUI(); for(let p=1;p<=4;p++) document.getElementById('playerName'+p).addEventListener('input', renderBoard); })();
 </script>
 </body>
 </html>
