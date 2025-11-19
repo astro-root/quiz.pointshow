@@ -16,14 +16,13 @@
 
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            background-color: #121212; /* 真っ黒に近いグレー */
-            color: #e0e0e0; /* 文字は白に近いグレー */
+            background-color: #121212;
+            color: #e0e0e0;
             margin: 0;
             padding: 20px;
             line-height: 1.6;
         }
 
-        /* ヘッダー部分 */
         h1 {
             text-align: center;
             color: #ffffff;
@@ -32,10 +31,21 @@
             border-bottom: 3px solid #3498db;
             display: inline-block;
             padding-bottom: 10px;
-            /* 中央寄せ */
             position: relative;
             left: 50%;
             transform: translateX(-50%);
+        }
+
+        /* 区切り線とサブタイトル */
+        h2 {
+            text-align: center;
+            color: #aaaaaa;
+            font-size: 1.2rem;
+            margin-top: 60px;
+            margin-bottom: 20px;
+            font-weight: normal;
+            border-top: 1px solid #333;
+            padding-top: 30px;
         }
 
         /* グリッドレイアウト */
@@ -47,27 +57,26 @@
             margin: 0 auto;
         }
 
-        /* === カードのデザイン（ダークモード） === */
+        /* === カードのデザイン === */
         .card {
-            background-color: #1e1e1e; /* 背景を暗いグレーに */
+            background-color: #1e1e1e;
             border-radius: 12px;
-            /* 影を少し濃くして浮き上がりを表現 */
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
             transition: transform 0.2s ease, background-color 0.2s ease;
             text-decoration: none;
-            color: #e0e0e0; /* 文字色 */
+            color: #e0e0e0;
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100px;
             font-weight: bold;
             font-size: 1.2rem;
-            border: 1px solid #333; /* 枠線を馴染む色に */
+            border: 1px solid #333;
             position: relative;
             overflow: hidden;
         }
 
-        /* 左側のアクセントカラー（デフォルト：青） */
+        /* 左側のアクセントカラー（デフォルト） */
         .card::before {
             content: "";
             position: absolute;
@@ -78,34 +87,26 @@
             background-color: #3498db;
         }
 
-        /* ホバー（マウスを乗せた時）のアニメーション */
+        /* ホバー時の動き */
         .card:hover {
             transform: translateY(-5px);
-            background-color: #2c2c2c; /* 少しだけ明るくする */
-            color: #ffffff; /* 文字を真っ白に */
+            background-color: #2c2c2c;
+            color: #ffffff;
             box-shadow: 0 8px 12px rgba(0, 0, 0, 0.7);
         }
 
-        .card:visited {
-            color: #e0e0e0;
-        }
-        .card:hover:visited {
-            color: #ffffff;
-        }
+        .card:visited { color: #e0e0e0; }
+        .card:hover:visited { color: #ffffff; }
 
-        /* === 色分け設定（URLに含まれる文字で判定） === */
-        /* AQLを含むURL -> 赤 */
-        .card[href*="AQL"]::before { background-color: #e74c3c; }
-        
-        /* EQIDENを含むURL -> 緑 */
-        .card[href*="EQIDEN"]::before { background-color: #2ecc71; }
-        
-        /* アタック25を含むURL -> 黄 */
-        .card[href*="アタック25"]::before { background-color: #f1c40f; }
+        /* === 色分け設定 === */
+        /* ツール系 */
+        .card[href*="AQL"]::before { background-color: #e74c3c; } /* 赤 */
+        .card[href*="EQIDEN"]::before { background-color: #2ecc71; } /* 緑 */
+        .card[href*="アタック25"]::before { background-color: #f1c40f; } /* 黄 */
 
-        /* 以下の行を追加すれば、他のルールも色分けできます */
-        /* 例: 「Lucky」を含む場合は紫にする */
-        /* .card[href*="Lucky"]::before { background-color: #9b59b6; } */
+        /* その他リンク系 */
+        .card[href*="forms"]::before { background-color: #ff4081; } /* ピンク（フォーム） */
+        .card[href*="x.com"]::before { background-color: #1da1f2; } /* 水色（X/Twitter） */
 
     </style>
 </head>
@@ -115,28 +116,23 @@
 
     <div class="grid-container">
         <a href="https://astro-root.github.io/quiz.pointshow/フォロー.html" target="_blank" rel="noopener noreferrer" class="card">フォロー</a>
-        
         <a href="https://astro-root.github.io/quiz.pointshow/AQL.html" target="_blank" rel="noopener noreferrer" class="card">AQL</a>
-        
         <a href="https://astro-root.github.io/quiz.pointshow/EQIDEN.html" target="_blank" rel="noopener noreferrer" class="card">EQIDEN</a>
-        
         <a href="https://astro-root.github.io/quiz.pointshow/Lucky Shot.html" target="_blank" rel="noopener noreferrer" class="card">Lucky Shot</a>
-        
         <a href="https://astro-root.github.io/quiz.pointshow/NewYork.html" target="_blank" rel="noopener noreferrer" class="card">NewYork</a>
-        
         <a href="https://astro-root.github.io/quiz.pointshow/TOMOE.html" target="_blank" rel="noopener noreferrer" class="card">TOMOE</a>
-        
         <a href="https://astro-root.github.io/quiz.pointshow/by.html" target="_blank" rel="noopener noreferrer" class="card">m by m</a>
-        
         <a href="https://astro-root.github.io/quiz.pointshow/m◯n×.html" target="_blank" rel="noopener noreferrer" class="card">m◯n×</a>
-        
         <a href="https://astro-root.github.io/quiz.pointshow/up-down.html" target="_blank" rel="noopener noreferrer" class="card">up-down</a>
-        
         <a href="https://astro-root.github.io/quiz.pointshow/アタサバ.html" target="_blank" rel="noopener noreferrer" class="card">アタサバ</a>
-        
         <a href="https://astro-root.github.io/quiz.pointshow/アタック25.html" target="_blank" rel="noopener noreferrer" class="card">アタック25</a>
-        
         <a href="https://astro-root.github.io/quiz.pointshow/連答付き.html" target="_blank" rel="noopener noreferrer" class="card">連答付き</a>
+    </div>
+
+    <h2>Contact & Feedback</h2>
+    <div class="grid-container">
+        <a href="https://forms.gle/7f9EYXkzycTQPBHr6" target="_blank" rel="noopener noreferrer" class="card">フィードバックを送る</a>
+        <a href="https://x.com/astro_root" target="_blank" rel="noopener noreferrer" class="card">X (@astro_root)</a>
     </div>
 
 </body>
