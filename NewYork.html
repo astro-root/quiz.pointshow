@@ -3,166 +3,374 @@
 <head>
   <meta charset="UTF-8">
   <title>New York</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f0f0f0;
-      padding: 20px;
+    :root{
+      --bg:#0b0b0b;
+      --panel-top:#003a66;
+      --panel-bottom:#002f51;
+      --ok:#33a853;
+      --muted:#9aa7aa;
+      --correct-blue:#3ea6ff;
+      --wrong-red:#ff6b6b;
+      --card-shadow:0 8px 20px rgba(0,0,0,0.6);
+      --win-shadow:0 0 20px gold,0 0 40px rgba(255,215,0,0.6);
+      --rank-bg:#3ea6ff;
+      --rank-color:#01263b;
     }
-    .settings {
-      background: #fff;
-      padding: 12px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      text-align: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;padding:0;font-family:"Hiragino Kaku Gothic ProN","Meiryo",system-ui,sans-serif;}
+    body{
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(24,160,176,0.03), transparent 14%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), transparent 18%),
+        var(--bg);
+      color:#eee;
+      padding:18px;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
-    .settings input {
-      width: 50px;
-      margin: 0 8px;
-      font-size: 14px;
+
+    .header{
+      display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:10px;
+      background: linear-gradient(180deg,var(--panel-top),var(--panel-bottom));
+      box-shadow:0 6px 18px rgba(0,0,0,0.6), inset 0 -2px 0 rgba(255,255,255,0.03);
+      margin-bottom:12px;
     }
-    .settings button {
-      padding: 6px 10px;
-      margin-left: 8px;
-      font-size: 14px;
+    .logo{width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;background:linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));box-shadow:0 6px 12px rgba(0,0,0,0.6)}
+    h1{margin:0;font-size:20px;color:#fff}
+
+    .settings{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+      padding:10px 12px; border-radius:10px; background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.04));
+      margin-bottom:12px; box-shadow:0 6px 18px rgba(0,0,0,0.5);
     }
-    .players {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 16px;
-      justify-items: center;
+    .settings label{
+      display:flex; gap:8px; align-items:center; color:#fff; font-weight:700;
+      padding:8px 10px; border-radius:8px; background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      border:1px solid rgba(255,255,255,0.02);
     }
-    .player {
-      background: #fff;
-      padding: 12px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      max-width: 140px;
-      width: 100%;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .settings input[type="number"]{ width:72px; padding:6px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.04); text-align:center; background:transparent; color:#fff; font-weight:700 }
+    .settings button{ padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:800; font-size:14px; box-shadow:0 6px 12px rgba(0,0,0,0.45) }
+    #startBtn{ background: linear-gradient(180deg,var(--ok),#2b8f44); color:#062f07 }
+    #resetAllBtn{ background: linear-gradient(180deg,#d7263d,#b71b2b); color:#fff }
+    #undoBtn{ background: linear-gradient(180deg,#9e9e9e,#6f6f6f); color:#fff }
+
+    /* players grid: each column is 1fr so total always fits screen */
+    .players{
+      display:grid;
+      gap:14px;
+      width:100%;
+      justify-items:stretch;
+      align-items:start;
     }
-    .player input.name {
-      writing-mode: vertical-rl;
-      text-orientation: upright;
-      font-size: 16px;
-      margin-bottom: 10px;
-      width: 40px;
-      height: 100px;
-      padding: 4px;
-      border: none;
-      background: transparent;
+
+    .player{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+      padding:12px; border-radius:12px; box-shadow:var(--card-shadow);
+      text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; position:relative;
+      border:1px solid rgba(255,255,255,0.03); color:#fff;
+      min-width:0; /* allow shrinking inside grid cell */
     }
-    .player .score {
-      font-size: 28px;
-      margin: 10px 0;
-      font-weight: bold;
-      color: #333;
+
+    /* 縦書き名 */
+    .name{ writing-mode:vertical-rl; text-orientation:upright; border:none; background:transparent; font-weight:800; font-size:24px; height:250px; width:44px; padding:4px; margin-bottom:8px; text-align:center; outline:none; color:#fff }
+
+    /* points area: rank badge appears here */
+    .points{
+      font-size:50px; font-weight:900; color:var(--ok); margin-bottom:8px; min-height:42px; display:flex; align-items:center; justify-content:center; width:100%; position:relative;
     }
-    .player button {
-      margin: 4px 0;
-      padding: 6px 12px;
-      font-size: 14px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      background-color: #007bff;
-      color: white;
-      transition: background-color 0.2s ease;
-      width: 100%;
+    .points .rank-badge{
+      position:absolute; left:8px; top:6px; background:var(--rank-bg); color:var(--rank-color); font-weight:900; padding:4px 8px; border-radius:8px; font-size:12px;
     }
-    .player button:hover {
-      background-color: #0056b3;
+    .points .pts-num{ display:block; }
+
+    .counts{ display:flex; gap:10px; align-items:center; justify-content:center; width:100%; font-weight:800; margin-bottom:8px }
+    .correct-count{ color:var(--correct-blue); min-width:28px; text-align:center; font-size:24px }
+    .wrong-count{ color:var(--wrong-red); min-width:28px; text-align:center; font-size:24px }
+
+    .buttons{ display:flex; gap:8px; width:100%; justify-content:center; margin-top:6px }
+    .btn{ flex:1; padding:8px 6px; border-radius:8px; border:none; cursor:pointer; font-weight:800; font-size:14px }
+    .btn-correct{ background: linear-gradient(180deg,#2fa84f,#1d7b36); color:#042a08 }
+    .btn-wrong{ background: linear-gradient(180deg,#e84a4a,#b71b2b); color:#fff }
+
+    .player.winner{ box-shadow: var(--win-shadow); opacity:0.98 }
+
+    .points.animate{ animation: pop 0.28s ease }
+    @keyframes pop{ 0%{ transform:scale(1) } 50%{ transform:scale(1.12) } 100%{ transform:scale(1) } }
+
+    @media (max-width:720px){
+      .name{ height:88px; width:36px; font-size:16px }
+      .points{ font-size:26px; min-height:36px }
+      .points .rank-badge{ font-size:11px; padding:3px 6px }
     }
   </style>
 </head>
 <body>
+  <div class="header">
+    <div class="logo">NY</div>
     <h1>New York</h1>
+  </div>
+
   <div class="settings">
-    正解: <input type="number" id="plusPoint" value="1">
-    誤答: <input type="number" id="minusPoint" value="1">
-    参加者数: <input type="number" id="playerCount" value="6" min="1" max="20">
+    <label>正解: <input type="number" id="plusPoint" value="1" min="0"></label>
+    <label>誤答: <input type="number" id="minusPoint" value="1" min="0"></label>
+    <label>参加者数: <input type="number" id="playerCount" value="6" min="1" max="20"></label>
+    <label>勝ち抜け: <input type="number" id="winPoints" value="10" min="1" max="9999"></label>
     <button id="startBtn">開始</button>
     <button id="resetAllBtn">リセット</button>
+    <button id="undoBtn">戻る</button>
   </div>
-  <div class="players" id="playersContainer"></div>
+
+  <div class="players" id="playersContainer" style="grid-auto-rows: auto;"></div>
+
   <script>
-    const startBtn = document.getElementById('startBtn');
-    const resetAllBtn = document.getElementById('resetAllBtn');
-    const container = document.getElementById('playersContainer');
-    let players = [];
+    (function(){
+      const plusInput = document.getElementById('plusPoint');
+      const minusInput = document.getElementById('minusPoint');
+      const countInput = document.getElementById('playerCount');
+      const winPointsInput = document.getElementById('winPoints');
+      const startBtn = document.getElementById('startBtn');
+      const resetAllBtn = document.getElementById('resetAllBtn');
+      const undoBtn = document.getElementById('undoBtn');
+      const container = document.getElementById('playersContainer');
 
-    startBtn.addEventListener('click', setupGame);
-    resetAllBtn.addEventListener('click', () => {
-      players.forEach(player => {
-        player.scoreVal = 0;
-        player.history = [];
-        player.score.textContent = '0';
-      });
-    });
+      let players = []; // { idx, el, nameEl, pointsEl, correctEl, wrongEl, btnC, btnW, correct, wrong, points, rank }
+      let historyStack = []; // actions for undo
+      let winners = []; // order of finishing (idx)
 
-    function setupGame() {
-      const count = parseInt(document.getElementById('playerCount').value);
-      const m = parseInt(document.getElementById('plusPoint').value);
-      const n = parseInt(document.getElementById('minusPoint').value);
-      container.innerHTML = '';
-      players = [];
-
-      for (let i = 0; i < count; i++) {
-        const div = document.createElement('div');
-        div.className = 'player';
-
-        const name = document.createElement('input');
-        name.type = 'text';
-        name.placeholder = `参加者${i+1}`;
-        name.className = 'name';
-
-        const score = document.createElement('div');
-        score.className = 'score';
-        score.textContent = '0';
-
-        const btnC = document.createElement('button');
-        btnC.textContent = '正解';
-
-        const btnW = document.createElement('button');
-        btnW.textContent = '誤答';
-
-        const btnU = document.createElement('button');
-        btnU.textContent = '戻る';
-
-        const history = [];
-        let scoreVal = 0;
-
-        btnC.onclick = () => {
-          history.push(scoreVal);
-          scoreVal += m;
-          score.textContent = scoreVal;
-        };
-
-        btnW.onclick = () => {
-          history.push(scoreVal);
-          scoreVal -= n;
-          score.textContent = scoreVal;
-        };
-
-        btnU.onclick = () => {
-          if (history.length > 0) {
-            scoreVal = history.pop();
-            score.textContent = scoreVal;
-          }
-        };
-
-        div.append(name, score, btnC, btnW, btnU);
-        container.append(div);
-
-        players.push({ scoreVal, score, history });
+      function buildGridTemplate(count){
+        // each column is 1fr so grid always fits the container width
+        container.style.gridTemplateColumns = `repeat(${count}, 1fr)`;
       }
-    }
 
-    setupGame();
+      function createPlayers(count){
+        container.innerHTML = '';
+        players = [];
+        historyStack = [];
+        winners = [];
+        buildGridTemplate(count);
+
+        for(let i=0;i<count;i++){
+          const card = document.createElement('div');
+          card.className = 'player';
+
+          const name = document.createElement('input');
+          name.type = 'text';
+          name.placeholder = `プレイヤー${i+1}`;
+          name.className = 'name';
+
+          const points = document.createElement('div');
+          points.className = 'points';
+          points.innerHTML = `<span class="pts-num">0</span>`;
+
+          const counts = document.createElement('div');
+          counts.className = 'counts';
+          // 縦棒を削除：正解と誤答だけ数字で表示
+          counts.innerHTML = `<div class="correct-count">0</div><div class="wrong-count">0</div>`;
+
+          const btnRow = document.createElement('div');
+          btnRow.className = 'buttons';
+          const btnC = document.createElement('button'); btnC.className = 'btn btn-correct'; btnC.textContent = '正解';
+          const btnW = document.createElement('button'); btnW.className = 'btn btn-wrong'; btnW.textContent = '誤答';
+          btnRow.append(btnC, btnW);
+
+          card.append(name, points, counts, btnRow);
+          container.appendChild(card);
+
+          const state = {
+            idx: i,
+            el: card,
+            nameEl: name,
+            pointsEl: points,
+            correctEl: counts.querySelector('.correct-count'),
+            wrongEl: counts.querySelector('.wrong-count'),
+            btnC, btnW,
+            correct: 0,
+            wrong: 0,
+            points: 0,
+            rank: 0
+          };
+
+          // 正解処理
+          btnC.addEventListener('click', ()=>{
+            if(state.rank !== 0) return;
+            const plus = Math.max(0, parseInt(plusInput.value || 0));
+            state.correct++;
+            state.points += plus;
+            historyStack.push({ type: 'correct', idx: state.idx, delta: plus });
+            checkWinByPoints(state);
+            updateAllDisplays(true);
+          });
+
+          // 誤答処理（誤答は数字でカウント）
+          btnW.addEventListener('click', ()=>{
+            if(state.rank !== 0) return;
+            const minus = Math.max(0, parseInt(minusInput.value || 0));
+            state.wrong++;
+            state.points -= minus;
+            historyStack.push({ type: 'wrong', idx: state.idx, delta: minus });
+            checkWinByPoints(state);
+            updateAllDisplays(true);
+          });
+
+          players.push(state);
+        }
+
+        updateAllDisplays(false);
+        updateUndoButton();
+      }
+
+      function checkWinByPoints(state){
+        const winPoints = Math.max(1, parseInt(winPointsInput.value || 1));
+        if(state.rank === 0 && state.points >= winPoints){
+          winners.push(state.idx);
+          state.rank = winners.length; // 1-based
+          historyStack.push({ type: 'win', idx: state.idx, rank: state.rank });
+        }
+      }
+
+      function updateAllDisplays(animate=true){
+        players.forEach(p=>{
+          // update numbers
+          const ptsNum = p.pointsEl.querySelector('.pts-num');
+          if(p.rank > 0){
+            // show rank badge inside points area and number
+            if(!p.pointsEl.querySelector('.rank-badge')){
+              const b = document.createElement('span');
+              b.className = 'rank-badge';
+              b.textContent = ordinalLabel(p.rank);
+              p.pointsEl.appendChild(b);
+            } else {
+              p.pointsEl.querySelector('.rank-badge').textContent = ordinalLabel(p.rank);
+            }
+            if(ptsNum) ptsNum.textContent = String(p.points);
+            p.el.classList.add('winner');
+            p.btnC.disabled = true;
+            p.btnW.disabled = true;
+            p.nameEl.disabled = true;
+          } else {
+            const old = p.pointsEl.querySelector('.rank-badge');
+            if(old) old.remove();
+            if(ptsNum) ptsNum.textContent = String(p.points);
+            p.el.classList.remove('winner');
+            p.btnC.disabled = false;
+            p.btnW.disabled = false;
+            p.nameEl.disabled = false;
+          }
+
+          p.correctEl.textContent = String(p.correct);
+          p.wrongEl.textContent = String(p.wrong);
+
+          if(animate && ptsNum){
+            ptsNum.classList.add('animate');
+            setTimeout(()=>ptsNum.classList.remove('animate'), 280);
+          }
+        });
+
+        updateUndoButton();
+      }
+
+      // ordinal label: 1 -> 1st, 2 -> 2nd, 3 -> 3rd, others -> 4th...
+      function ordinalLabel(n){
+        if(n % 100 >= 11 && n % 100 <= 13) return n + 'th';
+        const last = n % 10;
+        if(last === 1) return n + 'st';
+        if(last === 2) return n + 'nd';
+        if(last === 3) return n + 'rd';
+        return n + 'th';
+      }
+
+      function undoLast(){
+        if(historyStack.length === 0) return;
+        const last = historyStack.pop();
+        if(!last) return;
+        const p = players[last.idx];
+        if(!p) return;
+
+        if(last.type === 'win'){
+          // remove rank and shift following winners
+          const pos = winners.indexOf(p.idx);
+          if(pos !== -1){
+            winners.splice(pos,1);
+            for(let i=pos;i<winners.length;i++){
+              const idx = winners[i];
+              players[idx].rank = i+1;
+            }
+            p.rank = 0;
+          }
+        } else if(last.type === 'correct'){
+          p.correct = Math.max(0, p.correct - 1);
+          p.points = p.points - (last.delta || 0);
+          // remove rank if dropped below threshold
+          if(p.rank > 0 && p.points < Math.max(1, parseInt(winPointsInput.value || 1))){
+            const pos = winners.indexOf(p.idx);
+            if(pos !== -1){
+              winners.splice(pos,1);
+              p.rank = 0;
+              for(let i=pos;i<winners.length;i++){
+                const idx = winners[i];
+                players[idx].rank = i+1;
+              }
+            }
+          }
+        } else if(last.type === 'wrong'){
+          p.wrong = Math.max(0, p.wrong - 1);
+          p.points = p.points + (last.delta || 0);
+        }
+
+        updateAllDisplays(true);
+      }
+
+      function updateUndoButton(){
+        undoBtn.disabled = historyStack.length === 0;
+      }
+
+      function resetAll(){
+        players.forEach(p=>{
+          p.correct = 0;
+          p.wrong = 0;
+          p.points = 0;
+          p.rank = 0;
+          p.nameEl.value = '';
+          p.btnC.disabled = false;
+          p.btnW.disabled = false;
+          p.nameEl.disabled = false;
+          const badge = p.pointsEl.querySelector('.rank-badge'); if(badge) badge.remove();
+          p.el.classList.remove('winner');
+          const ptsNum = p.pointsEl.querySelector('.pts-num');
+          if(ptsNum) ptsNum.textContent = '0';
+          p.correctEl.textContent = '0';
+          p.wrongEl.textContent = '0';
+        });
+        historyStack = [];
+        winners = [];
+        updateUndoButton();
+      }
+
+      // controls
+      startBtn.addEventListener('click', ()=>{
+        const cnt = Math.max(1, Math.min(20, parseInt(countInput.value || 6)));
+        createPlayers(cnt);
+      });
+
+      // live adjust grid when changing participant count (no re-create)
+      countInput.addEventListener('input', ()=>{
+        const cnt = Math.max(1, Math.min(20, parseInt(countInput.value || 6)));
+        buildGridTemplate(cnt);
+      });
+
+      resetAllBtn.addEventListener('click', resetAll);
+      undoBtn.addEventListener('click', undoLast);
+
+      window.addEventListener('resize', ()=>{
+        const cnt = players.length || Math.max(1, Math.min(20, parseInt(countInput.value || 6)));
+        buildGridTemplate(cnt);
+      });
+
+      // initial
+      createPlayers(Math.max(1, Math.min(20, parseInt(countInput.value || 6))));
+    })();
   </script>
 </body>
 </html>
