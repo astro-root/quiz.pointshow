@@ -1,45 +1,130 @@
 <!doctype html>
-  <head>
+<html lang="ja">
+<head>
     <meta charset="UTF-8">
-    <title>クイズ 得点表示一覧</title> 
-  </head>
-  <body>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クイズ 得点表示一覧</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* 全体のリセットと基本設定 */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f0f4f8; /* 薄いブルーグレーの背景 */
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        /* ヘッダー部分 */
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 40px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #3498db;
+            display: inline-block;
+            padding-bottom: 10px;
+            /* 中央寄せのための親要素ハック */
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* グリッドレイアウト（カードを並べる枠） */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* カード（リンクボタン）のデザイン */
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100px; /* カードの高さ */
+            font-weight: bold;
+            font-size: 1.2rem;
+            border: 1px solid #e1e8ed;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 左側のアクセントカラー（装飾） */
+        .card::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            background-color: #3498db; /* デフォルトの色 */
+        }
+
+        /* ホバー（マウスを乗せた時）のアニメーション */
+        .card:hover {
+            transform: translateY(-5px); /* 少し浮き上がる */
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
+            background-color: #fafafa;
+        }
+
+        /* リンクの色設定（訪問済みなどの色変化を無効化） */
+        .card:visited {
+            color: #2c3e50;
+        }
+
+        /* 特定のルールに色を変えたい場合の例（任意） */
+        .card[href*="AQL"]::before { background-color: #e74c3c; } /* 赤 */
+        .card[href*="EQIDEN"]::before { background-color: #2ecc71; } /* 緑 */
+        .card[href*="アタック25"]::before { background-color: #f1c40f; } /* 黄 */
+
+    </style>
+</head>
+<body>
+
     <h1>クイズ 得点表示一覧</h1>
-    <p>
-    <a href="https://astro-root.github.io/quiz.pointshow/フォロー.html" target="_blank" rel="noopener noreferrer">フォロー</a>
-    </p>
-    <p>
-    <a href="https://astro-root.github.io/quiz.pointshow/AQL.html" target="_blank" rel="noopener noreferrer">AQL</a>
-    </p>
-    <p>
-    <a href="https://astro-root.github.io/quiz.pointshow/EQIDEN.html" target="_blank" rel="noopener noreferrer">EQIDEN</a>
-    </p>
-    <p>
-    <a href="https://astro-root.github.io/quiz.pointshow/Lucky Shot.html" target="_blank" rel="noopener noreferrer">Lucky Shot</a>
-    </p>
-    <p>
-    <a href="https://astro-root.github.io/quiz.pointshow/NewYork.html" target="_blank" rel="noopener noreferrer">NewYork</a>
-    </p>
-    <p>
-    <a href="https://astro-root.github.io/quiz.pointshow/TOMOE.html" target="_blank" rel="noopener noreferrer">TOMOE</a>
-    </p>
-    <p>
-    <a href="https://astro-root.github.io/quiz.pointshow/by.html" target="_blank" rel="noopener noreferrer">m by m</a>
-    </p>
-    <p>
-    <a href="https://astro-root.github.io/quiz.pointshow/m◯n×.html" target="_blank" rel="noopener noreferrer">m◯n×</a>
-    </p>
-    <p>
-    <a href="https://astro-root.github.io/quiz.pointshow/up-down.html" target="_blank" rel="noopener noreferrer">up-down</a>
-    </p>
-    <p>
-    <a href="https://astro-root.github.io/quiz.pointshow/アタサバ.html" target="_blank" rel="noopener noreferrer">アタサバ</a>
-    </p>
-    <p>
-    <a href="https://astro-root.github.io/quiz.pointshow/アタック25.html" target="_blank" rel="noopener noreferrer">アタック25</a>
-    </p>
-    <p>
-    <a href="https://astro-root.github.io/quiz.pointshow/連答付き.html" target="_blank" rel="noopener noreferrer">連答付き</a>
-    </p>
-  </body>
+
+    <div class="grid-container">
+        <a href="https://astro-root.github.io/quiz.pointshow/フォロー.html" target="_blank" rel="noopener noreferrer" class="card">フォロー</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/AQL.html" target="_blank" rel="noopener noreferrer" class="card">AQL</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/EQIDEN.html" target="_blank" rel="noopener noreferrer" class="card">EQIDEN</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/Lucky Shot.html" target="_blank" rel="noopener noreferrer" class="card">Lucky Shot</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/NewYork.html" target="_blank" rel="noopener noreferrer" class="card">NewYork</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/TOMOE.html" target="_blank" rel="noopener noreferrer" class="card">TOMOE</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/by.html" target="_blank" rel="noopener noreferrer" class="card">m by m</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/m◯n×.html" target="_blank" rel="noopener noreferrer" class="card">m◯n×</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/up-down.html" target="_blank" rel="noopener noreferrer" class="card">up-down</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/アタサバ.html" target="_blank" rel="noopener noreferrer" class="card">アタサバ</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/アタック25.html" target="_blank" rel="noopener noreferrer" class="card">アタック25</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/連答付き.html" target="_blank" rel="noopener noreferrer" class="card">連答付き</a>
+    </div>
+
+</body>
 </html>
