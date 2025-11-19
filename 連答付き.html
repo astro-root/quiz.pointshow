@@ -72,24 +72,25 @@
       border:1px solid rgba(255,255,255,0.03); color:#fff; min-width:0;
     }
 
-    /* 編集可能な縦書き入力欄（初期値は プレイヤー1 など、初期色はグレー） */
+    /* --- ここを LuckyShot/by/NewYork の雰囲気に合わせた編集可能縦書き入力に変更 --- */
     .name-input{
       writing-mode: vertical-rl;
       text-orientation: upright;
       border: none;
       background: transparent;
       font-weight:800;
-      font-size:24px;
-      height:250px;
-      width:44px;
+      font-size:24px;       /* サイズを調整（LuckyShot/by/NewYork 風） */
+      height:250px;         /* 高さを控えめに */
+      width:44px;           /* 幅は縦書きに合わせて狭く */
       padding:4px;
       margin-bottom:8px;
       text-align:center;
-      color:var(--muted);
+      color:var(--muted);   /* 初期は薄いグレー、フォーカスで白 */
       outline: none;
       caret-color: #fff;
     }
     .name-input:focus{ color: #fff; }
+    /* --- ここまで --- */
 
     /* 正解数（ここに rank バッジを入れる） */
     .correct-count{
