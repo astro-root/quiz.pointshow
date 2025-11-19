@@ -1,165 +1,388 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>up-down</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    * { box-sizing: border-box; }
-    body { margin:0; padding:0; font-family:"Yu Gothic",sans-serif; background:#111; color:#fff; }
-    .header { background:#003366; padding:15px; display:flex; justify-content:space-between; align-items:center; font-size:1.2rem; }
-    .thresholds { display:flex; gap:15px; align-items:center; }
-    .thresholds input { width:60px; padding:4px 6px; font-size:1rem; border-radius:4px; border:none; text-align:center; }
-    #resetAll { margin-left:20px; padding:6px 12px; font-size:1rem; background:#ea4335; border:none; border-radius:4px; cursor:pointer; color:#fff; }
-    #resetAll:hover { background:#c23321; }
-    .scoreboard { display:grid; grid-template-columns:repeat(10,1fr); gap:4px; padding:4px; }
-    .team-col { background:#004d40; width:120px; display:flex; flex-direction:column; align-items:center; padding:15px 8px; position:relative; min-height:350px; }
-    .team-col .info { background:#00251a; width:100%; text-align:center; font-size:0.85rem; padding:4px 0; margin-bottom:8px; border-radius:4px; }
-    .name-input { width:100%; height:140px; font-size:1.4rem; font-weight:bold; text-align:center; border:none; background:transparent; color:#fff; margin-bottom:12px; writing-mode:vertical-rl; text-orientation:upright; }
-    .name-input:focus { outline:2px dashed #fff; }
-    .status { position:absolute; top:6px; right:6px; padding:4px 8px; border-radius:4px; font-size:0.9rem; display:none; }
-    .team-col.win .status { display:block; background:#ffeb3b; color:#000; }
-    .team-col.lose .status { display:block; background:#e53935; color:#fff; }
-    .correct-count { font-size:2.6rem; font-weight:bold; margin:10px 0 6px; line-height:1; }
-    .wrong-count { font-size:1.8rem; color:#e53935; height:1.8em; line-height:1.8em; margin-bottom:12px; }
-    .actions { display:flex; gap:6px; margin-top:auto; width:100%; }
-    .actions button { flex:1; padding:8px 0; font-size:1rem; border:none; border-radius:6px; cursor:pointer; color:#fff; }
-    .btn-correct { background:#4caf50; }
-    .btn-wrong   { background:#f44336; }
-    .btn-undo    { background:#607d8b; }
-    .actions button:disabled { background:#555; cursor:default; }
+    :root{
+      --bg:#0b0b0b;
+      --panel-top:#003a66;
+      --panel-bottom:#002f51;
+      --card-bg: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+      --muted:#9aa7aa;
+      --correct-blue:#3ea6ff;
+      --wrong-red:#ff6b6b;
+      --elim-bg:#06283a;
+      --elim-text:#bfc8cc;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;padding:0;font-family:"Hiragino Kaku Gothic ProN","Meiryo",system-ui,sans-serif}
+    body{
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(24,160,176,0.03), transparent 14%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), transparent 18%),
+        var(--bg);
+      color:#eee; padding:18px;
+    }
+
+    .header{
+      display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:10px;
+      background: linear-gradient(180deg,var(--panel-top),var(--panel-bottom));
+      margin-bottom:12px;
+    }
+    .logo{ width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;background:linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); }
+    h1{ margin:0; font-size:20px; color:#fff; }
+
+    .settings{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+      padding:10px 12px; border-radius:10px; margin-bottom:18px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02));
+    }
+    .settings label{
+      display:flex; gap:8px; align-items:center; color:#fff; font-weight:700;
+      padding:8px 10px; border-radius:8px; font-size:16px;
+    }
+    .settings input[type="number"]{ width:80px; padding:6px 8px; border-radius:6px; text-align:center; background:transparent; color:#fff; font-weight:700; font-size:16px; border:1px solid rgba(255,255,255,0.03); }
+    .settings button{ padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:800; font-size:14px; }
+
+    #createBtn{ background: linear-gradient(180deg,var(--correct-blue), #2b8f44); color:#062f07; } /* 見た目合わせつつ */
+    #resetAll{ background: linear-gradient(180deg,#d7263d,#b71b2b); color:#fff; }
+    #undoGlobal{ background: linear-gradient(180deg,#9e9e9e,#6f6f6f); color:#fff; }
+
+    .scoreboard { display:block; width:100%; }
+    #grid {
+      display:grid;
+      gap:12px;
+      width:100%;
+      align-items:start;
+      grid-auto-rows:auto;
+      /* columns set to repeat(count, 1fr) in JS */
+    }
+
+    .column{
+      background: var(--card-bg);
+      padding:14px; border-radius:12px; border:1px solid rgba(255,255,255,0.03);
+      display:flex; flex-direction:column; align-items:center; min-height:220px; color:#fff;
+    }
+
+    .name-input{
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      border: none;
+      background: transparent;
+      font-weight:800;
+      font-size:24px;
+      height:250px;
+      width:44px;
+      padding:4px;
+      margin-bottom:8px;
+      text-align:center;
+      color:var(--muted);
+      outline: none;
+      caret-color: #fff;
+    }
+    .name-input:focus{ color:#fff; }
+
+    .correct-count{ font-size:36px; font-weight:900; color:var(--correct-blue); min-height:44px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; }
+    .wrong-count{ font-size:18px; color:var(--wrong-red); min-height:20px; font-weight:800; margin-bottom:10px; }
+
+    .buttons{ display:flex; gap:8px; width:100%; margin-top:auto; }
+    .btn-op{ flex:1; padding:8px 6px; border-radius:8px; border:none; cursor:pointer; font-weight:800; font-size:14px; }
+    .btn-correct{ background: linear-gradient(180deg,#2fa84f,#1d7b36); color:#042a08; }
+    .btn-wrong{ background: linear-gradient(180deg,#e84a4a,#b71b2b); color:#fff; }
+
+    .column.eliminated{ background: var(--elim-bg); color: var(--elim-text); }
+    .column.eliminated .name-input{ color: var(--elim-text); }
+    .column.eliminated .correct-count, .column.eliminated .wrong-count{ color: var(--elim-text); opacity:0.95; }
+    .column.eliminated .btn-op{ opacity:0.6; cursor:not-allowed; }
+
+    /* no glow / no animations */
+
+    @media (max-width:720px){
+      .name-input{ height:88px; width:36px; font-size:16px; }
+      .correct-count{ font-size:28px; }
+      .wrong-count{ font-size:16px; }
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <div>up-down</div>
-    <div class="thresholds">
-      <label>勝ち抜け <input type="number" id="winThresh" min="1" value="5"></label>
-      <label>失格 <input type="number" id="loseThresh" min="1" value="2"></label>
-      <button id="resetAll">リセット</button>
-    </div>
+    <div class="logo">UD</div>
+    <h1>up-down</h1>
   </div>
-  <div class="scoreboard" id="scoreboard"></div>
-  <script>
-    const winInput = document.getElementById('winThresh');
-    const loseInput = document.getElementById('loseThresh');
-    const resetAll = document.getElementById('resetAll');
-    const container = document.getElementById('scoreboard');
-    const historyMap = new Map();
 
-    // カラムを生成
-    for (let i = 1; i <= 10; i++) {
+  <div class="settings" role="region" aria-label="settings">
+    <label>勝ち抜け: <input id="winThresh" type="number" min="1" value="5"></label>
+    <label>失格: <input id="loseThresh" type="number" min="1" value="2"></label>
+    <label>参加人数: <input id="playerCount" type="number" min="1" max="20" value="6"></label>
+    <button id="createBtn">開始</button>
+    <button id="undoGlobal">戻る</button>
+    <button id="resetAll">リセット</button>
+  </div>
+
+  <div class="scoreboard">
+    <div id="grid" aria-label="scoreboard-grid"></div>
+  </div>
+
+<script>
+(function(){
+  const grid = document.getElementById('grid');
+  const winInput = document.getElementById('winThresh');
+  const loseInput = document.getElementById('loseThresh');
+  const countInput = document.getElementById('playerCount');
+  const createBtn = document.getElementById('createBtn');
+  const resetAllBtn = document.getElementById('resetAll');
+  const undoGlobalBtn = document.getElementById('undoGlobal');
+
+  let players = []; // { idx, el, nameEl, correctEl, wrongEl, btnC, btnW, correct, wrong, eliminated, rank }
+  let historyStack = []; // [{ idx, prev:{correct,wrong,eliminated,rank}, winners:[] }]
+  let winners = [];
+
+  function ordinal(n){
+    if(n % 100 >= 11 && n % 100 <= 13) return n + 'th';
+    const last = n % 10;
+    if(last === 1) return n + 'st';
+    if(last === 2) return n + 'nd';
+    if(last === 3) return n + 'rd';
+    return n + 'th';
+  }
+
+  function setColumns(count){
+    grid.style.gridTemplateColumns = `repeat(${count}, 1fr)`;
+    grid.parentElement.style.overflowX = 'hidden';
+  }
+
+  function pushHistory(idx, prev){
+    historyStack.push({ idx, prev: JSON.parse(JSON.stringify(prev)), winners: winners.slice() });
+    if(historyStack.length > 500) historyStack.shift();
+    updateUndoState();
+  }
+  function updateUndoState(){ undoGlobalBtn.disabled = historyStack.length === 0; }
+
+  function createGrid(count){
+    grid.innerHTML = '';
+    players = [];
+    historyStack = [];
+    winners = [];
+    setColumns(count);
+
+    for(let i=0;i<count;i++){
       const col = document.createElement('div');
-      col.className = 'team-col';
-      col.dataset.team = i;
+      col.className = 'column';
       col.innerHTML = `
-        <div class="status"></div>
-        <div class="info">No.${i}</div>
-        <input class="name-input" type="text" value="参加者${i}">
-        <div class="correct-count">0</div>
+        <input class="name-input" value="プレイヤー${i+1}" />
+        <div class="correct-count"><span class="num">0</span></div>
         <div class="wrong-count"></div>
-        <div class="actions">
-          <button class="btn-correct">正解</button>
-          <button class="btn-wrong">誤答</button>
-          <button class="btn-undo" disabled>戻る</button>
+        <div class="buttons">
+          <button class="btn-op btn-correct">正解</button>
+          <button class="btn-op btn-wrong">誤答</button>
         </div>
       `;
-      container.appendChild(col);
-    }
+      grid.appendChild(col);
 
-    function init() {
-      document.querySelectorAll('.team-col').forEach(col => {
-        historyMap.set(col, [{ r: 0, w: 0 }]);
-        col.querySelector('.btn-correct').addEventListener('click', () => apply(col, 1, 0));
-        col.querySelector('.btn-wrong').addEventListener('click', () => apply(col, 0, 1));
-        col.querySelector('.btn-undo').addEventListener('click', () => undo(col));
+      const nameEl = col.querySelector('.name-input');
+      const correctEl = col.querySelector('.correct-count .num');
+      const wrongEl = col.querySelector('.wrong-count');
+      const btnC = col.querySelector('.btn-correct');
+      const btnW = col.querySelector('.btn-wrong');
+
+      const p = { idx:i, el:col, nameEl, correctEl, wrongEl, btnC, btnW, correct:0, wrong:0, eliminated:false, rank:0 };
+
+      btnC.addEventListener('click', ()=>{
+        if(p.eliminated || p.rank>0) return;
+        pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
+        p.correct++;
+        checkFinishAndEliminate(p);
+        render();
       });
-      resetAll.addEventListener('click', resetAllTeams);
-      winInput.addEventListener('change', () => checkAll());
-      loseInput.addEventListener('change', () => checkAll());
+
+      btnW.addEventListener('click', ()=>{
+        if(p.eliminated || p.rank>0) return;
+        pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
+        p.wrong++;
+        // up-down original: first wrong resets correct to 0
+        if(p.wrong === 1) p.correct = 0;
+        checkFinishAndEliminate(p);
+        render();
+      });
+
+      players.push(p);
     }
 
-    function apply(col, dr, dw) {
-      const cntR = col.querySelector('.correct-count');
-      const cntW = col.querySelector('.wrong-count');
-      const prev = { r: parseInt(cntR.textContent, 10), w: cntW.textContent.length };
-      historyMap.get(col).push(prev);
-      col.querySelector('.btn-undo').disabled = false;
+    render();
+    updateUndoState();
+  }
 
-      // 誤答処理
-      if (dw > 0) {
-        const newW = prev.w + 1;
-        cntW.textContent = '×'.repeat(newW);
-        if (newW === 1) {
-          // 1問目の誤答で正解数リセット
-          cntR.textContent = '0';
+  function checkFinishAndEliminate(p){
+    const winTh = Math.max(1, parseInt(winInput.value || 1));
+    const loseTh = Math.max(1, parseInt(loseInput.value || 1));
+
+    if(!p.eliminated && p.wrong >= loseTh){
+      p.eliminated = true;
+      p.rank = 0;
+    }
+    if(!p.eliminated && p.rank === 0 && p.correct >= winTh){
+      winners.push(p.idx);
+      p.rank = winners.length;
+    }
+  }
+
+  function render(){
+    players.forEach(p=>{
+      if(p.eliminated){
+        p.el.classList.add('eliminated');
+        p.correctEl.textContent = 'Lose';
+        p.wrongEl.textContent = p.wrong > 0 ? '×'.repeat(p.wrong) : '';
+        p.btnC.disabled = true;
+        p.btnW.disabled = true;
+        p.nameEl.disabled = true;
+      } else {
+        p.el.classList.remove('eliminated');
+        if(p.rank > 0){
+          p.correctEl.textContent = ordinal(p.rank); // 1st/2nd...
+          p.btnC.disabled = true;
+          p.btnW.disabled = true;
+          p.nameEl.disabled = true;
+        } else {
+          p.correctEl.textContent = String(p.correct);
+          p.wrongEl.textContent = p.wrong > 0 ? '×'.repeat(p.wrong) : '';
+          p.btnC.disabled = false;
+          p.btnW.disabled = false;
+          p.nameEl.disabled = false;
         }
       }
-      // 正解処理
-      if (dr > 0) {
-        cntR.textContent = prev.r + 1;
+    });
+    updateUndoState();
+  }
+
+  function undoGlobal(){
+    if(historyStack.length === 0) return;
+    const last = historyStack.pop();
+    if(!last) return;
+    const idx = last.idx;
+    const prev = last.prev;
+    winners = (last.winners || []).slice();
+
+    const p = players[idx];
+    if(p){
+      p.correct = prev.correct;
+      p.wrong = prev.wrong;
+      p.eliminated = prev.eliminated;
+      p.rank = prev.rank || 0;
+    }
+
+    // restore ranks according to winners
+    players.forEach(pl => {
+      const pos = winners.indexOf(pl.idx);
+      pl.rank = pos === -1 ? (pl.rank>0 && pl.idx===idx ? 0 : pl.rank) : pos+1;
+    });
+
+    render();
+  }
+
+  function resetAll(){
+    players.forEach((p,i)=>{
+      p.correct = 0; p.wrong = 0; p.eliminated = false; p.rank = 0;
+      p.nameEl.value = `プレイヤー${i+1}`;
+      p.nameEl.disabled = false;
+      p.btnC.disabled = false;
+      p.btnW.disabled = false;
+    });
+    historyStack = [];
+    winners = [];
+    render();
+    updateUndoState();
+  }
+
+  // handlers
+  createBtn.addEventListener('click', ()=>{
+    const cnt = Math.max(1, Math.min(20, parseInt(countInput.value || 6)));
+    createGrid(cnt);
+  });
+  undoGlobalBtn.addEventListener('click', undoGlobal);
+  resetAllBtn.addEventListener('click', resetAll);
+
+  winInput.addEventListener('input', ()=>{
+    players.forEach(p=>{
+      if(!p.eliminated && p.rank === 0 && p.correct >= parseInt(winInput.value || 1)){
+        winners.push(p.idx);
+        p.rank = winners.length;
       }
+    });
+    render();
+  });
+  loseInput.addEventListener('input', ()=>{
+    players.forEach(p=>{
+      if(!p.eliminated && p.wrong >= parseInt(loseInput.value || 1)) p.eliminated = true;
+    });
+    render();
+  });
 
-      checkStatus(col);
-    }
+  // initial create
+  function createGrid(n){
+    setColumns(n);
+    grid.innerHTML = '';
+    players = [];
+    historyStack = [];
+    winners = [];
 
-    function undo(col) {
-      const hist = historyMap.get(col);
-      if (hist.length <= 1) return;
-      hist.pop();
-      const { r, w } = hist[hist.length - 1];
-      col.querySelector('.correct-count').textContent = r;
-      col.querySelector('.wrong-count').textContent = '×'.repeat(w);
-      col.querySelectorAll('button:not(.btn-undo)').forEach(b => b.disabled = false);
-      col.classList.remove('win', 'lose');
-      col.querySelector('.status').style.display = 'none';
-      if (hist.length === 1) col.querySelector('.btn-undo').disabled = true;
-    }
+    for(let i=0;i<n;i++){
+      const col = document.createElement('div');
+      col.className = 'column';
+      col.innerHTML = `
+        <input class="name-input" value="プレイヤー${i+1}" />
+        <div class="correct-count"><span class="num">0</span></div>
+        <div class="wrong-count"></div>
+        <div class="buttons">
+          <button class="btn-op btn-correct">正解</button>
+          <button class="btn-op btn-wrong">誤答</button>
+        </div>
+      `;
+      grid.appendChild(col);
 
-    function checkStatus(col) {
-      const right = parseInt(col.querySelector('.correct-count').textContent, 10);
-      const wrong = col.querySelector('.wrong-count').textContent.length;
-      const winTh = parseInt(winInput.value, 10);
-      const loseTh = parseInt(loseInput.value, 10);
-      const st = col.querySelector('.status');
+      const nameEl = col.querySelector('.name-input');
+      const correctEl = col.querySelector('.correct-count .num');
+      const wrongEl = col.querySelector('.wrong-count');
+      const btnC = col.querySelector('.btn-correct');
+      const btnW = col.querySelector('.btn-wrong');
 
-      st.style.display = 'none';
-      col.classList.remove('win', 'lose');
-      col.querySelectorAll('button:not(.btn-undo)').forEach(b => b.disabled = false);
+      const p = { idx:i, el:col, nameEl, correctEl, wrongEl, btnC, btnW, correct:0, wrong:0, eliminated:false, rank:0 };
 
-      if (right >= winTh) {
-        st.textContent = '勝ち抜け';
-        col.classList.add('win');
-        st.style.display = 'block';
-        lock(col);
-      } else if (wrong >= loseTh) {
-        st.textContent = '失格';
-        col.classList.add('lose');
-        st.style.display = 'block';
-        lock(col);
-      }
-    }
-
-    function checkAll() {
-      document.querySelectorAll('.team-col').forEach(checkStatus);
-    }
-
-    function resetAllTeams() {
-      document.querySelectorAll('.team-col').forEach(col => {
-        col.querySelector('.correct-count').textContent = '0';
-        col.querySelector('.wrong-count').textContent = '';
-        col.classList.remove('win', 'lose');
-        col.querySelector('.status').style.display = 'none';
-        col.querySelectorAll('button').forEach(b => b.disabled = false);
-        historyMap.set(col, [{ r: 0, w: 0 }]);
-        col.querySelector('.btn-undo').disabled = true;
+      btnC.addEventListener('click', ()=>{
+        if(p.eliminated || p.rank>0) return;
+        pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
+        p.correct++;
+        checkFinishAndEliminate(p);
+        render();
       });
+
+      btnW.addEventListener('click', ()=>{
+        if(p.eliminated || p.rank>0) return;
+        pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
+        p.wrong++;
+        if(p.wrong === 1) p.correct = 0;
+        checkFinishAndEliminate(p);
+        render();
+      });
+
+      players.push(p);
     }
 
-    function lock(col) {
-      col.querySelectorAll('button:not(.btn-undo)').forEach(b => b.disabled = true);
-    }
+    render();
+    updateUndoState();
+  }
 
-    window.addEventListener('DOMContentLoaded', init);
-  </script>
+  // create default 6 at load
+  createGrid(Math.max(1, Math.min(20, parseInt(countInput.value || 6))));
+
+  // keep grid fit on resize
+  window.addEventListener('resize', ()=>{
+    const n = players.length || Math.max(1, Math.min(20, parseInt(countInput.value || 6)));
+    setColumns(n);
+  });
+
+})();
+</script>
 </body>
 </html>
