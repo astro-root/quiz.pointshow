@@ -3,177 +3,380 @@
 <head>
   <meta charset="UTF-8">
   <title>連答付き</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f8f9fa;
-      padding: 20px;
+    :root{
+      --bg:#0b0b0b;
+      --panel-top:#003a66;
+      --panel-bottom:#002f51;
+      --card-bg: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+      --ok:#33a853;
+      --muted:#9aa7aa;
+      --correct-blue:#3ea6ff;
+      --wrong-red:#ff6b6b;
+      --elim-bg:#06283a;
+      --elim-text:#bfc8cc;
+      --rank-bg:#3ea6ff;
+      --rank-color:#01263b;
+      --card-shadow:0 8px 20px rgba(0,0,0,0.6);
+      --win-shadow:0 0 20px gold,0 0 40px rgba(255,215,0,0.6);
     }
-    h1 {
-      text-align: center;
-      font-size: 40px;
-      margin-bottom: 20px;
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;padding:0;font-family:"Hiragino Kaku Gothic ProN","Meiryo",system-ui,sans-serif}
+    body{
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(24,160,176,0.03), transparent 14%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), transparent 18%),
+        var(--bg);
+      color:#eee; padding:18px; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
-    .settings {
-      text-align: center;
-      margin-bottom: 30px;
+
+    .header{
+      display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:10px;
+      background: linear-gradient(180deg,var(--panel-top),var(--panel-bottom));
+      box-shadow:0 6px 18px rgba(0,0,0,0.6), inset 0 -2px 0 rgba(255,255,255,0.03);
+      margin-bottom:12px;
     }
-    .settings input {
-      font-size: 18px;
-      width: 60px;
-      text-align: center;
-      margin: 0 10px;
+    .logo{ width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;background:linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); box-shadow:0 6px 12px rgba(0,0,0,0.6) }
+    h1{ margin:0; font-size:20px; color:#fff; }
+
+    .settings{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+      padding:10px 12px; border-radius:10px; margin-bottom:18px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.04));
+      box-shadow:0 6px 18px rgba(0,0,0,0.5);
     }
-    .scoreboard {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 24px;
-      justify-items: center;
+    .settings label{
+      display:flex; gap:8px; align-items:center; color:#fff; font-weight:700;
+      padding:8px 10px; border-radius:8px; background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      border:1px solid rgba(255,255,255,0.02);
     }
-    .column {
-      background: white;
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-      text-align: center;
-      width: 180px;
+    .settings input[type="number"]{ width:80px; padding:6px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.04); text-align:center; background:transparent; color:#fff; font-weight:700 }
+    .settings button{ padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:800; font-size:14px; box-shadow:0 6px 12px rgba(0,0,0,0.45); }
+    #setupBtn{ background: linear-gradient(180deg,var(--ok),#2b8f44); color:#062f07; }
+    #resetAll{ background: linear-gradient(180deg,#d7263d,#b71b2b); color:#fff; }
+    #undoGlobal{ background: linear-gradient(180deg,#9e9e9e,#6f6f6f); color:#fff; }
+
+    .scoreboard{
+      display:grid;
+      gap:18px;
+      width:100%;
+      justify-items:stretch;
+      align-items:start;
     }
-    .name-input {
-      font-size: 22px;
-      width: 100%;
-      text-align: center;
-      margin-bottom: 16px;
+
+    .column{
+      background: var(--card-bg);
+      padding:16px; border-radius:14px; box-shadow:var(--card-shadow);
+      text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; position:relative;
+      border:1px solid rgba(255,255,255,0.03); color:#fff; min-width:0;
     }
-    .correct-count {
-      font-size: 52px;
-      margin: 10px 0;
-      color: green;
-      font-weight: bold;
+
+    /* 編集可能な縦書き入力欄（初期値は プレイヤー1 など、初期色はグレー） */
+    .name-input{
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      border: none;
+      background: transparent;
+      font-weight:800;
+      font-size:24px;
+      height:250px;
+      width:44px;
+      padding:4px;
+      margin-bottom:8px;
+      text-align:center;
+      color:var(--muted);
+      outline: none;
+      caret-color: #fff;
     }
-    .wrong-count {
-      font-size: 28px;
-      color: red;
-      margin-bottom: 10px;
+    .name-input:focus{ color: #fff; }
+
+    /* 正解数（ここに rank バッジを入れる） */
+    .correct-count{
+      font-size:48px; margin:8px 0; color:var(--ok); font-weight:900; position:relative; min-height:54px;
     }
-    .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 12px;
+    .correct-count .correct-num{ display:block; }
+
+    .rank-badge{
+      position:absolute; left:8px; top:-8px; background:var(--rank-bg); color:var(--rank-color); font-weight:900; padding:6px 8px; border-radius:8px; font-size:12px;
     }
-    .btn {
-      font-size: 20px;
-      padding: 6px 12px;
-      cursor: pointer;
+
+    .wrong-count{
+      font-size:20px; color:var(--wrong-red); margin-bottom:10px; font-weight:800;
+      min-height:22px;
     }
-    .status {
-      font-weight: bold;
-      font-size: 22px;
-      color: blue;
+
+    .buttons{ display:flex; gap:10px; width:100%; justify-content:center; margin-top:8px }
+    .btn-op{ flex:1; padding:10px 8px; border-radius:8px; border:none; cursor:pointer; font-weight:800; font-size:16px }
+    .btn-correct{ background: linear-gradient(180deg,#2fa84f,#1d7b36); color:#042a08 }
+    .btn-wrong{ background: linear-gradient(180deg,#e84a4a,#b71b2b); color:#fff }
+
+    .status{ font-weight:900; font-size:16px; color:#a8e7ff; min-height:20px; margin-top:10px; visibility:hidden; }
+
+    .column.eliminated{ background: var(--elim-bg); color: var(--elim-text); box-shadow:none; }
+    .column.eliminated .name-input{ color: var(--elim-text); }
+    .column.eliminated .correct-count, .column.eliminated .wrong-count { color: var(--elim-text); opacity:0.95; }
+    .column.eliminated .btn-op{ opacity:0.6; cursor:not-allowed; }
+
+    .column.finished{ box-shadow: var(--win-shadow); opacity:0.98; }
+
+    .num-animate{ animation: pop 0.28s ease; }
+    @keyframes pop{ 0%{ transform: scale(1);} 50%{ transform: scale(1.12);} 100%{ transform: scale(1);} }
+
+    @media (max-width:720px){
+      .name-input{ height:88px; width:36px; font-size:16px; }
+      .correct-count{ font-size:36px; }
+      .wrong-count{ font-size:18px; }
+      .rank-badge{ font-size:11px; padding:4px 6px; left:6px; top:-6px; }
     }
   </style>
 </head>
 <body>
-  <h1>連答付き</h1>
-  <div class="settings">
-    勝ち抜け：<input type="number" id="maxCorrectInput" value="5">問　
-    失格：<input type="number" id="maxWrongInput" value="2">問
-    <button id="resetAll" class="btn">リセット</button>
+  <div class="header">
+    <div class="logo">連付</div>
+    <h1>連答付き</h1>
   </div>
+
+  <div class="settings">
+    <label>勝ち抜け: <input type="number" id="maxCorrectInput" value="5" min="1"></label>
+    <label>失格: <input type="number" id="maxWrongInput" value="2" min="1"></label>
+    <label>参加人数: <input type="number" id="playerCountInput" value="6" min="1" max="20"></label>
+    <button id="setupBtn">開始</button>
+    <button id="resetAll">リセット</button>
+    <button id="undoGlobal">戻る</button>
+  </div>
+
   <div class="scoreboard" id="scoreboard"></div>
+
   <script>
-    const scoreboard = document.getElementById("scoreboard");
-    const resetAllBtn = document.getElementById("resetAll");
-    const maxCorrectInput = document.getElementById("maxCorrectInput");
-    const maxWrongInput = document.getElementById("maxWrongInput");
-    const players = 10;
+    (function(){
+      const scoreboard = document.getElementById('scoreboard');
+      const setupBtn = document.getElementById('setupBtn');
+      const resetAllBtn = document.getElementById('resetAll');
+      const undoGlobalBtn = document.getElementById('undoGlobal');
+      const maxCorrectInput = document.getElementById('maxCorrectInput');
+      const maxWrongInput = document.getElementById('maxWrongInput');
+      const playerCountInput = document.getElementById('playerCountInput');
 
-    function createPlayerColumn() {
-      const col = document.createElement("div");
-      col.className = "column";
-      col.innerHTML = `
-        <input type="text" class="name-input" placeholder="名前">
-        <div class="correct-count">0</div>
-        <div class="wrong-count"></div>
-        <div class="buttons">
-          <button class="btn btn-correct">正解</button>
-          <button class="btn btn-wrong">誤答</button>
-          <button class="btn btn-undo">戻る</button>
-        </div>
-        <div class="status"></div>
-      `;
+      let players = []; // { el, nameEl, correct, wrong, streak, rank, eliminated, btnC, btnW, correctEl, correctNumEl, wrongEl, statusEl }
+      let historyStack = []; // [{ idx, prev: {...}, winners: [...] }]
+      let winners = [];
 
-      let correct = 0;
-      let wrong = 0;
-      let streak = 0;
-      let history = [];
-
-      const correctCount = col.querySelector(".correct-count");
-      const wrongCount = col.querySelector(".wrong-count");
-      const status = col.querySelector(".status");
-      const correctBtn = col.querySelector(".btn-correct");
-      const wrongBtn = col.querySelector(".btn-wrong");
-      const undoBtn = col.querySelector(".btn-undo");
-
-      function updateDisplay() {
-        correctCount.textContent = correct;
-        wrongCount.textContent = "×".repeat(wrong);
-        const maxCorrect = parseInt(maxCorrectInput.value);
-        const maxWrong = parseInt(maxWrongInput.value);
-        status.textContent = correct >= maxCorrect ? "勝ち抜け！" : wrong >= maxWrong ? "失格" : "";
+      function buildGrid(count){
+        scoreboard.style.gridTemplateColumns = `repeat(${count}, 1fr)`;
       }
 
-      correctBtn.addEventListener("click", () => {
-        const maxCorrect = parseInt(maxCorrectInput.value);
-        const maxWrong = parseInt(maxWrongInput.value);
-        if (correct >= maxCorrect || wrong >= maxWrong) return;
-        history.push({ correct, wrong, streak });
-        streak++;
-        correct += (streak === 2) ? 2 : 1;
-        if (streak >= 3) streak = 1;
-        updateDisplay();
-      });
+      function createPlayerColumn(i){
+        const col = document.createElement('div');
+        col.className = 'column';
+        col.innerHTML = `
+          <input class="name-input" type="text" value="プレイヤー${i+1}">
+          <div class="correct-count"><span class="correct-num">0</span></div>
+          <div class="wrong-count"></div>
+          <div class="buttons">
+            <button class="btn-op btn-correct">正解</button>
+            <button class="btn-op btn-wrong">誤答</button>
+          </div>
+          <div class="status"></div>
+        `;
 
-      wrongBtn.addEventListener("click", () => {
-        const maxCorrect = parseInt(maxCorrectInput.value);
-        const maxWrong = parseInt(maxWrongInput.value);
-        if (correct >= maxCorrect || wrong >= maxWrong) return;
-        history.push({ correct, wrong, streak });
-        wrong++;
-        streak = 0;
-        updateDisplay();
-      });
+        const nameEl = col.querySelector('.name-input');
+        const correctEl = col.querySelector('.correct-count');
+        const correctNumEl = col.querySelector('.correct-num');
+        const wrongEl = col.querySelector('.wrong-count');
+        const btnC = col.querySelector('.btn-correct');
+        const btnW = col.querySelector('.btn-wrong');
+        const statusEl = col.querySelector('.status');
 
-      undoBtn.addEventListener("click", () => {
-        const last = history.pop();
-        if (last) {
-          correct = last.correct;
-          wrong = last.wrong;
-          streak = last.streak;
-          updateDisplay();
+        const state = {
+          el: col,
+          nameEl,
+          correct: 0,
+          wrong: 0,
+          streak: 0,
+          rank: 0,
+          eliminated: false,
+          btnC, btnW, correctEl, correctNumEl, wrongEl, statusEl
+        };
+
+        function snapshot(){
+          return { correct: state.correct, wrong: state.wrong, streak: state.streak, rank: state.rank, eliminated: state.eliminated };
         }
+
+        btnC.addEventListener('click', ()=>{
+          if(state.rank !== 0 || state.eliminated) return;
+          historyStack.push({ idx: i, prev: snapshot(), winners: winners.slice() });
+
+          state.streak++;
+          state.correct += (state.streak === 2) ? 2 : 1;
+          if(state.streak >= 3) state.streak = 1;
+
+          checkFinishAndEliminate(state, i);
+          renderAll(true);
+        });
+
+        btnW.addEventListener('click', ()=>{
+          if(state.rank !== 0 || state.eliminated) return;
+          historyStack.push({ idx: i, prev: snapshot(), winners: winners.slice() });
+
+          state.wrong++;
+          state.streak = 0;
+
+          checkFinishAndEliminate(state, i);
+          renderAll(true);
+        });
+
+        return state;
+      }
+
+      function checkFinishAndEliminate(state, idx){
+        const maxCorrect = Math.max(1, parseInt(maxCorrectInput.value || 1));
+        const maxWrong = Math.max(1, parseInt(maxWrongInput.value || 1));
+
+        if(state.rank === 0 && state.correct >= maxCorrect){
+          winners.push(idx);
+          state.rank = winners.length;
+        }
+        if(!state.eliminated && state.wrong >= maxWrong){
+          state.eliminated = true;
+        }
+      }
+
+      function renderAll(animate = false){
+        players.forEach((p, idx) => {
+          // correct number
+          p.correctNumEl.textContent = String(p.correct);
+
+          // wrong count as ×
+          p.wrongEl.textContent = p.wrong > 0 ? '×'.repeat(p.wrong) : '';
+
+          // rank badge inside correct-count (1st/2nd/3rd...)
+          let badge = p.correctEl.querySelector('.rank-badge');
+          if(p.rank > 0){
+            if(!badge){
+              badge = document.createElement('div');
+              badge.className = 'rank-badge';
+              p.correctEl.appendChild(badge);
+            }
+            badge.textContent = ordinalLabel(p.rank);
+            p.el.classList.add('finished');
+            p.btnC.disabled = true;
+            p.btnW.disabled = true;
+            p.nameEl.disabled = true;
+            p.nameEl.style.color = 'var(--muted)';
+          } else {
+            if(badge) badge.remove();
+            p.el.classList.remove('finished');
+            if(!p.eliminated){
+              p.btnC.disabled = false;
+              p.btnW.disabled = false;
+              p.nameEl.disabled = false;
+              p.nameEl.style.color = 'var(--muted)';
+            }
+          }
+
+          // eliminated styling and show "Lose" in points area
+          if(p.eliminated){
+            p.el.classList.add('eliminated');
+            p.btnC.disabled = true;
+            p.btnW.disabled = true;
+            p.nameEl.disabled = true;
+            p.correctNumEl.textContent = 'Lose';
+            p.nameEl.style.color = 'var(--elim-text)';
+          } else {
+            p.el.classList.remove('eliminated');
+            if(p.rank === 0){
+              // show numeric points if not eliminated
+              p.correctNumEl.textContent = String(p.correct);
+            }
+          }
+
+          if(animate){
+            p.correctNumEl.classList.add('num-animate');
+            setTimeout(()=>p.correctNumEl.classList.remove('num-animate'), 300);
+          }
+        });
+
+        undoGlobalBtn.disabled = historyStack.length === 0;
+      }
+
+      function ordinalLabel(n){
+        if(n % 100 >= 11 && n % 100 <= 13) return n + 'th';
+        const last = n % 10;
+        if(last === 1) return n + 'st';
+        if(last === 2) return n + 'nd';
+        if(last === 3) return n + 'rd';
+        return n + 'th';
+      }
+
+      function undoGlobal(){
+        if(historyStack.length === 0) return;
+        const last = historyStack.pop();
+        if(!last) return;
+        const idx = last.idx;
+        const prev = last.prev;
+        winners = (last.winners || []).slice();
+        // restore ranks from winners
+        players.forEach((p, i) => {
+          const pos = winners.indexOf(i);
+          p.rank = pos === -1 ? 0 : pos + 1;
+        });
+        const target = players[idx];
+        target.correct = prev.correct;
+        target.wrong = prev.wrong;
+        target.streak = prev.streak;
+        target.rank = prev.rank;
+        target.eliminated = prev.eliminated;
+
+        renderAll(true);
+      }
+
+      function resetAll(){
+        players.forEach((p, i)=>{
+          p.correct = 0; p.wrong = 0; p.streak = 0; p.rank = 0; p.eliminated = false;
+          p.nameEl.value = p.nameEl.value || `プレイヤー${i+1}`;
+          p.nameEl.disabled = false;
+          p.nameEl.style.color = 'var(--muted)';
+        });
+        historyStack = [];
+        winners = [];
+        renderAll(false);
+      }
+
+      function setup(count){
+        buildGrid(count);
+        scoreboard.innerHTML = '';
+        players = [];
+        historyStack = [];
+        winners = [];
+
+        for(let i=0;i<count;i++){
+          const p = createPlayerColumn(i);
+          players.push(p);
+          scoreboard.appendChild(p.el);
+        }
+        // initialize default names and muted color
+        players.forEach((p, i)=> { p.nameEl.value = `プレイヤー${i+1}`; p.nameEl.style.color = 'var(--muted)'; });
+        renderAll(false);
+      }
+
+      // handlers
+      setupBtn.addEventListener('click', ()=>{
+        const c = Math.max(1, Math.min(20, parseInt(playerCountInput.value || 6)));
+        setup(c);
+      });
+      resetAllBtn.addEventListener('click', resetAll);
+      undoGlobalBtn.addEventListener('click', undoGlobal);
+
+      playerCountInput.addEventListener('input', ()=>{
+        const c = Math.max(1, Math.min(20, parseInt(playerCountInput.value || 6)));
+        buildGrid(c);
       });
 
-      col.reset = () => {
-        correct = 0;
-        wrong = 0;
-        streak = 0;
-        history = [];
-        updateDisplay();
-      };
-
-      scoreboard.appendChild(col);
-      return col;
-    }
-
-    const columns = [];
-    for (let i = 0; i < players; i++) {
-      columns.push(createPlayerColumn());
-    }
-
-    resetAllBtn.addEventListener("click", () => {
-      columns.forEach(col => col.reset());
-    });
+      // initial
+      const initialCount = Math.max(1, Math.min(20, parseInt(playerCountInput.value || 6)));
+      setup(initialCount);
+    })();
   </script>
 </body>
 </html>
