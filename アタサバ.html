@@ -139,9 +139,9 @@
     </div>
 
     <div class="controls-right">
-      <button id="undoBtn" title="1手戻す">Undo</button>
+      <button id="undoBtn" title="1手戻す">戻る</button>
       <button id="resetBtn" title="初期化">リセット</button>
-      <button id="startBtn" title="ゲーム開始">ゲーム開始</button>
+      <button id="startBtn" title="ゲーム開始">開始</button>
     </div>
   </div>
 
@@ -239,7 +239,7 @@
 
     pushSnapshot(); // 初期状態を履歴に保存
     updateAll();
-    updateStatus('ゲーム開始。残り ' + players.filter(p => p.active).length + ' 人');
+    updateStatus('ゲーム開始！残り ' + players.filter(p => p.active).length + ' 人');
   }
 
   // スナップショット（最小限の情報）
