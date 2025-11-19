@@ -3,477 +3,369 @@
 <head>
   <meta charset="UTF-8" />
   <title>AQL</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    body {
-      font-family: "UDGothic", sans-serif;
-      padding: 20px;
-      background: #f8f9fa;
-      text-align: center;
-      user-select: none;
+    :root{
+      --bg:#0b0b0b;
+      --panel-top:#003a66;
+      --panel-bottom:#002f51;
+      --card:#072631;
+      --ok:#33a853;
+      --danger:#d7263d;
+      --muted:#9aa7aa;
+      --correct-blue:#3ea6ff;
+      --wrong-red:#ff6b6b;
+      --elim-bg:#06283a;
+      --elim-text:#bfc8cc;
+      --card-shadow: 0 8px 20px rgba(0,0,0,0.6);
     }
-    h1 {
-      margin-bottom: 24px;
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;padding:0;font-family:"Hiragino Kaku Gothic ProN","Meiryo",system-ui,sans-serif}
+    body{
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(24,160,176,0.03), transparent 14%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), transparent 18%),
+        var(--bg);
+      color:#eee;
+      padding:18px;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
-    .controls {
-      margin-bottom: 20px;
+
+    /* header */
+    .header{
+      display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:10px;
+      background: linear-gradient(180deg,var(--panel-top),var(--panel-bottom));
+      margin-bottom:12px;
     }
-    #resetAllBtn {
-      margin-left: 16px;
-      font-size: 16px;
-      padding: 6px 12px;
-      cursor: pointer;
-      color:black;
+    .logo{ width:48px; height:48px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; color:#fff; background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); }
+    h1{ margin:0; font-size:20px; color:#fff; }
+
+    /* settings */
+    .settings{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+      padding:10px 12px; border-radius:10px; margin-bottom:16px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.04));
     }
+    .settings label{
+      display:flex; gap:8px; align-items:center; color:#fff; font-weight:700; font-size:18px;
+      padding:8px 10px; border-radius:8px;
+    }
+    .settings input[type="number"]{ width:120px; padding:6px 8px; border-radius:6px; text-align:center; background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.03); font-weight:700; font-size:18px; }
+    .settings button{ padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:800; font-size:14px; }
+
+    #resetAllBtn { background: linear-gradient(180deg,var(--danger), #b71b2b); color:#fff; }
+    #undoBtn { background: #9e9e9e; color:#fff; } /* 平坦色 */
+    #startBtn { background: #33a853; color:#062f07; } /* 平坦色 */
+
+    /* teams layout */
     .container {
-      display: flex;
-      justify-content: center;
-      gap: 80px;
-      flex-wrap: wrap;
+      display:flex;
+      gap:18px;
+      align-items:flex-start;
+      justify-content:stretch;
+      flex-wrap:wrap;
+      width:100%;
     }
     .team {
-      background: white;
-      border-radius: 10px;
-      padding: 12px 16px 24px;
-      width: 520px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      transition: background-color 0.3s ease;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+      border-radius:12px;
+      padding:14px;
+      box-shadow: var(--card-shadow);
+      color:#fff;
+      min-width:260px;
+      flex: 1 1 0;
+      border: 1px solid rgba(255,255,255,0.03);
     }
+    /* winner styling (subtle, not too bright) */
     .team.winner {
-      background-color: #c8e6c9; /* 薄い緑 */
+      background: linear-gradient(180deg, rgba(255,203,0,0.06), rgba(255,203,0,0.02));
+      border: 1px solid rgba(255,203,0,0.16);
     }
+
+    /* header */
     .team-header-input {
-      font-weight: 600;
-      font-size: 20px;
-      border: none;
-      border-bottom: 2px solid #333;
-      padding-bottom: 6px;
-      margin-bottom: 12px;
-      width: 100%;
-      background: transparent;
-      text-align: center;
-      user-select: text;
-      outline: none;
-      transition: background-color 0.3s ease;
+      display:block; width:100%; border: none; background: transparent; color: var(--muted); font-weight:800; font-size:20px; text-align:center; margin-bottom:8px; outline:none;
     }
-    .team-header-input.winner {
-      background-color: #a5d6a7; /* 少し濃い緑 */
-      border-bottom-color: #4caf50;
+    .team-header-input:focus{ color:#fff; }
+
+    /* team score (big) */
+    .team-product { font-size:56px; font-weight:900; color: var(--ok); text-align:center; margin-bottom:12px; }
+
+    /* table layout */
+    table { width:100%; border-collapse:collapse; table-layout:fixed; color:#fff; }
+    thead th, tbody td { padding:8px 6px; text-align:center; vertical-align:middle; font-weight:800; font-size:16px; }
+
+    /* player name: horizontal editable */
+    .player-name {
+      width:100%;
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      font-weight:800;
+      font-size:16px;
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      height:40px;
+      outline:none;
+      text-align:center;
     }
-    thead input.player-name {
-      width: 90%;
-      font-size: 16px;
-      font-weight: 700;
-      border: none;
-      background: transparent;
-      text-align: center;
-      user-select: text;
-      outline: none;
-      padding: 2px 4px
+    .player-name:focus{ color:#fff; }
+
+    /* point cell style (visible border, rounded) */
+    .point-cell {
+      font-size:26px; font-weight:900; color:var(--ok); padding:12px 6px; min-height:52px;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius:10px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent);
     }
-    .team-product {
-      font-size: 60px;
-      font-weight: bold;
-      margin-bottom: 20px;
-      user-select: text;
-      color: #1a237e;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      user-select: text;
-      table-layout: fixed;
-    }
-    th, td {
-      border: 1px solid #999;
-      padding: 8px 6px;
-      font-size: 24px;
-      font-weight: 600;
-      text-align: center;
-      vertical-align: middle;
-    }
-    th {
-      background: #eee;
-      font-weight: 700;
-    }
-    td.point-cell {
-      width: 18%;
-    }
-    td.rest {
-      background: #ddd;
-      color: #777;
-    }
-    /* 勝利リーチの背景色 */
-    td.point-cell.reach {
-      background-color: #fff59d;
-      color: #000;
-      font-weight: 700;
-    }
-    /* 剥奪リーチ（誤答1回で次に剥奪される） の背景色 — 優先表示 */
-    td.point-cell.ban-reach {
-      background-color: red; /* 黄系（目立つ色） */
-      color: #000;
-      font-weight: 800;
-    }
-    .buttons {
-      margin-top: 12px;
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    button {
-      font-size: 16px;
-      padding: 6px 14px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.2s;
-      color: white;
-    }
-    button.correct {
-      background-color: #4caf50;
-    }
-    button.correct:disabled {
-      background-color: #a5d6a7;
-      cursor: not-allowed;
-    }
-    button.wrong {
-      background-color: #f44336;
-    }
-    button.undo {
-      background-color: #2196f3;
+    .point-cell.rest { background: rgba(255,255,255,0.02); color:var(--muted); border-color: rgba(255,255,255,0.03); }
+    /* reach color: toned down */
+    .point-cell.reach { background: rgba(160,120,40,0.10); color:#fff; border-color: rgba(160,120,40,0.18); }
+    .point-cell.ban-reach { background: rgba(180,80,60,0.10); color:#fff; border-color: rgba(180,80,60,0.18); }
+    .point-cell.lock { background: var(--elim-bg); color: var(--elim-text); border-color: rgba(255,255,255,0.02); }
+
+    /* counts row: correct hidden, wrong displayed as × */
+    .counts-row { display:flex; gap:12px; justify-content:center; margin-top:8px; }
+    .correct-count { display:none; }
+    .wrong-count   { color:var(--wrong-red); font-size:18px; font-weight:900; width:60px; text-align:center; }
+
+    /* buttons: 平坦色（グラデなし） */
+    .btn { padding:8px 10px; border-radius:6px; border:none; cursor:pointer; font-weight:800; font-size:14px; color:#fff; }
+    .btn-correct { background: #4caf50; color: #062f07; } /* 平坦な緑 */
+    .btn-wrong   { background: #f44336; color: #fff; }     /* 平坦な赤 */
+
+    /* small responsive */
+    @media (max-width:980px){
+      .container{ flex-direction:column; }
+      .team{ width:100%; }
+      .player-name{ height:36px; font-size:14px; }
+      .point-cell{ font-size:22px; }
+      .team-product{ font-size:40px; }
     }
   </style>
 </head>
 <body>
-  <h1>AQL</h1>
-  <div class="controls">
-    勝利条件：
-    <input type="number" id="mValue" min="1" value="200" />
+  <div class="header">
+    <div class="logo">AQL</div>
+    <h1>AQL</h1>
+  </div>
+
+  <div class="settings" role="region" aria-label="settings">
+    <label>勝利条件: <input type="number" id="mValue" min="1" value="200"></label>
+    <button id="startBtn">開始</button>
     <button id="resetAllBtn">リセット</button>
+    <button id="undoBtn">戻る</button>
   </div>
 
-  <div class="container">
-
-    <div class="team" id="team1">
-      <input type="text" class="team-header-input" id="team1-name" value="Aチーム" />
-      <div class="team-product" id="team1-product">1</div>
-      <table>
-        <thead>
-          <tr>
-            <th><input type="text" class="player-name" data-team="1" data-index="0" value="No.1"></th>
-            <th><input type="text" class="player-name" data-team="1" data-index="1" value="No.2"></th>
-            <th><input type="text" class="player-name" data-team="1" data-index="2" value="No.3"></th>
-            <th><input type="text" class="player-name" data-team="1" data-index="3" value="No.4"></th>
-            <th><input type="text" class="player-name" data-team="1" data-index="4" value="No.5"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr id="team1-points-row">
-            <td class="point-cell">1</td>
-            <td class="point-cell">1</td>
-            <td class="point-cell">1</td>
-            <td class="point-cell">1</td>
-            <td class="point-cell">1</td>
-          </tr>
-          <tr id="team1-buttons-row">
-            <td>
-              <button class="correct" data-team="1" data-index="0">正解</button><br>
-              <button class="wrong" data-team="1" data-index="0">誤答</button><br>
-              <button class="undo" data-team="1" data-index="0">戻る</button>
-            </td>
-            <td>
-              <button class="correct" data-team="1" data-index="1">正解</button><br>
-              <button class="wrong" data-team="1" data-index="1">誤答</button><br>
-              <button class="undo" data-team="1" data-index="1">戻る</button>
-            </td>
-            <td>
-              <button class="correct" data-team="1" data-index="2">正解</button><br>
-              <button class="wrong" data-team="1" data-index="2">誤答</button><br>
-              <button class="undo" data-team="1" data-index="2">戻る</button>
-            </td>
-            <td>
-              <button class="correct" data-team="1" data-index="3">正解</button><br>
-              <button class="wrong" data-team="1" data-index="3">誤答</button><br>
-              <button class="undo" data-team="1" data-index="3">戻る</button>
-            </td>
-            <td>
-              <button class="correct" data-team="1" data-index="4">正解</button><br>
-              <button class="wrong" data-team="1" data-index="4">誤答</button><br>
-              <button class="undo" data-team="1" data-index="4">戻る</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="team" id="team2">
-      <input type="text" class="team-header-input" id="team2-name" value="Bチーム" />
-      <div class="team-product" id="team2-product">1</div>
-      <table>
-        <thead>
-          <tr>
-            <th><input type="text" class="player-name" data-team="2" data-index="0" value="No.1"></th>
-            <th><input type="text" class="player-name" data-team="2" data-index="1" value="No.2"></th>
-            <th><input type="text" class="player-name" data-team="2" data-index="2" value="No.3"></th>
-            <th><input type="text" class="player-name" data-team="2" data-index="3" value="No.4"></th>
-            <th><input type="text" class="player-name" data-team="2" data-index="4" value="No.5"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr id="team2-points-row">
-            <td class="point-cell">1</td>
-            <td class="point-cell">1</td>
-            <td class="point-cell">1</td>
-            <td class="point-cell">1</td>
-            <td class="point-cell">1</td>
-          </tr>
-          <tr id="team2-buttons-row">
-            <td>
-              <button class="correct" data-team="2" data-index="0">正解</button><br>
-              <button class="wrong" data-team="2" data-index="0">誤答</button><br>
-              <button class="undo" data-team="2" data-index="0">戻る</button>
-            </td>
-            <td>
-              <button class="correct" data-team="2" data-index="1">正解</button><br>
-              <button class="wrong" data-team="2" data-index="1">誤答</button><br>
-              <button class="undo" data-team="2" data-index="1">戻る</button>
-            </td>
-            <td>
-              <button class="correct" data-team="2" data-index="2">正解</button><br>
-              <button class="wrong" data-team="2" data-index="2">誤答</button><br>
-              <button class="undo" data-team="2" data-index="2">戻る</button>
-            </td>
-            <td>
-              <button class="correct" data-team="2" data-index="3">正解</button><br>
-              <button class="wrong" data-team="2" data-index="3">誤答</button><br>
-              <button class="undo" data-team="2" data-index="3">戻る</button>
-            </td>
-            <td>
-              <button class="correct" data-team="2" data-index="4">正解</button><br>
-              <button class="wrong" data-team="2" data-index="4">誤答</button><br>
-              <button class="undo" data-team="2" data-index="4">戻る</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
+  <div class="container" id="teamsWrap"></div>
 
   <script>
-    const mInput = document.getElementById('mValue');
-    const resetAllBtn = document.getElementById('resetAllBtn');
+    (function(){
+      const mInput = document.getElementById('mValue');
+      const resetAllBtn = document.getElementById('resetAllBtn');
+      const undoBtn = document.getElementById('undoBtn');
+      const startBtn = document.getElementById('startBtn');
+      const teamsWrap = document.getElementById('teamsWrap');
 
-    // 状態管理用データ構造
-    const teamPoints = [
-      Array(5).fill(0).map(() => ({
-        point: 1,
-        wrongCount: 0,
-        resting: false,
-        history: []
-      })),
-      Array(5).fill(0).map(() => ({
-        point: 1,
-        wrongCount: 0,
-        resting: false,
-        history: []
-      })),
-    ];
+      // model
+      const TEAM_COUNT = 2;
+      const PLAYERS_PER_TEAM = 5;
+      const LOCK_THRESHOLD = 2; // 固定：2回でLock（失格）
 
-    function updateDisplay(teamIdx) {
-      const pointsRow = document.getElementById(`team${teamIdx+1}-points-row`);
-      const productDisplay = document.getElementById(`team${teamIdx+1}-product`);
-      const teamDiv = document.getElementById(`team${teamIdx+1}`);
-      const teamNameInput = document.getElementById(`team${teamIdx+1}-name`);
-      const m = parseInt(mInput.value);
+      let teamPoints = [];
+      let historyStack = [];
 
-      let product = 1;
-      for(let i=0; i<5; i++) {
-        product *= teamPoints[teamIdx][i].point;
+      function buildTeams(){
+        teamsWrap.innerHTML = '';
+        for(let t=0;t<TEAM_COUNT;t++){
+          const teamDiv = document.createElement('div');
+          teamDiv.className = 'team';
+          teamDiv.id = `team${t+1}`;
+
+          teamDiv.innerHTML = `
+            <input class="team-header-input" id="team${t+1}-name" value="${t===0? 'Aチーム' : 'Bチーム'}" />
+            <div class="team-product" id="team${t+1}-product">1</div>
+            <table aria-label="team${t+1}-table">
+              <thead>
+                <tr>
+                  ${Array.from({length:PLAYERS_PER_TEAM}).map((_,i)=>`<th><input class="player-name" data-team="${t}" data-index="${i}" value="プレイヤー${i+1}" /></th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                <tr id="team${t+1}-points-row">
+                  ${Array.from({length:PLAYERS_PER_TEAM}).map(()=>`<td class="point-cell">1</td>`).join('')}
+                </tr>
+                <tr id="team${t+1}-counts-row">
+                  ${Array.from({length:PLAYERS_PER_TEAM}).map(()=>`<td class="counts-cell"><div class="correct-count">0</div><div class="wrong-count"></div></td>`).join('')}
+                </tr>
+                <tr id="team${t+1}-buttons-row">
+                  ${Array.from({length:PLAYERS_PER_TEAM}).map((_,i)=>`
+                    <td class="btncell">
+                      <div style="display:flex;gap:6px;justify-content:center">
+                        <button class="btn btn-correct" data-team="${t}" data-index="${i}">正解</button>
+                        <button class="btn btn-wrong" data-team="${t}" data-index="${i}">誤答</button>
+                      </div>
+                    </td>`).join('')}
+                </tr>
+              </tbody>
+            </table>
+          `;
+          teamsWrap.appendChild(teamDiv);
+        }
+        attachButtonHandlers();
+        attachNameHandlers();
       }
 
-      for(let i=0; i<5; i++) {
-        const player = teamPoints[teamIdx][i];
+      function initModel(){
+        teamPoints = [];
+        for(let t=0;t<TEAM_COUNT;t++){
+          const arr = [];
+          for(let i=0;i<PLAYERS_PER_TEAM;i++){
+            arr.push({ point:1, wrongCount:0, resting:false, history:[] });
+          }
+          teamPoints.push(arr);
+        }
+        historyStack = [];
+        pushSnapshot();
+        updateAllDisplays();
+      }
 
-        const tdPoint = pointsRow.children[i];
-        tdPoint.textContent = player.point;
+      function snapshotModel(){
+        return teamPoints.map(arr => arr.map(p => ({ point:p.point, wrongCount:p.wrongCount, resting:p.resting, history: p.history ? p.history.slice() : [] })));
+      }
+      function pushSnapshot(){
+        historyStack.push(snapshotModel());
+        if(historyStack.length > 500) historyStack.shift();
+        updateUndoState();
+      }
+      function updateUndoState(){ undoBtn.disabled = historyStack.length <= 1; }
 
-        // まずクラスをリセット
-        tdPoint.classList.remove('rest', 'reach', 'ban-reach');
+      function attachButtonHandlers(){
+        document.querySelectorAll('.btn-correct').forEach(btn=>{
+          btn.addEventListener('click', (e)=>{
+            const t = Number(btn.dataset.team);
+            const i = Number(btn.dataset.index);
+            handleCorrect(t,i);
+          });
+        });
+        document.querySelectorAll('.btn-wrong').forEach(btn=>{
+          btn.addEventListener('click', (e)=>{
+            const t = Number(btn.dataset.team);
+            const i = Number(btn.dataset.index);
+            handleWrong(t,i);
+          });
+        });
+      }
 
-        if(player.resting) {
-          // 封鎖中は灰色表示
-          tdPoint.classList.add('rest');
-        } else if (player.wrongCount >= 1) {
-          // 誤答1回のときは「剥奪リーチ」を表示（appear as ban-reach）
-          // 剥奪リーチなら勝利リーチ表示とは排他的にする
-          tdPoint.classList.add('ban-reach');
-        } else {
-          // 通常時は勝利リーチ判定
-          const willProduct = (product / player.point) * (player.point + 1);
-          if(willProduct >= m) {
-            tdPoint.classList.add('reach');
+      function attachNameHandlers(){
+        document.querySelectorAll('.player-name, .team-header-input').forEach(inp=>{
+          inp.addEventListener('input', ()=>{}); // placeholder
+        });
+      }
+
+      function updateAllDisplays(){
+        const m = Math.max(1, parseInt(mInput.value || 1));
+
+        for(let t=0;t<TEAM_COUNT;t++){
+          const pointsRow = document.getElementById(`team${t+1}-points-row`);
+          const countsRow = document.getElementById(`team${t+1}-counts-row`);
+          const productEl = document.getElementById(`team${t+1}-product`);
+          let product = 1;
+          for(let i=0;i<PLAYERS_PER_TEAM;i++) product *= teamPoints[t][i].point;
+
+          for(let i=0;i<PLAYERS_PER_TEAM;i++){
+            const player = teamPoints[t][i];
+            const tdPoint = pointsRow.children[i];
+            tdPoint.classList.remove('rest','reach','ban-reach','lock');
+            tdPoint.textContent = player.point;
+
+            const wrongEl = countsRow.children[i].querySelector('.wrong-count');
+            wrongEl.textContent = player.wrongCount > 0 ? '×'.repeat(player.wrongCount) : '';
+
+            if(player.resting) {
+              tdPoint.classList.add('rest');
+            } else if(player.wrongCount >= 1) {
+              tdPoint.classList.add('ban-reach');
+            } else {
+              const willProduct = (product / player.point) * (player.point + 1);
+              if(willProduct >= m) tdPoint.classList.add('reach');
+            }
+
+            if(player.wrongCount >= LOCK_THRESHOLD){
+              tdPoint.classList.remove('reach','ban-reach','rest');
+              tdPoint.classList.add('lock');
+              tdPoint.textContent = 'Lock';
+            }
+          }
+
+          productEl.textContent = String(product);
+          const teamDiv = document.getElementById(`team${t+1}`);
+          if(product >= m){
+            teamDiv.classList.add('winner');
+            document.getElementById(`team${t+1}-name`).classList.add('winner');
+          } else {
+            teamDiv.classList.remove('winner');
+            document.getElementById(`team${t+1}-name`).classList.remove('winner');
           }
         }
+        updateUndoState();
       }
 
-      // 勝ち判定（積m以上）
-      if(product >= m) {
-        teamDiv.classList.add('winner');
-        teamNameInput.classList.add('winner');
-      } else {
-        teamDiv.classList.remove('winner');
-        teamNameInput.classList.remove('winner');
-      }
-      productDisplay.textContent = product;
-    }
-
-    // 正解処理
-    function handleCorrect(teamIdx, playerIdx) {
-      const player = teamPoints[teamIdx][playerIdx];
-      if(player.resting) return;
-
-      player.history.push({
-        point: player.point,
-        wrongCount: player.wrongCount,
-        resting: player.resting,
-        action: 'correct'
-      });
-
-      player.point++;
-
-      updateDisplay(teamIdx);
-    }
-
-    // 誤答処理
-    function handleWrong(teamIdx, playerIdx) {
-      const player = teamPoints[teamIdx][playerIdx];
-
-      player.history.push({
-        point: player.point,
-        wrongCount: player.wrongCount,
-        resting: player.resting,
-        action: 'wrong'
-      });
-
-      player.wrongCount++;
-      player.point = 1; // 誤答のたびに得点リセット
-
-      // 休み判定は誤答2回目以降のみ
-      if(player.wrongCount >= 2) {
-        player.resting = true;
+      function handleCorrect(teamIdx, playerIdx){
+        const player = teamPoints[teamIdx][playerIdx];
+        if(player.resting) return;
+        if(player.wrongCount >= LOCK_THRESHOLD) return;
+        pushSnapshot();
+        player.history.push({ point: player.point, wrongCount: player.wrongCount, resting: player.resting, action: 'correct' });
+        player.point += 1;
+        updateAllDisplays();
       }
 
-      updateDisplay(teamIdx);
-
-      if(player.wrongCount >= 1) {
-        // 相手チームの休みを解除（解答権復活）し、復活時はポイントを1に戻して誤答カウントを0にする
-        opponentWrong(teamIdx);
-      }
-    }
-
-    // 戻る処理
-    function handleUndo(teamIdx, playerIdx) {
-      const player = teamPoints[teamIdx][playerIdx];
-      if(player.history.length === 0) return;
-      const last = player.history.pop();
-      player.point = last.point;
-      player.wrongCount = last.wrongCount;
-      player.resting = last.resting;
-
-      updateDisplay(teamIdx);
-    }
-
-    // 相手チームの誤答で休み解除（ただし解除時はポイントを1に戻し誤答カウントを0にする）
-    function opponentWrong(teamIdx) {
-      const opponentIdx = teamIdx === 0 ? 1 : 0;
-      let changed = false;
-      for(let i=0; i<5; i++) {
-        const player = teamPoints[opponentIdx][i];
-        if(player.resting) {
-          // 変更前の状態を履歴に残す（undo対応）
-          player.history.push({
-            point: player.point,
-            wrongCount: player.wrongCount,
-            resting: player.resting,
-            action: 'opponentRestore'
-          });
-          // 復活時はポイントを1に戻し、誤答カウントを0にして封鎖解除
-          player.point = 1;
-          player.wrongCount = 0;
-          player.resting = false;
-          changed = true;
+      function handleWrong(teamIdx, playerIdx){
+        pushSnapshot();
+        const player = teamPoints[teamIdx][playerIdx];
+        player.history.push({ point: player.point, wrongCount: player.wrongCount, resting: player.resting, action: 'wrong' });
+        player.wrongCount += 1;
+        player.point = 1;
+        if(player.wrongCount >= 2) player.resting = true;
+        const opponentIdx = teamIdx === 0 ? 1 : 0;
+        for(let i=0;i<PLAYERS_PER_TEAM;i++){
+          const op = teamPoints[opponentIdx][i];
+          if(op.resting){
+            op.history.push({ point: op.point, wrongCount: op.wrongCount, resting: op.resting, action: 'opponentRestore' });
+            op.point = 1;
+            op.wrongCount = 1;   // 復活時は ×1 の状態で再開
+            op.resting = false;
+          }
         }
+        updateAllDisplays();
       }
-      if(changed) updateDisplay(opponentIdx);
-    }
 
-    // イベントリスナー付与
-    function setupButtons() {
-      document.querySelectorAll('button.correct').forEach(btn => {
-        btn.addEventListener('click', e => {
-          const teamIdx = Number(e.target.dataset.team) -1;
-          const playerIdx = Number(e.target.dataset.index);
-          handleCorrect(teamIdx, playerIdx);
-        });
-      });
-      document.querySelectorAll('button.wrong').forEach(btn => {
-        btn.addEventListener('click', e => {
-          const teamIdx = Number(e.target.dataset.team) -1;
-          const playerIdx = Number(e.target.dataset.index);
-          handleWrong(teamIdx, playerIdx);
-        });
-      });
-      document.querySelectorAll('button.undo').forEach(btn => {
-        btn.addEventListener('click', e => {
-          const teamIdx = Number(e.target.dataset.team) -1;
-          const playerIdx = Number(e.target.dataset.index);
-          handleUndo(teamIdx, playerIdx);
-        });
-      });
-    }
-
-    // プレイヤー名編集時の処理（保存なし）
-    function setupNameInputs() {
-      document.querySelectorAll('input.player-name').forEach(input => {
-        input.addEventListener('input', e => {
-          // 必要なら保存処理追加可能
-        });
-      });
-      document.querySelectorAll('.team-header-input').forEach(input => {
-        input.addEventListener('input', e => {
-          // 必要なら保存処理追加可能
-        });
-      });
-    }
-
-    // 全リセット処理
-    function resetAll() {
-      for(let t=0; t<2; t++) {
-        for(let i=0; i<5; i++) {
-          teamPoints[t][i].point = 1;
-          teamPoints[t][i].wrongCount = 0;
-          teamPoints[t][i].resting = false;
-          teamPoints[t][i].history = [];
-        }
-        updateDisplay(t);
+      function undo(){
+        if(historyStack.length <= 1) return;
+        historyStack.pop();
+        const prev = historyStack[historyStack.length - 1];
+        teamPoints = prev.map(arr => arr.map(p => ({ point:p.point, wrongCount:p.wrongCount, resting:p.resting, history: p.history ? p.history.slice() : [] })));
+        updateAllDisplays();
       }
-    }
 
-    resetAllBtn.addEventListener('click', () => {
-      resetAll();
-    });
+      function resetAll(){
+        initModel();
+      }
 
-    mInput.addEventListener('input', () => {
-      updateDisplay(0);
-      updateDisplay(1);
-    });
+      // events
+      resetAllBtn.addEventListener('click', ()=> resetAll());
+      undoBtn.addEventListener('click', ()=> undo());
+      startBtn.addEventListener('click', ()=>{ buildTeams(); initModel(); });
+      mInput.addEventListener('input', ()=> updateAllDisplays());
 
-    setupButtons();
-    setupNameInputs();
-    resetAll();
+      // init
+      buildTeams();
+      initModel();
+      updateAllDisplays();
+
+    })();
   </script>
 </body>
 </html>
