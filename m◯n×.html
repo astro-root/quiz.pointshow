@@ -1,267 +1,430 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
   <title>m◯n×</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; padding: 0;
-      font-family: "Yu Gothic", sans-serif;
-      background: #111; color: #fff;
+    :root{
+      --bg:#0b0b0b;
+      --panel-top:#003a66;
+      --panel-bottom:#002f51;
+      --card-bg: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+      --ok:#33a853;
+      --muted:#9aa7aa;
+      --correct-blue:#3ea6ff;
+      --wrong-red:#ff6b6b;
+      --elim-bg:#06283a;
+      --elim-text:#bfc8cc;
     }
-    .header {
-      background: #003366;
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 1.2rem;
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;padding:0;font-family:"Hiragino Kaku Gothic ProN","Meiryo",system-ui,sans-serif}
+    body{
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(24,160,176,0.03), transparent 14%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), transparent 18%),
+        var(--bg);
+      color:#eee; padding:18px; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
-    .thresholds {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-    }
-    .thresholds input {
-      width: 60px;
-      padding: 4px 6px;
-      font-size: 1rem;
-      border-radius: 4px;
-      border: none;
-      text-align: center;
-    }
-    #resetAll {
-      margin-left: 20px;
-      padding: 6px 12px;
-      font-size: 1rem;
-      background: #ea4335;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      color: #fff;
-    }
-    #resetAll:hover { background: #c23321; }
 
-    .scoreboard {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 4px;
-      padding: 4px;
+    /* header */
+    .header{
+      display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:10px;
+      background: linear-gradient(180deg,var(--panel-top),var(--panel-bottom));
+      box-shadow:0 6px 18px rgba(0,0,0,0.6), inset 0 -2px 0 rgba(255,255,255,0.03);
+      margin-bottom:12px;
     }
-    .team-col {
-      background: #004d40;
-      width: 120px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 15px 8px;
-      position: relative;
-      min-height: 350px;
+    .logo{ width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;background:linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); box-shadow:0 6px 12px rgba(0,0,0,0.6) }
+    h1{ margin:0; font-size:20px; color:#fff; }
+
+    /* controls */
+    .settings{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+      padding:10px 12px; border-radius:10px; margin-bottom:18px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.04));
+      box-shadow:0 6px 18px rgba(0,0,0,0.5);
     }
-    .team-col .info {
-      background: #00251a;
-      width: 100%;
-      text-align: center;
-      font-size: 0.85rem;
-      padding: 4px 0;
-      margin-bottom: 8px;
-      border-radius: 4px;
+    .settings label{
+      display:flex; gap:8px; align-items:center; color:#fff; font-weight:700;
+      padding:8px 10px; border-radius:8px; background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      border:1px solid rgba(255,255,255,0.02); font-size:18px;
     }
-    .team-col .name-input {
-      width: 100%;
-      height: 140px;
-      font-size: 1.4rem;
-      font-weight: bold;
-      text-align: center;
-      border: none;
-      background: transparent;
-      color: #fff;
-      margin-bottom: 12px;
+    .settings input[type="number"]{ width:80px; padding:6px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.04); text-align:center; background:transparent; color:#fff; font-weight:700; font-size:18px; }
+    .settings button{ padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:800; font-size:14px; box-shadow:0 6px 12px rgba(0,0,0,0.45); }
+
+    #setupBtn{ background: linear-gradient(180deg,var(--ok),#2b8f44); color:#062f07; }
+    #resetAll{ background: linear-gradient(180deg,#d7263d,#b71b2b); color:#fff; }
+    #undoGlobal{ background: linear-gradient(180deg,#9e9e9e,#6f6f6f); color:#fff; }
+
+    /* grid that always fits the viewport: repeat(count, 1fr) */
+    .scoreboard { display:block; width:100%; }
+    #grid {
+      display:grid;
+      gap:14px;
+      width:100%;
+      align-items:start;
+      grid-auto-rows: auto;
+      /* columns will be set to repeat(count, 1fr) so it always fits the screen */
+    }
+
+    /* card */
+    .column{
+      background: var(--card-bg);
+      padding:16px; border-radius:14px; box-shadow:0 8px 20px rgba(0,0,0,0.6);
+      text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; position:relative;
+      border:1px solid rgba(255,255,255,0.03); color:#fff; min-width:0;
+    }
+
+    /* name input: vertical editable like LuckyShot/by/NewYork */
+    .name-input{
       writing-mode: vertical-rl;
       text-orientation: upright;
-    }
-    .team-col .name-input:focus {
-      outline: 2px dashed #fff;
-    }
-    .status {
-      position: absolute;
-      top: 6px; right: 6px;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.9rem;
-      display: none;
-    }
-    .team-col.win .status {
-      display: block;
-      background: #ffeb3b; color: #000;
-    }
-    .team-col.lose .status {
-      display: block;
-      background: #e53935; color: #fff;
-    }
-    .correct-count {
-      font-size: 2.6rem;
-      font-weight: bold;
-      margin: 10px 0 6px;
-      line-height: 1;
-    }
-    .wrong-count {
-      font-size: 1.8rem;
-      color: #e53935;
-      height: 1.8em;
-      line-height: 1.8em;
-      margin-bottom: 12px;
-    }
-    .actions {
-      display: flex;
-      gap: 6px;
-      margin-top: auto;
-      width: 100%;
-    }
-    .actions button {
-      flex: 1;
-      padding: 8px 0;
-      font-size: 1rem;
       border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      color: #fff;
+      background: transparent;
+      font-weight:800;
+      font-size:24px;
+      height:250px;
+      width:44px;
+      padding:4px;
+      margin-bottom:8px;
+      text-align:center;
+      color:var(--muted);
+      outline: none;
+      caret-color: #fff;
     }
-    .btn-correct { background: #4caf50; }
-    .btn-wrong   { background: #f44336; }
-    .btn-undo    { background: #607d8b; }
-    .actions button:disabled {
-      background: #555; cursor: default;
+    .name-input:focus{ color: #fff; }
+
+    /* correct count (blue, large) */
+    .correct-count{
+      font-size:48px; margin:8px 0; color:var(--correct-blue); font-weight:900; position:relative; min-height:54px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .correct-count .correct-num{ display:block; }
+
+    /* wrong count (× display) */
+    .wrong-count{
+      font-size:20px; color:var(--wrong-red); margin-bottom:10px; font-weight:800; min-height:22px;
+    }
+
+    /* buttons */
+    .buttons{ display:flex; gap:10px; width:100%; justify-content:center; margin-top:8px }
+    .btn-op{ flex:1; padding:10px 8px; border-radius:8px; border:none; cursor:pointer; font-weight:800; font-size:16px }
+    .btn-correct{ background: linear-gradient(180deg,#2fa84f,#1d7b36); color:#042a08 }
+    .btn-wrong{ background: linear-gradient(180deg,#e84a4a,#b71b2b); color:#fff }
+
+    /* eliminated appearance */
+    .column.eliminated{ background: var(--elim-bg); color: var(--elim-text); box-shadow:none; }
+    .column.eliminated .name-input{ color: var(--elim-text); }
+    .column.eliminated .correct-count, .column.eliminated .wrong-count { color: var(--elim-text); opacity:0.95; }
+    .column.eliminated .btn-op{ opacity:0.6; cursor:not-allowed; }
+
+    /* remove any glowing/shine effect: no .finished styles */
+
+    .num-animate{ /* subtle animation kept optional; user didn't request animation removal for numbers; keep minimal */
+      animation: pop 0.18s ease;
+    }
+    @keyframes pop{ 0%{ transform: scale(1);} 50%{ transform: scale(1.06);} 100%{ transform: scale(1);} }
+
+    @media (max-width:720px){
+      .name-input{ height:88px; width:36px; font-size:16px; }
+      .correct-count{ font-size:36px; }
+      .wrong-count{ font-size:18px; }
     }
   </style>
 </head>
 <body>
-
   <div class="header">
-    <div>m◯n×</div>
-    <div class="thresholds">
-      <label>勝ち抜け <input type="number" id="winThresh" min="1" value="5"></label>
-      <label>失格 <input type="number" id="loseThresh" min="1" value="2"></label>
-      <button id="resetAll">リセット</button>
-    </div>
+    <div class="logo">◯×</div>
+    <h1>m◯n×</h1>
   </div>
 
-  <div class="scoreboard" id="scoreboard">
-    <!-- 10人分 -->
-    <script>
-      const container = document.getElementById('scoreboard');
-      for (let i = 1; i <= 10; i++) {
-        container.insertAdjacentHTML('beforeend', `
-        <div class="team-col" data-team="${i}">
-          <div class="status"></div>
-          <div class="info">No.${i}</div>
-          <input class="name-input" type="text" value="参加者${i}">
-          <div class="correct-count">0</div>
-          <div class="wrong-count"></div>
-          <div class="actions">
-            <button class="btn-correct">正解</button>
-            <button class="btn-wrong">誤答</button>
-            <button class="btn-undo" disabled>戻る</button>
-          </div>
+  <div class="settings">
+    <label>勝ち抜け: <input type="number" id="winThresh" min="1" value="5"></label>
+    <label>失格: <input type="number" id="loseThresh" min="1" value="2"></label>
+    <label>参加人数: <input type="number" id="playerCount" min="1" max="20" value="6"></label>
+    <button id="setupBtn">開始</button>
+    <button id="resetAll">リセット</button>
+    <button id="undoGlobal">戻る</button>
+  </div>
+
+  <div class="scoreboard">
+    <div id="grid" aria-label="scoreboard-grid"></div>
+  </div>
+
+<script>
+(function(){
+  const grid = document.getElementById('grid');
+  const winInput = document.getElementById('winThresh');
+  const loseInput = document.getElementById('loseThresh');
+  const countInput = document.getElementById('playerCount');
+  const setupBtn = document.getElementById('setupBtn');
+  const resetBtn = document.getElementById('resetAll');
+  const undoBtn = document.getElementById('undoGlobal');
+
+  let players = []; // { idx, el, nameEl, correctNumEl, wrongEl, btnC, btnW, correct, wrong, eliminated, rank }
+  let historyStack = []; // { idx, prev:{correct,wrong,eliminated,rank}, winners:[] }
+  let winners = [];
+
+  // ordinal label (keeps English ordinal like before)
+  function ordinalLabel(n){
+    if(n % 100 >= 11 && n % 100 <= 13) return n + 'th';
+    const last = n % 10;
+    if(last === 1) return n + 'st';
+    if(last === 2) return n + 'nd';
+    if(last === 3) return n + 'rd';
+    return n + 'th';
+  }
+
+  // always fit: repeat(count, 1fr)
+  function setGridColumnsByCount(count){
+    grid.style.gridTemplateColumns = `repeat(${count}, 1fr)`;
+    grid.parentElement.style.overflowX = 'hidden';
+  }
+
+  function pushHistory(idx, prev){
+    historyStack.push({ idx, prev: JSON.parse(JSON.stringify(prev)), winners: winners.slice() });
+    if(historyStack.length > 500) historyStack.shift();
+    updateUndoState();
+  }
+
+  function updateUndoState(){
+    undoBtn.disabled = historyStack.length === 0;
+  }
+
+  function createGrid(count){
+    grid.innerHTML = '';
+    players = [];
+    historyStack = [];
+    winners = [];
+    setGridColumnsByCount(count);
+
+    for(let i=0;i<count;i++){
+      const col = document.createElement('div');
+      col.className = 'column';
+      col.innerHTML = `
+        <input class="name-input" value="プレイヤー${i+1}" />
+        <div class="correct-count"><span class="correct-num">0</span></div>
+        <div class="wrong-count"></div>
+        <div class="buttons">
+          <button class="btn-op btn-correct">正解</button>
+          <button class="btn-op btn-wrong">誤答</button>
         </div>
-        `);
-      }
-    </script>
-  </div>
+      `;
+      grid.appendChild(col);
 
-  <script>
-    const winInput  = document.getElementById('winThresh');
-    const loseInput = document.getElementById('loseThresh');
-    const resetAll  = document.getElementById('resetAll');
+      const nameEl = col.querySelector('.name-input');
+      const correctNumEl = col.querySelector('.correct-num');
+      const wrongEl = col.querySelector('.wrong-count');
+      const btnC = col.querySelector('.btn-correct');
+      const btnW = col.querySelector('.btn-wrong');
 
-    const historyMap = new Map();
+      const p = { idx:i, el:col, nameEl, correctNumEl, wrongEl, btnC, btnW, correct:0, wrong:0, eliminated:false, rank:0 };
 
-    function init() {
-      const teams = document.querySelectorAll('.team-col');
-      teams.forEach(col => {
-        historyMap.set(col, [{ r:0, w:0 }]);
-        const btnC = col.querySelector('.btn-correct');
-        const btnW = col.querySelector('.btn-wrong');
-        const btnU = col.querySelector('.btn-undo');
-
-        btnC.addEventListener('click', () => apply(col, 1, 0));
-        btnW.addEventListener('click', () => apply(col, 0, 1));
-        btnU.addEventListener('click', () => undo(col));
+      btnC.addEventListener('click', ()=>{
+        if(p.eliminated || p.rank>0) return;
+        pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
+        p.correct++;
+        checkFinishAndEliminate(p);
+        renderAll(true);
       });
 
-      resetAll.addEventListener('click', resetAllTeams);
-      winInput.addEventListener('change', () => document.querySelectorAll('.team-col').forEach(checkStatus));
-      loseInput.addEventListener('change', () => document.querySelectorAll('.team-col').forEach(checkStatus));
-    }
-
-    function apply(col, dr, dw) {
-      const cntR = col.querySelector('.correct-count');
-      const cntW = col.querySelector('.wrong-count');
-      const prev = { r: parseInt(cntR.textContent,10), w: cntW.textContent.length };
-      historyMap.get(col).push(prev);
-      col.querySelector('.btn-undo').disabled = false;
-
-      cntR.textContent = prev.r + dr;
-      cntW.textContent = '×'.repeat(prev.w + dw);
-      checkStatus(col);
-    }
-
-    function undo(col) {
-      const hist = historyMap.get(col);
-      if (hist.length <= 1) return;
-      hist.pop();
-      const { r, w } = hist[hist.length - 1];
-      col.querySelector('.correct-count').textContent = r;
-      col.querySelector('.wrong-count').textContent   = '×'.repeat(w);
-
-      col.querySelectorAll('button:not(.btn-undo)').forEach(b=>b.disabled=false);
-      col.classList.remove('win','lose');
-      col.querySelector('.status').style.display = 'none';
-      if (hist.length === 1) col.querySelector('.btn-undo').disabled = true;
-    }
-
-    function checkStatus(col) {
-      const right = parseInt(col.querySelector('.correct-count').textContent,10);
-      const wrong = col.querySelector('.wrong-count').textContent.length;
-      const winTh  = parseInt(winInput.value, 10);
-      const loseTh = parseInt(loseInput.value, 10);
-      const st     = col.querySelector('.status');
-
-      st.style.display = 'none';
-      col.classList.remove('win','lose');
-      col.querySelectorAll('button:not(.btn-undo)').forEach(b=>b.disabled=false);
-
-      if (right >= winTh) {
-        st.textContent = '勝ち抜け';
-        col.classList.add('win');
-        st.style.display = 'block';
-        lock(col);
-      } else if (wrong >= loseTh) {
-        st.textContent = '失格';
-        col.classList.add('lose');
-        st.style.display = 'block';
-        lock(col);
-      }
-    }
-
-    function resetAllTeams() {
-      document.querySelectorAll('.team-col').forEach(col => {
-        col.querySelector('.correct-count').textContent = '0';
-        col.querySelector('.wrong-count').textContent   = '';
-        col.classList.remove('win','lose');
-        col.querySelector('.status').style.display = 'none';
-        col.querySelectorAll('button').forEach(b=>b.disabled=false);
-        historyMap.set(col, [{ r:0, w:0 }]);
-        col.querySelector('.btn-undo').disabled = true;
+      btnW.addEventListener('click', ()=>{
+        if(p.eliminated || p.rank>0) return;
+        pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
+        p.wrong++;
+        checkFinishAndEliminate(p);
+        renderAll(true);
       });
+
+      players.push(p);
     }
 
-    function lock(col) {
-      col.querySelectorAll('button:not(.btn-undo)').forEach(b=>b.disabled=true);
+    renderAll(false);
+    updateUndoState();
+  }
+
+  function checkFinishAndEliminate(p){
+    const winTh = Math.max(1, parseInt(winInput.value || 1));
+    const loseTh = Math.max(1, parseInt(loseInput.value || 1));
+
+    // elimination by wrong threshold
+    if(!p.eliminated && p.wrong >= loseTh){
+      p.eliminated = true;
+      p.rank = 0;
     }
 
-    window.addEventListener('DOMContentLoaded', init);
-  </script>
+    // assign rank when reaching win threshold (in order)
+    if(!p.eliminated && p.rank === 0 && p.correct >= winTh){
+      winners.push(p.idx);
+      p.rank = winners.length;
+    }
+  }
+
+  function renderAll(animate=true){
+    players.forEach(p=>{
+      if(p.eliminated){
+        p.el.classList.add('eliminated');
+        p.correctNumEl.textContent = 'Lose';
+        p.wrongEl.textContent = p.wrong > 0 ? '×'.repeat(p.wrong) : '';
+        p.btnC.disabled = true;
+        p.btnW.disabled = true;
+        p.nameEl.disabled = true;
+      } else {
+        p.el.classList.remove('eliminated');
+        if(p.rank > 0){
+          // show ordinal in points area (no extra badge)
+          p.correctNumEl.textContent = ordinalLabel(p.rank);
+          p.btnC.disabled = true;
+          p.btnW.disabled = true;
+          p.nameEl.disabled = true;
+        } else {
+          p.correctNumEl.textContent = String(p.correct);
+          p.wrongEl.textContent = p.wrong > 0 ? '×'.repeat(p.wrong) : '';
+          p.btnC.disabled = false;
+          p.btnW.disabled = false;
+          p.nameEl.disabled = false;
+        }
+      }
+      if(animate){
+        p.correctNumEl.classList.add('num-animate');
+        setTimeout(()=>p.correctNumEl.classList.remove('num-animate'), 220);
+      }
+    });
+
+    updateUndoState();
+  }
+
+  function undoGlobal(){
+    if(historyStack.length === 0) return;
+    const last = historyStack.pop();
+    if(!last) return;
+    const idx = last.idx;
+    const prev = last.prev;
+    winners = (last.winners || []).slice();
+    // restore target
+    const p = players[idx];
+    if(p){
+      p.correct = prev.correct;
+      p.wrong = prev.wrong;
+      p.eliminated = prev.eliminated;
+      p.rank = prev.rank || 0;
+    }
+    // restore winners -> reassign ranks based on winners array
+    players.forEach(pl => {
+      const pos = winners.indexOf(pl.idx);
+      pl.rank = pos === -1 ? (pl.rank>0 && pl.idx===idx ? 0 : pl.rank) : pos+1;
+    });
+    // clean stray ranks
+    players.forEach(pl => { if(winners.indexOf(pl.idx) === -1 && pl.rank>0 && pl.idx !== idx) pl.rank = 0; });
+    renderAll(true);
+  }
+
+  function resetAll(){
+    players.forEach((p,i)=>{
+      p.correct = 0; p.wrong = 0; p.eliminated = false; p.rank = 0;
+      p.nameEl.value = `プレイヤー${i+1}`;
+      p.nameEl.disabled = false;
+      p.btnC.disabled = false;
+      p.btnW.disabled = false;
+    });
+    historyStack = [];
+    winners = [];
+    renderAll(false);
+    updateUndoState();
+  }
+
+  // handlers
+  setupBtn.addEventListener('click', ()=>{
+    const cnt = Math.max(1, Math.min(20, parseInt(countInput.value || 6)));
+    createGrid(cnt);
+  });
+
+  resetBtn.addEventListener('click', resetAll);
+  undoBtn.addEventListener('click', undoGlobal);
+
+  // respond to threshold edits (re-evaluate)
+  winInput.addEventListener('input', ()=> {
+    // assign ranks immediately for those who meet threshold
+    players.forEach(p => {
+      if(!p.eliminated && p.rank === 0 && p.correct >= parseInt(winInput.value || 1)){
+        winners.push(p.idx);
+        p.rank = winners.length;
+      }
+    });
+    renderAll(false);
+  });
+  loseInput.addEventListener('input', ()=> {
+    players.forEach(p => {
+      if(!p.eliminated && p.wrong >= parseInt(loseInput.value || 1)) p.eliminated = true;
+    });
+    renderAll(false);
+  });
+
+  // helper to call createGrid and set columns
+  function createGrid(n){
+    setGridColumnsByCount(n);
+    // build
+    grid.innerHTML = '';
+    players = [];
+    historyStack = [];
+    winners = [];
+    setGridColumnsByCount(n);
+
+    for(let i=0;i<n;i++){
+      const col = document.createElement('div');
+      col.className = 'column';
+      col.innerHTML = `
+        <input class="name-input" value="プレイヤー${i+1}" />
+        <div class="correct-count"><span class="correct-num">0</span></div>
+        <div class="wrong-count"></div>
+        <div class="buttons">
+          <button class="btn-op btn-correct">正解</button>
+          <button class="btn-op btn-wrong">誤答</button>
+        </div>
+      `;
+      grid.appendChild(col);
+
+      const nameEl = col.querySelector('.name-input');
+      const correctNumEl = col.querySelector('.correct-num');
+      const wrongEl = col.querySelector('.wrong-count');
+      const btnC = col.querySelector('.btn-correct');
+      const btnW = col.querySelector('.btn-wrong');
+
+      const p = { idx:i, el:col, nameEl, correctNumEl, wrongEl, btnC, btnW, correct:0, wrong:0, eliminated:false, rank:0 };
+
+      btnC.addEventListener('click', ()=>{
+        if(p.eliminated || p.rank>0) return;
+        pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
+        p.correct++;
+        checkFinishAndEliminate(p);
+        renderAll(true);
+      });
+
+      btnW.addEventListener('click', ()=>{
+        if(p.eliminated || p.rank>0) return;
+        pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
+        p.wrong++;
+        checkFinishAndEliminate(p);
+        renderAll(true);
+      });
+
+      players.push(p);
+    }
+
+    renderAll(false);
+    updateUndoState();
+  }
+
+  // initial
+  createGrid(Math.max(1, Math.min(20, parseInt(countInput.value || 6))));
+
+  // resize: keep columns = repeat(n, 1fr)
+  window.addEventListener('resize', ()=> {
+    const cnt = players.length || Math.max(1, Math.min(20, parseInt(countInput.value || 6)));
+    setGridColumnsByCount(cnt);
+  });
+
+})();
+</script>
 </body>
 </html>
