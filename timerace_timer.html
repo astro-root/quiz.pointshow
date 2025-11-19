@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タイマー</title>
+    <style>
+        body {
+            background-color: #222;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+
+        /* タイムアップ時の激しい点滅 */
+        @keyframes timeUpFlash {
+            0% { background-color: #ff0000; }
+            50% { background-color: #500000; }
+            100% { background-color: #ff0000; }
+        }
+        body.time-up {
+            animation: timeUpFlash 0.5s infinite;
+        }
+
+        h1 {
+            font-family: sans-serif;
+            color: #aaa;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        /* 入力エリア */
+        .input-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-family: sans-serif;
+            transition: opacity 0.3s;
+        }
+        
+        .input-area.hidden {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute; /* レイアウトが崩れないように浮かす */
+        }
+
+        input[type="number"] {
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            font-size: 1.5rem;
+            width: 80px;
+            padding: 5px;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        #timer-display {
+            font-size: 18vw;
+            font-weight: bold;
+            letter-spacing: -5px;
+            margin: 10px 0 30px 0;
+            line-height: 1;
+        }
+
+        /* 残り10秒以下で黄色くする（音は鳴らさない） */
+        #timer-display.warning {
+            color: #ffeb3b;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+        }
+
+        button {
+            font-size: 1.2rem;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: sans-serif;
+            font-weight: bold;
+            outline: none;
+            min-width: 120px;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        #startStopBtn { background-color: #00d26a; color: #003b1c; }
+        #startStopBtn.running { background-color: #ff9f43; color: #fff; }
+        #resetBtn { background-color: #57606f; color: #fff; }
+
+        /* 設定再表示ボタン */
+        .show-settings-btn {
+            margin-top: 30px;
+            background: transparent;
+            border: 1px solid #555;
+            color: #777;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Countdown Timer</h1>
+
+    <div class="input-area" id="inputArea">
+        <input type="number" id="inputMin" value="3" min="0" max="99"> 分
+        <input type="number" id="inputSec" value="0" min="0" max="59"> 秒
+    </div>
+
+    <div id="timer-display">03:00</div>
+
+    <div class="controls">
+        <button id="startStopBtn" onclick="toggleTimer()">START</button>
+        <button id="resetBtn" onclick="resetTimer()">RESET</button>
+    </div>
+
+    <button class="show-settings-btn" onclick="showSettings()">時間設定を表示</button>
+
+    <script>
+        let totalTimeMs = 0;
+        let endTime = 0;
+        let timerInterval;
+        let isRunning = false;
+        let audioCtx = null;
+        let lastSecond = -1;
+
+        const display = document.getElementById('timer-display');
+        const startStopBtn = document.getElementById('startStopBtn');
+        const inputMin = document.getElementById('inputMin');
+        const inputSec = document.getElementById('inputSec');
+        const inputArea = document.getElementById('inputArea');
+
+        // 初期化
+        updateDisplayFromInput();
+
+        inputMin.addEventListener('change', updateDisplayFromInput);
+        inputSec.addEventListener('change', updateDisplayFromInput);
+
+        function updateDisplayFromInput() {
+            let m = parseInt(inputMin.value) || 0;
+            let s = parseInt(inputSec.value) || 0;
+            display.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            display.classList.remove('warning');
+            document.body.classList.remove('time-up');
+        }
+
+        function showSettings() {
+            inputArea.classList.remove('hidden');
+            if(isRunning) toggleTimer(); // 設定変更時は止める
+        }
+
+        // 音声機能の準備
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // 単発の音を鳴らす
+        function playSound(freq, duration, type = 'square') {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        // 終了音（ピピピ！）
+        function playTimeUpSound() {
+            // ピッ
+            playSound(880, 0.1, 'square');
+            // ピッ（0.2秒後）
+            setTimeout(() => playSound(880, 0.1, 'square'), 200);
+            // ピッ（0.4秒後）
+            setTimeout(() => playSound(880, 0.3, 'square'), 400);
+        }
+
+        function toggleTimer() {
+            initAudio(); 
+
+            if (isRunning) {
+                clearInterval(timerInterval);
+                const remaining = endTime - Date.now();
+                totalTimeMs = remaining;
+                isRunning = false;
+                startStopBtn.textContent = 'RESUME';
+                startStopBtn.classList.remove('running');
+            } else {
+                if (startStopBtn.textContent === 'START') {
+                    let m = parseInt(inputMin.value) || 0;
+                    let s = parseInt(inputSec.value) || 0;
+                    totalTimeMs = (m * 60 + s) * 1000;
+                    if(totalTimeMs <= 0) return;
+                    inputArea.classList.add('hidden'); // スタートしたら設定を隠す
+                }
+
+                endTime = Date.now() + totalTimeMs;
+                timerInterval = setInterval(updateTimer, 20);
+                isRunning = true;
+                startStopBtn.textContent = 'STOP';
+                startStopBtn.classList.add('running');
+            }
+        }
+
+        function updateTimer() {
+            const remaining = endTime - Date.now();
+            
+            // --- タイムアップ処理 ---
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                display.textContent = "00:00";
+                isRunning = false;
+                startStopBtn.textContent = 'START';
+                startStopBtn.classList.remove('running');
+                
+                document.body.classList.add('time-up'); // 画面点滅
+                playTimeUpSound(); // ピピピ音
+                return;
+            }
+
+            // --- 表示更新 ---
+            const totalSeconds = Math.ceil(remaining / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+
+            display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            // --- 色の変更だけ行う（音は鳴らさない） ---
+            if (lastSecond !== totalSeconds) {
+                lastSecond = totalSeconds;
+                if (totalSeconds <= 10) {
+                     display.classList.add('warning'); // 黄色くするだけ
+                }
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            startStopBtn.textContent = 'START';
+            startStopBtn.classList.remove('running');
+            display.classList.remove('warning');
+            document.body.classList.remove('time-up');
+            lastSecond = -1;
+            updateDisplayFromInput();
+            inputArea.classList.remove('hidden');
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space') {
+                event.preventDefault();
+                toggleTimer();
+            }
+            if (event.code === 'KeyR') {
+                resetTimer();
+            }
+        });
+    </script>
+</body>
+</html>
