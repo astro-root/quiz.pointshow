@@ -19,7 +19,7 @@
             margin: 0;
             padding: 20px;
             line-height: 1.6;
-            padding-bottom: 60px; /* 下部に余白を追加 */
+            padding-bottom: 60px;
         }
 
         h1 {
@@ -42,7 +42,7 @@
             gap: 20px;
             max-width: 1000px;
             margin: 0 auto;
-            margin-bottom: 60px; /* 下のセクションとの間隔を広げる */
+            margin-bottom: 60px;
         }
 
         /* === カードのデザイン（ツール用） === */
@@ -63,6 +63,7 @@
             position: relative;
             overflow: hidden;
         }
+        /* 左側のアクセントカラー（デフォルト：青） */
         .card::before {
             content: "";
             position: absolute;
@@ -81,10 +82,11 @@
         .card:visited { color: #e0e0e0; }
         .card:hover:visited { color: #ffffff; }
 
-        /* カードの色分け */
-        .card[href*="AQL"]::before { background-color: #e74c3c; }
-        .card[href*="EQIDEN"]::before { background-color: #2ecc71; }
-        .card[href*="アタック25"]::before { background-color: #f1c40f; }
+        /* === カードの色分け設定 === */
+        .card[href*="AQL"]::before { background-color: #e74c3c; }      /* 赤 */
+        .card[href*="EQIDEN"]::before { background-color: #2ecc71; }   /* 緑 */
+        .card[href*="アタック25"]::before { background-color: #f1c40f; } /* 黄 */
+        .card[href*="timer"]::before { background-color: #e67e22; }    /* オレンジ（今回追加） */
 
 
         /* === 下部のアクションボタンエリア === */
@@ -92,7 +94,7 @@
             max-width: 800px;
             margin: 0 auto;
             text-align: center;
-            border-top: 1px solid #333; /* 区切り線 */
+            border-top: 1px solid #333;
             padding-top: 40px;
         }
         
@@ -116,7 +118,7 @@
             justify-content: center;
             text-decoration: none;
             padding: 15px 30px;
-            border-radius: 50px; /* 丸みを強くしてボタン感を出す */
+            border-radius: 50px;
             font-weight: bold;
             color: #fff;
             transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s;
@@ -130,12 +132,10 @@
             opacity: 0.9;
         }
 
-        /* フィードバックボタン（グラデーションで目立たせる） */
         .btn-feedback {
             background: linear-gradient(135deg, #ff4081, #f50057);
         }
 
-        /* Xボタン（黒背景でXらしく） */
         .btn-x {
             background-color: #000;
             border: 1px solid #333;
@@ -160,10 +160,11 @@
         <a href="https://astro-root.github.io/quiz.pointshow/アタサバ.html" target="_blank" rel="noopener noreferrer" class="card">アタサバ</a>
         <a href="https://astro-root.github.io/quiz.pointshow/アタック25.html" target="_blank" rel="noopener noreferrer" class="card">アタック25</a>
         <a href="https://astro-root.github.io/quiz.pointshow/連答付き.html" target="_blank" rel="noopener noreferrer" class="card">連答付き</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/timerace_timer.html" target="_blank" rel="noopener noreferrer" class="card">Time Race Timer</a>
     </div>
 
     <div class="action-area">
-        <div class="action-title">Contact $ Feedback</div>
+        <div class="action-title">開発者への連絡・ご要望</div>
         <div class="button-container">
             <a href="https://forms.gle/7f9EYXkzycTQPBHr6" target="_blank" rel="noopener noreferrer" class="action-btn btn-feedback">
                 ✉️ フィードバックを送る
