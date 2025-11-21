@@ -63,7 +63,6 @@
             position: relative;
             overflow: hidden;
         }
-        /* 左側のアクセントカラー（デフォルト：青） */
         .card::before {
             content: "";
             position: absolute;
@@ -86,7 +85,7 @@
         .card[href*="AQL"]::before { background-color: #e74c3c; }      /* 赤 */
         .card[href*="EQIDEN"]::before { background-color: #2ecc71; }   /* 緑 */
         .card[href*="アタック25"]::before { background-color: #f1c40f; } /* 黄 */
-        .card[href*="timer"]::before { background-color: #e67e22; }    /* オレンジ（今回追加） */
+        .card[href*="timer"]::before { background-color: #e67e22; }    /* オレンジ */
 
 
         /* === 下部のアクションボタンエリア === */
@@ -96,6 +95,7 @@
             text-align: center;
             border-top: 1px solid #333;
             padding-top: 40px;
+            margin-bottom: 60px;
         }
         
         .action-title {
@@ -111,7 +111,6 @@
             gap: 20px;
         }
 
-        /* 目立つボタンのデザイン */
         .action-btn {
             display: inline-flex;
             align-items: center;
@@ -132,13 +131,64 @@
             opacity: 0.9;
         }
 
-        .btn-feedback {
-            background: linear-gradient(135deg, #ff4081, #f50057);
+        .btn-feedback { background: linear-gradient(135deg, #ff4081, #f50057); }
+        .btn-x { background-color: #000; border: 1px solid #333; }
+
+        /* === 更新履歴エリア（今回追加） === */
+        .update-area {
+            max-width: 800px;
+            margin: 0 auto;
+            color: #ccc;
+            font-size: 0.9rem;
         }
 
-        .btn-x {
-            background-color: #000;
-            border: 1px solid #333;
+        .update-header {
+            font-size: 1.1rem;
+            border-left: 4px solid #3498db;
+            padding-left: 10px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        /* 最新情報のハイライトボックス */
+        .latest-box {
+            background-color: rgba(52, 152, 219, 0.1); /* 薄い青背景 */
+            border: 1px solid #3498db;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: baseline;
+            gap: 15px;
+        }
+        .latest-badge {
+            background-color: #3498db;
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* 履歴リスト */
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .history-item {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid #2c2c2c;
+        }
+        .history-date {
+            min-width: 100px;
+            color: #888;
+            font-family: monospace; /* 日付を等幅フォントに */
+        }
+        .history-content {
+            color: #ddd;
         }
 
     </style>
@@ -173,6 +223,34 @@
                 𝕏 @astro_root
             </a>
         </div>
+    </div>
+
+    <div class="update-area">
+        <div class="update-header">Latest Update</div>
+        
+        <div class="latest-box">
+            <span class="latest-badge">NEW</span>
+            <div>
+                <strong>「アタック25」更新</strong><br>
+                デザイン変更、休みのルール変更、アタックチャンスを改善を行いました。
+            </div>
+        </div>
+
+        <div class="update-header" style="font-size: 1rem; border-left: none; color: #888; margin-top: 30px;">Update History</div>
+        <ul class="history-list">
+            <li class="history-item">
+                <div class="history-date">2025/11/21</div>
+                <div class="history-content">更新履歴欄を追加</div>
+            </li>
+            <li class="history-item">
+                <div class="history-date">2025/11/20</div>
+                <div class="history-content">「タイムレース用タイマー」を追加</div>
+            </li>
+            <li class="history-item">
+                <div class="history-date">2025/11/19</div>
+                <div class="history-content">サイトの大幅リニューアル</div>
+            </li>
+        </ul>
     </div>
 
 </body>
