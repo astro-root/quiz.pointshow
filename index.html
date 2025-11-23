@@ -8,112 +8,179 @@
     
     <meta name="description" content="早押しクイズで使える得点表示ツールのリンク集です。abc/EQIDENやAQLなど、様々なルールに対応しております。">
 
-    <title>Q-Score</title>
+    <title>Q-Score | クイズ得点表示ツール</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
 
     <style>
-        /* === 全体の設定（ダークモード） === */
+        /* === ベース設定 === */
+        :root {
+            --bg-dark: #0f172a;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --accent-blue: #38bdf8;
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --glass: blur(12px);
+        }
+
         * { box-sizing: border-box; }
 
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
+            background: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(244, 114, 182, 0.1) 0%, transparent 20%);
+            color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            min-height: 100vh;
             line-height: 1.6;
-            padding-bottom: 60px;
+        }
+
+        /* === ヘッダーエリア === */
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            animation: fadeInDown 0.8s ease-out;
         }
 
         h1 {
-            text-align: center;
-            color: #ffffff;
-            margin-bottom: 40px;
-            font-size: 1.8rem;
-            border-bottom: 3px solid #3498db;
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             display: inline-block;
-            padding-bottom: 10px;
-            position: relative;
-            left: 50%;
-            transform: translateX(-50%);
+            letter-spacing: 0.05em;
         }
 
-        /* === メインのグリッドレイアウト === */
+        .subtitle {
+            color: var(--text-sub);
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+
+        /* === 検索バー === */
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 40px;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            border-radius: 50px;
+            border: 1px solid var(--card-border);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+            backdrop-filter: var(--glass);
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+
+        /* === グリッドレイアウト === */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-            margin-bottom: 60px;
+            max-width: 1100px;
+            margin: 0 auto 80px;
+            padding: 0 20px;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
         }
 
-        /* === カードのデザイン（ツール用） === */
+        /* === カードデザイン（Glassmorphism） === */
         .card {
-            background-color: #1e1e1e;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-            transition: transform 0.2s ease, background-color 0.2s ease;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 25px;
             text-decoration: none;
-            color: #e0e0e0;
+            color: var(--text-main);
             display: flex;
             align-items: center;
-            justify-content: center;
-            height: 100px;
-            font-weight: bold;
-            font-size: 1.2rem;
-            border: 1px solid #333;
+            justify-content: space-between; /* 矢印アイコンのために変更 */
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: var(--glass);
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
+        /* カード左側のカラーインジケーター */
         .card::before {
             content: "";
             position: absolute;
             left: 0;
             top: 0;
             bottom: 0;
-            width: 6px;
-            background-color: #3498db;
+            width: 4px;
+            background: var(--accent-blue);
+            transition: width 0.3s ease;
         }
+
         .card:hover {
             transform: translateY(-5px);
-            background-color: #2c2c2c;
-            color: #ffffff;
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.7);
+            background: rgba(40, 50, 70, 0.8);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255,255,255,0.2);
         }
-        .card:visited { color: #e0e0e0; }
-        .card:hover:visited { color: #ffffff; }
 
-        /* === カードの色分け設定 === */
-        .card[href*="AQL"]::before { background-color: #e74c3c; }       /* 赤 */
-        .card[href*="EQIDEN"]::before { background-color: #2ecc71; }    /* 緑 */
-        .card[href*="アタック25"]::before { background-color: #f1c40f; } /* 黄 */
-        .card[href*="timer"]::before { background-color: #e67e22; }     /* オレンジ */
+        .card:hover::before {
+            width: 6px;
+        }
 
+        /* 矢印アイコン */
+        .card::after {
+            content: "→";
+            font-family: sans-serif;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+            color: var(--accent-blue);
+        }
+        .card:hover::after {
+            opacity: 1;
+            transform: translateX(0);
+        }
 
-        /* === 下部のアクションボタンエリア === */
+        /* 色分け設定（グラデーション対応） */
+        .card[data-type="AQL"]::before { background: linear-gradient(to bottom, #ef4444, #b91c1c); }
+        .card[data-type="EQIDEN"]::before { background: linear-gradient(to bottom, #22c55e, #15803d); }
+        .card[data-type="Yellow"]::before { background: linear-gradient(to bottom, #eab308, #ca8a04); }
+        .card[data-type="Orange"]::before { background: linear-gradient(to bottom, #f97316, #c2410c); }
+
+        /* === アクションエリア === */
         .action-area {
-            max-width: 800px;
-            margin: 0 auto;
             text-align: center;
-            border-top: 1px solid #333;
-            padding-top: 40px;
-            margin-bottom: 60px;
-        }
-        
-        .action-title {
-            font-size: 1.1rem;
-            color: #888;
-            margin-bottom: 20px;
+            padding: 40px 20px;
+            border-top: 1px solid var(--card-border);
+            background: rgba(0,0,0,0.2);
         }
 
         .button-container {
             display: flex;
-            flex-wrap: wrap;
             justify-content: center;
             gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
         }
 
         .action-btn {
@@ -121,104 +188,172 @@
             align-items: center;
             justify-content: center;
             text-decoration: none;
-            padding: 15px 30px;
+            padding: 12px 28px;
             border-radius: 50px;
             font-weight: bold;
             color: #fff;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s;
-            min-width: 200px;
-            font-size: 1rem;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .btn-feedback {
+            background: linear-gradient(135deg, #ec4899, #be185d);
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+        }
+        
+        .btn-x {
+            background: #000;
+            border: 1px solid #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
         .action-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            opacity: 0.9;
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
 
-        .btn-feedback { background: linear-gradient(135deg, #ff4081, #f50057); }
-        .btn-x { background-color: #000; border: 1px solid #333; }
-
-        /* === 更新履歴エリア（今回追加） === */
+        /* === 更新履歴エリア === */
         .update-area {
             max-width: 800px;
-            margin: 0 auto;
-            color: #ccc;
-            font-size: 0.9rem;
+            margin: 0 auto 60px;
+            padding: 0 20px;
         }
 
-        .update-header {
-            font-size: 1.1rem;
-            border-left: 4px solid #3498db;
-            padding-left: 10px;
-            margin-bottom: 15px;
-            color: #fff;
-        }
-
-        /* 最新情報のハイライトボックス */
         .latest-box {
-            background-color: rgba(52, 152, 219, 0.1); /* 薄い青背景 */
-            border: 1px solid #3498db;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 30px;
+            background: rgba(56, 189, 248, 0.05);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 12px;
+            padding: 20px;
             display: flex;
-            align-items: baseline;
+            align-items: flex-start;
             gap: 15px;
-        }
-        .latest-badge {
-            background-color: #3498db;
-            color: white;
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            white-space: nowrap;
+            margin-bottom: 40px;
         }
 
-        /* 履歴リスト */
+        .latest-badge {
+            background: var(--accent-blue);
+            color: #0f172a;
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 800;
+        }
+
+        .history-title {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 10px;
+        }
+
         .history-list {
             list-style: none;
             padding: 0;
             margin: 0;
-        }
-        .history-item {
-            display: flex;
-            padding: 10px 0;
-            border-bottom: 1px solid #2c2c2c;
-        }
-        .history-date {
-            min-width: 100px;
-            color: #888;
-            font-family: monospace; /* 日付を等幅フォントに */
-        }
-        .history-content {
-            color: #ddd;
+            font-size: 0.9rem;
         }
 
+        .history-item {
+            display: flex;
+            padding: 8px 0;
+            color: var(--text-sub);
+        }
+        .history-date {
+            font-family: 'Roboto Mono', monospace;
+            margin-right: 20px;
+            color: var(--accent-blue);
+            opacity: 0.8;
+        }
+
+        /* === アニメーション定義 === */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === レスポンシブ === */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .grid-container { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-    <h1>Q-Score / 早押しクイズ 得点表示一覧</h1>
 
-    <div class="grid-container">
-        <a href="https://astro-root.github.io/quiz.pointshow/フォロー.html" target="_blank" rel="noopener noreferrer" class="card">フォロー</a>
-        <a href="https://astro-root.github.io/quiz.pointshow/AQL.html" target="_blank" rel="noopener noreferrer" class="card">AQL</a>
-        <a href="https://astro-root.github.io/quiz.pointshow/EQIDEN.html" target="_blank" rel="noopener noreferrer" class="card">EQIDEN</a>
-        <a href="https://astro-root.github.io/quiz.pointshow/Lucky Shot.html" target="_blank" rel="noopener noreferrer" class="card">Lucky Shot</a>
-        <a href="https://astro-root.github.io/quiz.pointshow/NewYork.html" target="_blank" rel="noopener noreferrer" class="card">NewYork</a>
-        <a href="https://astro-root.github.io/quiz.pointshow/TOMOE.html" target="_blank" rel="noopener noreferrer" class="card">TOMOE</a>
-        <a href="https://astro-root.github.io/quiz.pointshow/by.html" target="_blank" rel="noopener noreferrer" class="card">by</a>
-        <a href="https://astro-root.github.io/quiz.pointshow/m◯n×.html" target="_blank" rel="noopener noreferrer" class="card">m◯n×</a>
-        <a href="https://astro-root.github.io/quiz.pointshow/up-down.html" target="_blank" rel="noopener noreferrer" class="card">up-down</a>
-        <a href="https://astro-root.github.io/quiz.pointshow/アタサバ.html" target="_blank" rel="noopener noreferrer" class="card">アタック風サバイバル</a>
-        <a href="https://astro-root.github.io/quiz.pointshow/アタック25.html" target="_blank" rel="noopener noreferrer" class="card">アタック25</a>
-        <a href="https://astro-root.github.io/quiz.pointshow/連答付き.html" target="_blank" rel="noopener noreferrer" class="card">連答付き</a>
-        <a href="https://astro-root.github.io/quiz.pointshow/timerace_timer.html" target="_blank" rel="noopener noreferrer" class="card">タイムレース用タイマー</a>
+    <header>
+        <h1>Q-Score</h1>
+        <div class="subtitle">早押しクイズ得点表示ツール一覧</div>
+    </header>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="ツール名で検索 (例: AQL, アタック...)">
+    </div>
+
+    <div class="grid-container" id="cardGrid">
+        <a href="https://astro-root.github.io/quiz.pointshow/フォロー.html" class="card" data-name="フォロー follow" target="_blank" rel="noopener noreferrer">フォロー</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/AQL.html" class="card" data-type="AQL" data-name="AQL エーキューエル" target="_blank" rel="noopener noreferrer">AQL</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/EQIDEN.html" class="card" data-type="EQIDEN" data-name="EQIDEN エキデン 駅伝" target="_blank" rel="noopener noreferrer">EQIDEN</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/Lucky Shot.html" class="card" data-name="Lucky Shot ラッキーショット" target="_blank" rel="noopener noreferrer">Lucky Shot</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/NewYork.html" class="card" data-name="NewYork ニューヨーク" target="_blank" rel="noopener noreferrer">NewYork</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/TOMOE.html" class="card" data-name="TOMOE 巴" target="_blank" rel="noopener noreferrer">TOMOE</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/by.html" class="card" data-name="by" target="_blank" rel="noopener noreferrer">by</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/m◯n×.html" class="card" data-name="m◯n× m○n×" target="_blank" rel="noopener noreferrer">m◯n×</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/up-down.html" class="card" data-name="up-down アップダウン" target="_blank" rel="noopener noreferrer">up-down</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/アタサバ.html" class="card" data-name="アタック風サバイバル アタサバ" target="_blank" rel="noopener noreferrer">アタック風サバイバル</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/アタック25.html" class="card" data-type="Yellow" data-name="アタック25 attack25" target="_blank" rel="noopener noreferrer">アタック25</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/連答付き.html" class="card" data-name="連答付き" target="_blank" rel="noopener noreferrer">連答付き</a>
+        
+        <a href="https://astro-root.github.io/quiz.pointshow/timerace_timer.html" class="card" data-type="Orange" data-name="タイムレース用タイマー time race timer" target="_blank" rel="noopener noreferrer">タイムレース用タイマー</a>
+    </div>
+
+    <div class="update-area">
+        <div class="latest-box">
+            <span class="latest-badge">NEW</span>
+            <div style="font-size: 0.95rem;">
+                <strong style="color: #fff; display:block; margin-bottom:4px;">「連答付き」を更新</strong>
+                連答権の表示を見やすく変更しました。
+            </div>
+        </div>
+
+        <div class="history-title">Update History</div>
+        <ul class="history-list">
+            <li class="history-item">
+                <span class="history-date">2025.11.21</span>
+                <span class="history-content">「by」を更新</span>
+            </li>
+            <li class="history-item">
+                <span class="history-date">2025.11.21</span>
+                <span class="history-content">「アタック25」を更新</span>
+            </li>
+            <li class="history-item">
+                <span class="history-date">2025.11.21</span>
+                <span class="history-content">更新履歴欄を追加</span>
+            </li>
+        </ul>
     </div>
 
     <div class="action-area">
-        <div class="action-title">開発者への連絡・ご要望</div>
+        <div style="color: var(--text-sub); font-size: 0.9rem;">開発者への連絡・ご要望</div>
         <div class="button-container">
             <a href="https://forms.gle/7f9EYXkzycTQPBHr6" target="_blank" rel="noopener noreferrer" class="action-btn btn-feedback">
                 ✉️ フィードバックを送る
@@ -229,33 +364,26 @@
         </div>
     </div>
 
-    <div class="update-area">
-        <div class="update-header">Latest Update</div>
-        
-        <div class="latest-box">
-            <span class="latest-badge">NEW</span>
-            <div>
-                <strong>「連答付き」を更新</strong><br>
-                連答権の表示を変更しました。
-            </div>
-        </div>
+    <script>
+        // 簡易検索フィルター機能
+        const searchInput = document.getElementById('searchInput');
+        const cards = document.querySelectorAll('.card');
 
-        <div class="update-header" style="font-size: 1rem; border-left: none; color: #888; margin-top: 30px;">Update History</div>
-        <ul class="history-list">
-            <li class="history-item">
-                <div class="history-date">2025/11/21</div>
-                <div class="history-content">「by」を更新</div>
-            </li>
-            <li class="history-item">
-                <div class="history-date">2025/11/21</div>
-                <div class="history-content">「アタック25」を更新</div>
-            </li>
-            <li class="history-item">
-                <div class="history-date">2025/11/21</div>
-                <div class="history-content">更新履歴欄を追加</div>
-            </li>
-        </ul>
-    </div>
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+
+            cards.forEach(card => {
+                const name = card.innerText.toLowerCase();
+                const dataName = card.getAttribute('data-name') || '';
+                
+                if (name.includes(term) || dataName.includes(term)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>
