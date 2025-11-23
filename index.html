@@ -8,13 +8,12 @@
     
     <meta name="description" content="早押しクイズで使える得点表示ツールのリンク集です。abc/EQIDENやAQLなど、様々なルールに対応しております。">
 
-    <title>Q-Score | クイズ得点表示ツール</title>
+    <title>Q-Score | 早押しクイズ得点表示サイト</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
 
     <style>
-        /* === ベース設定 === */
         :root {
             --bg-dark: #0f172a;
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -41,7 +40,6 @@
             line-height: 1.6;
         }
 
-        /* === ヘッダーエリア === */
         header {
             text-align: center;
             padding: 60px 20px 40px;
@@ -65,7 +63,6 @@
             font-size: 0.95rem;
         }
 
-        /* === 検索バー === */
         .search-container {
             max-width: 600px;
             margin: 0 auto 40px;
@@ -92,7 +89,6 @@
             box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
         }
 
-        /* === グリッドレイアウト === */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -103,7 +99,6 @@
             animation: fadeInUp 0.8s ease-out 0.2s backwards;
         }
 
-        /* === カードデザイン（Glassmorphism） === */
         .card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -113,7 +108,7 @@
             color: var(--text-main);
             display: flex;
             align-items: center;
-            justify-content: space-between; /* 矢印アイコンのために変更 */
+            justify-content: space-between;
             font-weight: 700;
             font-size: 1.1rem;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -123,7 +118,6 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        /* カード左側のカラーインジケーター */
         .card::before {
             content: "";
             position: absolute;
@@ -146,7 +140,6 @@
             width: 6px;
         }
 
-        /* 矢印アイコン */
         .card::after {
             content: "→";
             font-family: sans-serif;
@@ -161,13 +154,11 @@
             transform: translateX(0);
         }
 
-        /* 色分け設定（グラデーション対応） */
         .card[data-type="AQL"]::before { background: linear-gradient(to bottom, #ef4444, #b91c1c); }
         .card[data-type="EQIDEN"]::before { background: linear-gradient(to bottom, #22c55e, #15803d); }
         .card[data-type="Yellow"]::before { background: linear-gradient(to bottom, #eab308, #ca8a04); }
         .card[data-type="Orange"]::before { background: linear-gradient(to bottom, #f97316, #c2410c); }
 
-        /* === アクションエリア === */
         .action-area {
             text-align: center;
             padding: 40px 20px;
@@ -216,7 +207,6 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
 
-        /* === 更新履歴エリア === */
         .update-area {
             max-width: 800px;
             margin: 0 auto 60px;
@@ -270,7 +260,6 @@
             opacity: 0.8;
         }
 
-        /* === アニメーション定義 === */
         @keyframes fadeInDown {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -280,7 +269,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* === レスポンシブ === */
         @media (max-width: 600px) {
             h1 { font-size: 1.8rem; }
             .grid-container { grid-template-columns: 1fr; }
@@ -365,7 +353,6 @@
     </div>
 
     <script>
-        // 簡易検索フィルター機能
         const searchInput = document.getElementById('searchInput');
         const cards = document.querySelectorAll('.card');
 
