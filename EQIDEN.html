@@ -1,459 +1,536 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <title>EQIDEN</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    :root{
-      --bg:#0b0b0b;
-      --panel-top:#003a66;
-      --panel-bottom:#002f51;
-      --card-bg: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
-      --muted:#9aa7aa;
-      --ok:#33a853;
-      --warn:#a87b1f;
-      --danger:#e84a4a;
-      --elim-bg:#06283a;
-      --elim-text:#bfc8cc;
-      --card-border: rgba(255,255,255,0.04);
-      --gap:8px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;padding:0;font-family:"Hiragino Kaku Gothic ProN","Meiryo",system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
-    body{
-      background:
-        radial-gradient(1200px 600px at 10% 10%, rgba(24,160,176,0.03), transparent 14%),
-        linear-gradient(180deg, rgba(255,255,255,0.02), transparent 18%),
-        var(--bg);
-      color:#eee;
-      padding:10px;
-      font-size:13px;
+    :root {
+      --bg-color: #0f172a;
+      --bg-gradient: radial-gradient(circle at 50% 10%, #1e293b 0%, #0f172a 100%);
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      
+      --color-blue: #3b82f6;
+      --color-green: #10b981;
+      --color-red: #ef4444;
+      --color-gold: #f59e0b;
+      --color-cyan: #06b6d4;
+      --color-purple: #8b5cf6;
+      
+      --font-family: "Hiragino Kaku Gothic ProN", "Meiryo", system-ui, sans-serif;
+      --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
     }
 
-    .header{ display:flex; align-items:center; gap:10px; padding:6px 8px; border-radius:6px;
-      background: linear-gradient(180deg,var(--panel-top),var(--panel-bottom)); margin-bottom:8px; }
-    .logo{ width:36px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;}
-    h1{ margin:0; font-size:15px; color:#fff; }
-
-    .controls{
-      display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px;
-      padding:8px; border-radius:8px; background: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02));
-      border:1px solid var(--card-border); font-weight:800;
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; font-family: var(--font-family); }
+    
+    body {
+      background: var(--bg-color);
+      background-image: var(--bg-gradient);
+      color: var(--text-main);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
     }
-    .controls .group { display:flex; gap:6px; align-items:center; color:#fff; font-size:12px; white-space:nowrap; }
-    .controls input[type="number"]{ width:56px; padding:4px 6px; border-radius:6px; border:1px solid var(--card-border);
-      background:transparent; color:#fff; text-align:center; font-weight:700; font-size:12px; }
-    .controls button{ padding:6px 8px; border-radius:6px; border:none; cursor:pointer; font-weight:800; font-size:12px; white-space:nowrap; }
 
-    #applyBtn{ background:#2fa84f; color:#062f07; }
-    #resetBtn{ background:#d7263d; color:#fff; }
-    #globalSkip, #globalUndo{ background:#8d99a6; color:#fff; }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding: 15px 20px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-soft);
+    }
+    
+    .title-group { display: flex; align-items: center; gap: 10px; }
+    .logo {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--color-purple), var(--color-blue));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 16px; color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    h1 { margin: 0; font-size: 20px; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
-    .needs { display:flex; gap:6px; align-items:center; flex-wrap:wrap; max-width:520px; }
+    .controls { 
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; 
+      background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px;
+      border: 1px solid var(--card-border); margin-bottom: 20px;
+    }
+    .control-group { display: flex; flex-direction: column; gap: 5px; }
+    .control-group label { font-size: 11px; color: var(--text-muted); font-weight: bold; }
+    .control-group input {
+      background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); 
+      color: var(--text-main); font-weight: bold; font-size: 14px; 
+      width: 60px; text-align: center; padding: 5px; border-radius: 4px;
+    }
+    .control-group input:focus { outline: none; border-color: var(--color-purple); }
+
+    .needs-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+    .need-item { display: flex; flex-direction: column; align-items: center; }
+    .need-item span { font-size: 9px; color: var(--text-muted); }
+    .need-item input { width: 30px; height: 24px; font-size: 12px; padding: 0; }
+
+    .btn-action {
+      border: none; padding: 8px 16px; border-radius: 6px;
+      font-weight: bold; cursor: pointer; color: white;
+      transition: all 0.2s; font-size: 13px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      height: 36px;
+    }
+    .btn-action:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-action:active { transform: translateY(0); }
+    
+    #applyBtn { background: var(--color-blue); }
+    #resetBtn { background: var(--color-red); }
+    #globalSkip { background: var(--color-gold); color: #000; }
+    #globalUndo { background: #64748b; }
+
+    .global-summary {
+      margin-left: auto; font-weight: 800; color: var(--text-muted); font-size: 14px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .global-summary span { color: var(--color-gold); font-size: 20px; font-family: monospace; }
 
     .teams-wrap {
-      display:grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: var(--gap);
-      width:100%;
-      align-items:start;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 15px;
+      width: 100%;
+      align-items: start;
+      overflow-x: auto;
+      padding-bottom: 10px;
     }
 
-    .team-card{
+    .team-card {
       background: var(--card-bg);
-      padding:8px;
-      border-radius:8px;
-      border:1px solid var(--card-border);
-      min-height:150px;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      min-width:0;
-      overflow:visible;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 200px;
+      box-shadow: var(--shadow-soft);
+      transition: all 0.3s;
     }
-    .team-card.disqualified { opacity:0.75; border-color: rgba(255,0,0,0.12); }
+    .team-card.disqualified {
+      opacity: 0.6;
+      border-color: var(--color-red);
+      background: rgba(239, 68, 68, 0.1);
+    }
 
     .team-name {
-      display:block; width:100%; padding:6px 8px; font-size:12px; font-weight:800;
-      border-radius:6px; border:none; background:transparent; color:var(--muted); text-align:center; outline:none;
+      background: transparent; border: none; 
+      color: var(--text-muted); font-weight: 800; font-size: 14px;
+      text-align: center; width: 100%; outline: none;
     }
-    .team-name:focus{ color:#fff; }
+    .team-name:focus { color: var(--text-main); }
 
     .team-current {
-      font-size:12px; font-weight:900; text-align:center; color:#fff; padding:6px; border-radius:6px;
-      border:1px solid rgba(255,255,255,0.02); background: linear-gradient(90deg, rgba(255,255,255,0.01), transparent);
+      font-size: 16px; font-weight: 900; text-align: center; color: var(--color-gold);
+      padding: 8px; border-radius: 6px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      min-height: 40px; display: flex; align-items: center; justify-content: center;
     }
 
-    .limits { font-size:11px; color:var(--muted); text-align:center; }
+    .limits { 
+      font-size: 11px; color: var(--text-muted); text-align: center; 
+      display: flex; justify-content: space-around;
+      background: rgba(0,0,0,0.2); padding: 4px; border-radius: 4px;
+    }
+    .limits span { color: var(--text-main); font-weight: bold; }
 
-    .districts { display:flex; flex-direction:column; gap:6px; margin-top:6px; }
+    .districts { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
+    
     .district {
-      display:flex; align-items:center; gap:8px; padding:6px; border-radius:6px;
-      border:1px solid rgba(255,255,255,0.03); background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent);
-      font-size:12px;
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 8px; border-radius: 6px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid transparent;
+      font-size: 12px;
+      transition: all 0.2s;
     }
+    
+    .district.current { border-color: var(--color-blue); background: rgba(59, 130, 246, 0.1); }
+    .district.done { opacity: 0.5; background: transparent; }
+    .district.reach { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); }
+    .district.lock { background: rgba(15, 23, 42, 0.9); border-color: var(--color-red); color: var(--text-muted); }
 
-    /* ここを調整：選手名の幅を小さくして被らないようにする */
-    .district .player-input {
-      flex: 0 0 78px;            /* 固定幅を小さく設定（78px） */
-      max-width: 78px;
-      border:none;
-      background:transparent;
-      color:var(--muted);
-      font-weight:800;
-      text-align:left;
-      outline:none;
-      font-size:12px;
-      padding:0;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+    .player-input {
+      flex: 1; border: none; background: transparent;
+      color: var(--text-main); font-weight: 700;
+      font-size: 13px; outline: none; min-width: 0;
     }
-    .district .player-input:focus{ color:#fff; }
+    .player-input:focus { color: var(--color-cyan); }
 
-    /* カウント欄は右寄せ・固定幅 */
-    .district .count { flex:0 0 120px; text-align:right; font-weight:800; color:var(--muted); font-size:11px; }
-
-    .top-controls { display:flex; gap:6px; justify-content:center; margin-top:6px; }
-    .btn { padding:6px 8px; border-radius:6px; border:none; cursor:pointer; font-weight:800; color:#fff; font-size:12px; }
-    .btn-correct { background:#2fa84f; color:#062f07; }
-    .btn-wrong   { background:#e84a4a; color:#fff; }
-    .btn-undo    { background:#8d99a6; color:#fff; }
-
-    .district.reach { background: rgba(168,120,40,0.06); border-color: rgba(168,120,40,0.12); }
-    .district.ban-reach { background: rgba(160,60,60,0.06); border-color: rgba(160,60,60,0.12); }
-    .district.lock { background: linear-gradient(90deg, rgba(2,24,34,0.6), rgba(6,40,58,0.6)); color:var(--elim-text); }
-    .district.lock .player-input { color: var(--elim-text); }
-    .district.lock .count { color: var(--elim-text); }
-
-    @media (max-width:1100px){
-      body{ font-size:12px; }
-      .district .count{ flex-basis:90px; font-size:10px; }
-      .team-card{ min-height:140px; padding:6px; }
-      .district .player-input { flex-basis:64px; max-width:64px; } /* モバイル時はさらに小さく */
+    .count {
+      font-family: monospace; font-weight: 700;
+      color: var(--text-muted); font-size: 12px; white-space: nowrap;
     }
-    @media (max-width:720px){
-      .teams-wrap { grid-template-columns: repeat(5, minmax(0, 1fr)); grid-auto-rows: auto; gap:6px; }
+    .district.current .count { color: var(--color-blue); }
+    .district.reach .count { color: var(--color-gold); }
+    .district.lock .count { color: var(--color-red); }
+
+    .top-controls { display: flex; gap: 5px; margin-bottom: 5px; }
+    .btn-mini {
+      flex: 1; padding: 8px 0; border-radius: 6px; border: none;
+      cursor: pointer; font-weight: 800; font-size: 12px; color: #fff;
+      transition: transform 0.1s;
+    }
+    .btn-mini:active { transform: scale(0.95); }
+    .btn-correct { background: var(--color-green); color: #064e3b; }
+    .btn-wrong { background: var(--color-red); color: #450a0a; }
+    .btn-undo { background: var(--text-muted); color: #1e293b; }
+
+    @media (max-width: 1024px) {
+      .teams-wrap { gap: 10px; }
+      .team-card { min-width: 180px; }
     }
   </style>
 </head>
 <body>
-  <div class="header">
+
+<header>
+  <div class="title-group">
     <div class="logo">EQ</div>
     <h1>EQIDEN</h1>
   </div>
+</header>
 
-  <div class="controls" role="region" aria-label="controls">
-    <div class="group">
-      <label>往路失格
-        <input id="c15" type="number" min="1" value="4">
-      </label>
-    </div>
-
-    <div class="group">
-      <label>復路休み
-        <input id="mVal" type="number" min="0" value="4">
-      </label>
-    </div>
-
-    <div class="group">
-      <label>選手数
-        <input id="playersPerTeam" type="number" min="1" max="10" value="10">
-      </label>
-    </div>
-
-    <div class="group" style="min-width:260px;">
-      <div style="font-weight:800; color:#fff; font-size:12px; margin-bottom:4px;">正解数</div>
-      <div class="needs" id="needsInputs"></div>
-    </div>
-
-    <button id="applyBtn">開始</button>
-    <button id="resetBtn">リセット</button>
-    <button id="globalSkip">スルー</button>
-    <button id="globalUndo">スルー取消</button>
-
-    <div style="margin-left:auto; font-weight:800; color:var(--muted); font-size:12px;">
-      問題数: <span id="global-summary">0</span>
-    </div>
+<div class="controls">
+  <div class="control-group">
+    <label>往路失格</label>
+    <input id="c15" type="number" min="1" value="4">
   </div>
 
-  <div class="teams-wrap" id="preview" aria-live="polite"></div>
+  <div class="control-group">
+    <label>復路休み</label>
+    <input id="mVal" type="number" min="0" value="4">
+  </div>
 
-  <script>
-  (function(){
-    let globalSkips = 0;
-    const preview = document.getElementById('preview');
-    const c15El = document.getElementById('c15');
-    const mValEl = document.getElementById('mVal');
-    const playersPerTeamEl = document.getElementById('playersPerTeam');
-    const needsInputsWrap = document.getElementById('needsInputs');
-    const applyBtn = document.getElementById('applyBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const globalSkipBtn = document.getElementById('globalSkip');
-    const globalUndoBtn = document.getElementById('globalUndo');
-    const globalSummary = document.getElementById('global-summary');
+  <div class="control-group">
+    <label>選手数</label>
+    <input id="playersPerTeam" type="number" min="1" max="10" value="10">
+  </div>
 
-    function defaultNeeds(){ return [1,1,1,2,2,2,2,2,2,2]; }
+  <div class="control-group">
+    <label>正解数</label>
+    <div class="needs-grid" id="needsInputs"></div>
+  </div>
 
-    function buildNeedsInputs(){
-      needsInputsWrap.innerHTML = '';
-      const needs = defaultNeeds();
-      for(let i=0;i<10;i++){
-        const lbl = document.createElement('label');
-        lbl.style.display = 'flex';
-        lbl.style.flexDirection = 'column';
-        lbl.style.alignItems = 'center';
-        lbl.style.fontSize = '11px';
-        lbl.style.color = '#fff';
-        const span = document.createElement('span');
-        span.style.fontSize = '10px';
-        span.style.color = 'var(--muted)';
-        span.textContent = `${i+1}`;
-        const inp = document.createElement('input');
-        inp.type = 'number';
-        inp.id = 'need' + (i+1);
-        inp.min = 1;
-        inp.value = needs[i];
-        inp.style.width = '44px';
-        inp.style.padding = '3px';
-        inp.style.borderRadius = '6px';
-        inp.style.border = '1px solid rgba(255,255,255,0.04)';
-        inp.style.background = 'transparent';
-        inp.style.color = '#fff';
-        inp.style.fontWeight = '700';
-        lbl.appendChild(span);
-        lbl.appendChild(inp);
-        needsInputsWrap.appendChild(lbl);
-      }
+  <div style="flex:1"></div>
+
+  <div class="control-group" style="flex-direction:row; align-items:center; gap:10px;">
+    <button id="applyBtn" class="btn-action">開始</button>
+    <button id="resetBtn" class="btn-action">リセット</button>
+  </div>
+  
+  <div class="control-group" style="flex-direction:row; align-items:center; gap:10px; border-left: 1px solid var(--card-border); padding-left:15px; margin-left:10px;">
+    <button id="globalSkip" class="btn-action">スルー</button>
+    <button id="globalUndo" class="btn-action">戻る</button>
+  </div>
+
+  <div class="global-summary">
+    問題数: <span id="global-summary">0</span>
+  </div>
+</div>
+
+<div class="teams-wrap" id="preview" aria-live="polite"></div>
+
+<script>
+(function(){
+  let globalHistory = [];
+  const preview = document.getElementById('preview');
+  const c15El = document.getElementById('c15');
+  const mValEl = document.getElementById('mVal');
+  const playersPerTeamEl = document.getElementById('playersPerTeam');
+  const needsInputsWrap = document.getElementById('needsInputs');
+  const applyBtn = document.getElementById('applyBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const globalSkipBtn = document.getElementById('globalSkip');
+  const globalUndoBtn = document.getElementById('globalUndo');
+  const globalSummary = document.getElementById('global-summary');
+
+  function defaultNeeds(){ return [1,1,1,2,2,2,2,2,2,2]; }
+
+  function buildNeedsInputs(){
+    needsInputsWrap.innerHTML = '';
+    const needs = defaultNeeds();
+    for(let i=0;i<10;i++){
+      const div = document.createElement('div');
+      div.className = 'need-item';
+      div.innerHTML = `<span>${i+1}</span><input type="number" id="need${i+1}" min="1" value="${needs[i]||1}">`;
+      needsInputsWrap.appendChild(div);
+    }
+  }
+
+  function readNeeds(){
+    const arr = [];
+    for(let i=1;i<=10;i++){
+      const el = document.getElementById('need'+i);
+      arr.push(el ? Math.max(1, parseInt(el.value||'1',10)) : 1);
+    }
+    return arr;
+  }
+
+  function initUI(){
+    const playersPerTeam = Math.max(1, Math.min(10, +playersPerTeamEl.value));
+    preview.innerHTML = '';
+    for(let t = 1; t <= 5; t++){
+      preview.appendChild(createTeamBoard(t, playersPerTeam));
+    }
+    recalcAndRender();
+  }
+
+  function createTeamBoard(teamNo, playersPerTeam){
+    const board = document.createElement('div');
+    board.className = 'team-card';
+    board.id = `team-card-${teamNo}`;
+    board.dataset.teamId = teamNo;
+
+    const nameInput = document.createElement('input');
+    nameInput.className = 'team-name';
+    nameInput.value = `Team ${teamNo}`;
+
+    const currentDiv = document.createElement('div');
+    currentDiv.className = 'team-current';
+    currentDiv.textContent = '—';
+
+    const limits = document.createElement('div');
+    limits.className = 'limits';
+    limits.innerHTML = `<span>往路誤答: <span class="team15-count">0</span></span><span>復路休み: <span class="m-val-disp"></span></span>`;
+
+    const ctl = document.createElement('div');
+    ctl.className = 'top-controls';
+    const btnCorrect = document.createElement('button'); btnCorrect.className='btn-mini btn-correct'; btnCorrect.textContent='正解';
+    const btnWrong = document.createElement('button'); btnWrong.className='btn-mini btn-wrong'; btnWrong.textContent='誤答';
+    const btnUndo = document.createElement('button'); btnUndo.className='btn-mini btn-undo'; btnUndo.textContent='戻る';
+    
+    btnCorrect.addEventListener('click', () => pushAction('correct', teamNo));
+    btnWrong.addEventListener('click', () => pushAction('wrong', teamNo));
+    btnUndo.addEventListener('click', () => undoTeamAction(teamNo));
+
+    ctl.appendChild(btnCorrect); ctl.appendChild(btnWrong); ctl.appendChild(btnUndo);
+
+    const ds = document.createElement('div'); ds.className = 'districts';
+    for(let idx=0; idx<playersPerTeam; idx++){
+      const cell = document.createElement('div');
+      cell.className = 'district';
+      cell.id = `t${teamNo}-d${idx}`;
+      cell.dataset.index = idx;
+
+      const inp = document.createElement('input'); inp.className = 'player-input';
+      inp.value = `プレイヤー${idx+1}`;
+
+      const count = document.createElement('div'); count.className = 'count';
+      count.textContent = '-';
+      
+      cell.appendChild(inp);
+      cell.appendChild(count);
+      ds.appendChild(cell);
     }
 
-    function readNeeds(){
-      const arr = [];
-      for(let i=1;i<=10;i++){
-        const el = document.getElementById('need'+i);
-        arr.push(el ? Math.max(1, parseInt(el.value||'1',10)) : 1);
-      }
-      return arr;
-    }
+    board.appendChild(nameInput);
+    board.appendChild(currentDiv);
+    board.appendChild(limits);
+    board.appendChild(ctl);
+    board.appendChild(ds);
 
-    function renderPreview(){
-      const needs = readNeeds();
-      const c15 = +c15El.value;
-      const m = +mValEl.value;
-      const playersPerTeam = Math.max(1, Math.min(10, +playersPerTeamEl.value));
-      preview.innerHTML = '';
+    return board;
+  }
 
-      for(let t = 1; t <= 5; t++){
-        preview.appendChild(createTeamBoard(t, needs, c15, m, playersPerTeam));
-      }
-      updateGlobalSummary();
-    }
+  function pushAction(type, teamId){
+    globalHistory.push({ type, teamId });
+    recalcAndRender();
+  }
 
-    function createTeamBoard(teamNo, needs, c15, m, playersPerTeam){
-      const board = document.createElement('div');
-      board.className = 'team-card';
-      board.dataset.history = JSON.stringify([]);
-      board.dataset.teamWrongs15 = 0;
-      board.dataset.m = m;
-
-      const nameInput = document.createElement('input');
-      nameInput.className = 'team-name';
-      nameInput.value = `チーム${teamNo}`;
-
-      const currentDiv = document.createElement('div');
-      currentDiv.className = 'team-current';
-      currentDiv.textContent = '—';
-
-      const limits = document.createElement('div');
-      limits.className = 'limits';
-      limits.innerHTML = `往路 ×<span class="team15-count">0/${c15}</span>　｜　復路 ${m}問休み`;
-
-      const ctl = document.createElement('div');
-      ctl.className = 'top-controls';
-      const btnCorrect = document.createElement('button'); btnCorrect.className='btn btn-correct'; btnCorrect.textContent='正解';
-      const btnWrong = document.createElement('button'); btnWrong.className='btn btn-wrong'; btnWrong.textContent='誤答';
-      const btnUndo = document.createElement('button'); btnUndo.className='btn btn-undo'; btnUndo.textContent='戻る';
-      ctl.appendChild(btnCorrect); ctl.appendChild(btnWrong); ctl.appendChild(btnUndo);
-
-      const ds = document.createElement('div'); ds.className = 'districts';
-      for(let idx=0; idx<playersPerTeam; idx++){
-        const need = needs[idx] !== undefined ? needs[idx] : 1;
-        const cell = document.createElement('div');
-        cell.className = 'district';
-        cell.dataset.corrects = 0;
-        cell.dataset.skip = 0;
-        cell.dataset.need = need;
-        cell.dataset.index = idx;
-
-        const inp = document.createElement('input'); inp.className = 'player-input';
-        inp.value = `プレイヤー${idx+1}`;
-
-        const count = document.createElement('div'); count.className = 'count';
-        count.textContent = idx < 5 ? `◯0/${need}` : `◯0/${need}　0/${m}問休み`;
-
-        cell.appendChild(inp);
-        cell.appendChild(count);
-        ds.appendChild(cell);
-      }
-
-      board.appendChild(nameInput);
-      board.appendChild(currentDiv);
-      board.appendChild(limits);
-      board.appendChild(ctl);
-      board.appendChild(ds);
-
-      btnCorrect.addEventListener('click', ()=> teamOp('correct', board, ds.querySelectorAll('.district')));
-      btnWrong.addEventListener('click', ()=> teamOp('wrong', board, ds.querySelectorAll('.district')));
-      btnUndo.addEventListener('click', ()=> teamOp('undo', board, ds.querySelectorAll('.district')));
-
-      updateBoardControls(board, ds.querySelectorAll('.district'));
-      updateTeamCurrent(board);
-
-      return board;
-    }
-
-    function teamOp(action, board, cells){
-      const history = JSON.parse(board.dataset.history || '[]');
-      const idx = findCurrentIndex(cells);
-      if(action !== 'undo'){
-        if(idx === -1) return;
-        if(idx >= 5 && +cells[idx].dataset.skip > 0) return;
-      }
-
-      decrementRest(board);
-
-      if(action === 'correct'){
-        history.push({ type:'correct', index: idx });
-        cells[idx].dataset.corrects = +cells[idx].dataset.corrects + 1;
-      } else if(action === 'wrong'){
-        history.push({ type:'wrong', index: idx });
-        if(idx < 5){
-          board.dataset.teamWrongs15 = (+board.dataset.teamWrongs15 || 0) + 1;
-          const c15 = +c15El.value;
-          board.querySelector('.team15-count').textContent = `${board.dataset.teamWrongs15}/${c15}`;
-          if(+board.dataset.teamWrongs15 >= c15) board.classList.add('disqualified');
-        } else {
-          const m = +board.dataset.m;
-          cells[idx].dataset.skip = m;
-        }
-      } else if(action === 'undo'){
-        const last = history.pop();
-        if(!last) return;
-        const undoCell = cells[last.index];
-        if(last.type === 'correct'){
-          undoCell.dataset.corrects = Math.max(0, +undoCell.dataset.corrects - 1);
-        } else if(last.type === 'wrong'){
-          if(last.index < 5){
-            board.dataset.teamWrongs15 = Math.max(0, (+board.dataset.teamWrongs15||0) - 1);
-            board.querySelector('.team15-count').textContent = `${board.dataset.teamWrongs15}/${c15El.value}`;
-            board.classList.remove('disqualified');
-          } else {
-            undoCell.dataset.skip = Math.max(0, +undoCell.dataset.skip - 1);
-          }
-        }
-      }
-
-      board.dataset.history = JSON.stringify(history);
-      if(idx >= 0) updateCell(cells[idx]);
-      updateBoardControls(board, cells);
-      updateTeamCurrent(board);
-      updateGlobalSummary();
-    }
-
-    function findCurrentIndex(cells){
-      return Array.from(cells).findIndex(cell => +cell.dataset.corrects < +cell.dataset.need);
-    }
-
-    function decrementRest(excludeBoard){
-      preview.querySelectorAll('.team-card').forEach(board => {
-        if(board === excludeBoard) return;
-        const cells = board.querySelectorAll('.district');
-        cells.forEach(cell => {
-          const idx = +cell.dataset.index;
-          if(idx >= 5 && +cell.dataset.skip > 0){
-            cell.dataset.skip = Math.max(0, +cell.dataset.skip - 1);
-            updateCell(cell);
-          }
-        });
-        updateBoardControls(board, cells);
-        updateTeamCurrent(board);
-      });
-    }
-
-    function updateBoardControls(board, cells){
-      const idx = findCurrentIndex(cells);
-      const isResting = (idx >= 5 && +cells[idx].dataset.skip > 0);
-      const topCorrect = board.querySelector('.btn-correct');
-      const topWrong = board.querySelector('.btn-wrong');
-      if(topCorrect) topCorrect.disabled = !!isResting;
-      if(topWrong) topWrong.disabled = !!isResting;
-    }
-
-    function updateCell(cell){
-      const c = +cell.dataset.corrects;
-      const n = +cell.dataset.need;
-      const s = +cell.dataset.skip;
-      const idx = +cell.dataset.index;
-      const m = +mValEl.value;
-
-      if(idx < 5){
-        cell.querySelector('.count').textContent = `◯${c}/${n}`;
-      } else {
-        cell.querySelector('.count').textContent = `◯${c}/${n} 休${s}/${m}問`;
-      }
-
-      cell.classList.toggle('done', c >= n);
-      cell.classList.remove('reach','ban-reach','lock');
-      if(+cell.dataset.skip > 0){
-        cell.classList.add('lock');
-      } else if((+cell.dataset.corrects + 1) >= +n){
-        cell.classList.add('reach');
-      }
-    }
-
-    function updateTeamCurrent(board){
-      const cells = board.querySelectorAll('.district');
-      const idx = findCurrentIndex(cells);
-      const currentDiv = board.querySelector('.team-current');
-      if(idx === -1){
-        currentDiv.textContent = '完了';
+  function undoTeamAction(teamId){
+    for(let i = globalHistory.length - 1; i >= 0; i--){
+      if(globalHistory[i].teamId === teamId){
+        globalHistory.splice(i, 1);
+        recalcAndRender();
         return;
       }
-      const cell = cells[idx];
-      const playerName = cell.querySelector('.player-input').value || `選手${idx+1}`;
-      if(+cell.dataset.skip > 0){
-        currentDiv.textContent = `Lock（${playerName}）`;
-      } else {
-        currentDiv.textContent = `${playerName}`;
+    }
+  }
+
+  function pushGlobalSkip(){
+    globalHistory.push({ type: 'skip', teamId: null });
+    recalcAndRender();
+  }
+
+  function undoGlobalLast(){
+    if(globalHistory.length > 0){
+      globalHistory.pop();
+      recalcAndRender();
+    }
+  }
+
+  function recalcAndRender(){
+    const needs = readNeeds();
+    const c15 = +c15El.value;
+    const m = +mValEl.value;
+    const playersPerTeam = Math.max(1, Math.min(10, +playersPerTeamEl.value));
+
+    const teamsState = {};
+    for(let t=1; t<=5; t++){
+      teamsState[t] = {
+        corrects: Array(playersPerTeam).fill(0),
+        wrongs15: 0,
+        currentIdx: 0,
+        penaltyStartTurn: null,
+        disqualified: false
+      };
+    }
+
+    let globalTurnCount = 0;
+
+    globalHistory.forEach((action, actionIdx) => {
+      globalTurnCount++;
+
+      if(action.type === 'skip'){
+        return;
       }
+
+      const t = teamsState[action.teamId];
+      if(!t) return;
+      if(t.disqualified) return;
+      if(t.currentIdx >= playersPerTeam) return;
+
+      let isLocked = false;
+      if(t.penaltyStartTurn !== null){
+        const turnsPassed = (globalTurnCount - 1) - t.penaltyStartTurn;
+        if(turnsPassed < m) isLocked = true;
+      }
+
+      if(isLocked){
+        return; 
+      }
+
+      if(action.type === 'correct'){
+        t.corrects[t.currentIdx]++;
+        if(t.corrects[t.currentIdx] >= (needs[t.currentIdx] || 1)){
+          t.currentIdx++;
+          t.penaltyStartTurn = null;
+        }
+      } else if(action.type === 'wrong'){
+        if(t.currentIdx < 5){
+          t.wrongs15++;
+          if(t.wrongs15 >= c15) t.disqualified = true;
+        } else {
+          t.penaltyStartTurn = globalTurnCount;
+        }
+      }
+    });
+
+    globalSummary.textContent = String(globalTurnCount);
+
+    for(let t=1; t<=5; t++){
+      const state = teamsState[t];
+      const board = document.getElementById(`team-card-${t}`);
+      
+      board.querySelector('.team15-count').textContent = `${state.wrongs15}/${c15}`;
+      board.querySelector('.m-val-disp').textContent = m;
+      
+      if(state.disqualified) board.classList.add('disqualified');
+      else board.classList.remove('disqualified');
+
+      let lockRemaining = 0;
+      if(state.penaltyStartTurn !== null && !state.disqualified){
+        const turnsPassed = globalTurnCount - state.penaltyStartTurn;
+        lockRemaining = Math.max(0, m - turnsPassed);
+      }
+      if(lockRemaining === 0) state.penaltyStartTurn = null; 
+
+      const districtEls = board.querySelectorAll('.district');
+      let activeIndexFound = false;
+
+      districtEls.forEach((cell, idx) => {
+        const need = needs[idx] || 1;
+        const cCount = state.corrects[idx];
+        const isCurrent = (idx === state.currentIdx);
+        
+        cell.classList.remove('done', 'current', 'reach', 'lock');
+        let text = `${cCount}/${need}`;
+
+        if(idx < state.currentIdx){
+          cell.classList.add('done');
+        } else if(idx === state.currentIdx){
+          if(state.disqualified){
+            text = "Lose";
+            cell.classList.add('lock');
+          } else if(lockRemaining > 0){
+            cell.classList.add('lock');
+            text += ` 休${lockRemaining}`;
+          } else {
+            cell.classList.add('current');
+            if(cCount + 1 >= need) cell.classList.add('reach');
+          }
+          activeIndexFound = true;
+        }
+
+        cell.querySelector('.count').textContent = text;
+      });
+
+      const curDiv = board.querySelector('.team-current');
+      if(state.disqualified){
+        curDiv.textContent = "Lose";
+        curDiv.style.color = "var(--color-red)";
+      } else if(state.currentIdx >= playersPerTeam){
+        curDiv.textContent = "GOAL!";
+        curDiv.style.color = "var(--color-green)";
+      } else {
+        const playerName = document.querySelector(`#t${t}-d${state.currentIdx} .player-input`).value;
+        if(lockRemaining > 0){
+          curDiv.textContent = `LOCK (${lockRemaining})`;
+          curDiv.style.color = "var(--color-red)";
+        } else {
+          curDiv.textContent = playerName;
+          curDiv.style.color = "var(--color-gold)";
+        }
+      }
+
+      const btnC = board.querySelector('.btn-correct');
+      const btnW = board.querySelector('.btn-wrong');
+      const isFrozen = state.disqualified || (state.currentIdx >= playersPerTeam) || (lockRemaining > 0);
+      
+      btnC.disabled = isFrozen;
+      btnW.disabled = isFrozen;
     }
+  }
 
-    function updateGlobalSummary(){
-      globalSummary.textContent = String(globalSkips);
+  globalSkipBtn.addEventListener('click', pushGlobalSkip);
+  globalUndoBtn.addEventListener('click', undoGlobalLast);
+
+  applyBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    initUI();
+  });
+  
+  resetBtn.addEventListener('click', () => {
+    if(confirm("全リセットしますか？")){
+      globalHistory = [];
+      initUI();
     }
+  });
 
-    globalSkipBtn.addEventListener('click', ()=>{
-      globalSkips++;
-      decrementRest(null);
-      updateGlobalSummary();
-    });
-    globalUndoBtn.addEventListener('click', ()=>{
-      if(globalSkips>0) globalSkips--;
-      updateGlobalSummary();
-    });
+  buildNeedsInputs();
+  initUI();
 
-    applyBtn.addEventListener('click', e => { e.preventDefault(); renderPreview(); });
-    resetBtn.addEventListener('click', ()=> {
-      if(!confirm('本当にリセットしますか？')) return;
-      globalSkips = 0;
-      buildNeedsInputs();
-      renderPreview();
-    });
-
-    buildNeedsInputs();
-    renderPreview();
-  })();
-  </script>
+})();
+</script>
 </body>
 </html>
