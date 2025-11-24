@@ -5,151 +5,236 @@
   <title>m◯n×</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    :root{
-      --bg:#0b0b0b;
-      --panel-top:#003a66;
-      --panel-bottom:#002f51;
-      --card-bg: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
-      --ok:#33a853;
-      --muted:#9aa7aa;
-      --correct-blue:#3ea6ff;
-      --wrong-red:#ff6b6b;
-      --elim-bg:#06283a;
-      --elim-text:#bfc8cc;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;padding:0;font-family:"Hiragino Kaku Gothic ProN","Meiryo",system-ui,sans-serif}
-    body{
-      background:
-        radial-gradient(1200px 600px at 10% 10%, rgba(24,160,176,0.03), transparent 14%),
-        linear-gradient(180deg, rgba(255,255,255,0.02), transparent 18%),
-        var(--bg);
-      color:#eee; padding:18px; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    :root {
+      --bg-color: #0f172a;
+      --bg-gradient: radial-gradient(circle at 50% 10%, #1e293b 0%, #0f172a 100%);
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      
+      --color-blue: #3b82f6;
+      --color-green: #10b981;
+      --color-red: #ef4444;
+      --color-gold: #f59e0b;
+      --color-cyan: #06b6d4;
+      
+      --font-family: "Hiragino Kaku Gothic ProN", "Meiryo", system-ui, sans-serif;
+      --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+      --shadow-glow: 0 0 15px rgba(59, 130, 246, 0.3);
     }
 
-    /* header */
-    .header{
-      display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:10px;
-      background: linear-gradient(180deg,var(--panel-top),var(--panel-bottom));
-      box-shadow:0 6px 18px rgba(0,0,0,0.6), inset 0 -2px 0 rgba(255,255,255,0.03);
-      margin-bottom:12px;
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; font-family: var(--font-family); }
+    
+    body {
+      background: var(--bg-color);
+      background-image: var(--bg-gradient);
+      color: var(--text-main);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
     }
-    .logo{ width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;background:linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); box-shadow:0 6px 12px rgba(0,0,0,0.6) }
-    h1{ margin:0; font-size:20px; color:#fff; }
 
-    /* controls */
-    .settings{
-      display:flex; flex-wrap:wrap; gap:10px; align-items:center;
-      padding:10px 12px; border-radius:10px; margin-bottom:18px;
-      background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.04));
-      box-shadow:0 6px 18px rgba(0,0,0,0.5);
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding: 15px 20px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-soft);
     }
-    .settings label{
-      display:flex; gap:8px; align-items:center; color:#fff; font-weight:700;
-      padding:8px 10px; border-radius:8px; background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
-      border:1px solid rgba(255,255,255,0.02); font-size:18px;
+    
+    .title-group { display: flex; align-items: center; gap: 10px; }
+    .logo {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--color-blue), var(--color-cyan));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 16px; color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
-    .settings input[type="number"]{ width:80px; padding:6px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.04); text-align:center; background:transparent; color:#fff; font-weight:700; font-size:18px; }
-    .settings button{ padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:800; font-size:14px; box-shadow:0 6px 12px rgba(0,0,0,0.45); }
+    h1 { margin: 0; font-size: 20px; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
-    #setupBtn{ background: linear-gradient(180deg,var(--ok),#2b8f44); color:#062f07; }
-    #resetAll{ background: linear-gradient(180deg,#d7263d,#b71b2b); color:#fff; }
-    #undoGlobal{ background: linear-gradient(180deg,#9e9e9e,#6f6f6f); color:#fff; }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .control-group {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 6px;
+      border: 1px solid var(--card-border);
+    }
+    .control-group label { font-size: 12px; color: var(--text-muted); font-weight: bold; }
+    .control-group input {
+      background: transparent; border: none; color: var(--text-main);
+      font-weight: bold; font-size: 16px; width: 40px; text-align: center;
+      border-bottom: 2px solid rgba(255,255,255,0.2);
+    }
+    .control-group input:focus { outline: none; border-color: var(--color-blue); }
 
-    /* grid that always fits the viewport: repeat(count, 1fr) */
-    .scoreboard { display:block; width:100%; }
+    .btn-action {
+      border: none; padding: 8px 16px; border-radius: 6px;
+      font-weight: bold; cursor: pointer; color: white;
+      transition: all 0.2s; font-size: 13px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .btn-action:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-action:active { transform: translateY(0); }
+    
+    #setupBtn { background: var(--color-blue); }
+    #resetAll { background: var(--color-red); }
+    #undoGlobal { background: #64748b; }
+    #undoGlobal:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .scoreboard {
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+    }
     #grid {
-      display:grid;
-      gap:14px;
-      width:100%;
-      align-items:start;
-      grid-auto-rows: auto;
-      /* columns will be set to repeat(count, 1fr) so it always fits the screen */
+      display: grid;
+      gap: 15px;
+      align-items: start;
     }
 
-    /* card */
-    .column{
+    .column {
       background: var(--card-bg);
-      padding:16px; border-radius:14px; box-shadow:0 8px 20px rgba(0,0,0,0.6);
-      text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; position:relative;
-      border:1px solid rgba(255,255,255,0.03); color:#fff; min-width:0;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 15px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-soft);
     }
-
-    /* name input: vertical editable like LuckyShot/by/NewYork */
-    .name-input{
+    
+    .name-input {
       writing-mode: vertical-rl;
       text-orientation: upright;
-      border: none;
       background: transparent;
-      font-weight:800;
-      font-size:24px;
-      height:250px;
-      width:44px;
-      padding:4px;
-      margin-bottom:8px;
-      text-align:center;
-      color:var(--muted);
-      outline: none;
-      caret-color: #fff;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 24px;
+      height: 240px;
+      width: 40px;
+      text-align: center;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      transition: color 0.2s;
     }
-    .name-input:focus{ color: #fff; }
+    .name-input:focus { outline: none; color: var(--text-main); }
 
-    /* correct count (blue, large) */
-    .correct-count{
-      font-size:48px; margin:8px 0; color:var(--correct-blue); font-weight:900; position:relative; min-height:54px;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .correct-count .correct-num{ display:block; }
-
-    /* wrong count (× display) */
-    .wrong-count{
-      font-size:20px; color:var(--wrong-red); margin-bottom:10px; font-weight:800; min-height:22px;
+    .score-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      width: 100%;
     }
 
-    /* buttons */
-    .buttons{ display:flex; gap:10px; width:100%; justify-content:center; margin-top:8px }
-    .btn-op{ flex:1; padding:10px 8px; border-radius:8px; border:none; cursor:pointer; font-weight:800; font-size:16px }
-    .btn-correct{ background: linear-gradient(180deg,#2fa84f,#1d7b36); color:#042a08 }
-    .btn-wrong{ background: linear-gradient(180deg,#e84a4a,#b71b2b); color:#fff }
-
-    /* eliminated appearance */
-    .column.eliminated{ background: var(--elim-bg); color: var(--elim-text); box-shadow:none; }
-    .column.eliminated .name-input{ color: var(--elim-text); }
-    .column.eliminated .correct-count, .column.eliminated .wrong-count { color: var(--elim-text); opacity:0.95; }
-    .column.eliminated .btn-op{ opacity:0.6; cursor:not-allowed; }
-
-    /* remove any glowing/shine effect: no .finished styles */
-
-    .num-animate{ /* subtle animation kept optional; user didn't request animation removal for numbers; keep minimal */
-      animation: pop 0.18s ease;
+    .correct-count {
+      font-size: 56px;
+      font-weight: 800;
+      color: var(--color-blue);
+      line-height: 1;
+      text-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+      min-height: 60px;
+      display: flex; align-items: center; justify-content: center;
     }
-    @keyframes pop{ 0%{ transform: scale(1);} 50%{ transform: scale(1.06);} 100%{ transform: scale(1);} }
+    
+    .wrong-count {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--color-red);
+      height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 5px;
+    }
 
-    @media (max-width:720px){
-      .name-input{ height:88px; width:36px; font-size:16px; }
-      .correct-count{ font-size:36px; }
-      .wrong-count{ font-size:18px; }
+    .buttons { display: flex; gap: 8px; width: 100%; }
+    .btn-op {
+      flex: 1; border: none; padding: 12px 0; border-radius: 8px;
+      cursor: pointer; font-weight: 900; font-size: 16px; color: rgba(0,0,0,0.6);
+      transition: transform 0.1s, filter 0.2s;
+    }
+    .btn-op:active { transform: scale(0.95); }
+    .btn-correct { background: var(--color-green); color: #064e3b; }
+    .btn-wrong { background: var(--color-red); color: #450a0a; }
+
+    .column.eliminated {
+      background: rgba(15, 23, 42, 0.95);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+    .column.eliminated .name-input { color: #334155; }
+    .column.eliminated .correct-count { font-size: 24px; color: #475569; text-shadow: none; }
+    .column.eliminated .wrong-count { opacity: 0.5; }
+    .column.eliminated .btn-op { opacity: 0.2; cursor: not-allowed; pointer-events: none; }
+
+    .column.winner {
+      border-color: var(--color-gold);
+      box-shadow: 0 0 30px rgba(245, 158, 11, 0.2);
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.1), rgba(30, 41, 59, 0.8));
+    }
+    .column.winner .correct-count {
+      color: var(--color-gold);
+      text-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+      font-size: 40px;
+    }
+
+    .pop-anim { animation: pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @keyframes pop { 0%{transform: scale(1);} 50%{transform: scale(1.3);} 100%{transform: scale(1);} }
+
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      header { flex-direction: column; align-items: stretch; gap: 10px; padding: 10px; }
+      .controls { justify-content: space-between; }
+      .name-input { height: 100px; font-size: 14px; width: 30px; letter-spacing: 0; }
+      .correct-count { font-size: 36px; }
+      .wrong-count { font-size: 18px; }
+      .btn-op { padding: 8px 0; font-size: 14px; }
     }
   </style>
 </head>
 <body>
-  <div class="header">
+
+<header>
+  <div class="title-group">
     <div class="logo">◯×</div>
     <h1>m◯n×</h1>
   </div>
-
-  <div class="settings">
-    <label>勝ち抜け: <input type="number" id="winThresh" min="1" value="5"></label>
-    <label>失格: <input type="number" id="loseThresh" min="1" value="2"></label>
-    <label>参加人数: <input type="number" id="playerCount" min="1" max="20" value="6"></label>
-    <button id="setupBtn">開始</button>
-    <button id="resetAll">リセット</button>
-    <button id="undoGlobal">戻る</button>
+  <div class="controls">
+    <div class="control-group">
+      <label>WIN</label>
+      <input type="number" id="winThresh" min="1" value="5">
+    </div>
+    <div class="control-group">
+      <label>LOSE</label>
+      <input type="number" id="loseThresh" min="1" value="2">
+    </div>
+    <div class="control-group">
+      <label>PLAYER</label>
+      <input type="number" id="playerCount" min="1" max="20" value="6">
+    </div>
+    <div style="flex:1"></div>
+    <button id="setupBtn" class="btn-action">開始</button>
+    <button id="resetAll" class="btn-action">リセット</button>
+    <button id="undoGlobal" class="btn-action">戻る</button>
   </div>
+</header>
 
-  <div class="scoreboard">
-    <div id="grid" aria-label="scoreboard-grid"></div>
-  </div>
+<div class="scoreboard">
+  <div id="grid" aria-label="scoreboard-grid"></div>
+</div>
 
 <script>
 (function(){
@@ -161,11 +246,10 @@
   const resetBtn = document.getElementById('resetAll');
   const undoBtn = document.getElementById('undoGlobal');
 
-  let players = []; // { idx, el, nameEl, correctNumEl, wrongEl, btnC, btnW, correct, wrong, eliminated, rank }
-  let historyStack = []; // { idx, prev:{correct,wrong,eliminated,rank}, winners:[] }
+  let players = []; 
+  let historyStack = [];
   let winners = [];
 
-  // ordinal label (keeps English ordinal like before)
   function ordinalLabel(n){
     if(n % 100 >= 11 && n % 100 <= 13) return n + 'th';
     const last = n % 10;
@@ -175,10 +259,8 @@
     return n + 'th';
   }
 
-  // always fit: repeat(count, 1fr)
   function setGridColumnsByCount(count){
     grid.style.gridTemplateColumns = `repeat(${count}, 1fr)`;
-    grid.parentElement.style.overflowX = 'hidden';
   }
 
   function pushHistory(idx, prev){
@@ -203,8 +285,10 @@
       col.className = 'column';
       col.innerHTML = `
         <input class="name-input" value="プレイヤー${i+1}" />
-        <div class="correct-count"><span class="correct-num">0</span></div>
-        <div class="wrong-count"></div>
+        <div class="score-area">
+          <div class="correct-count"><span class="correct-num">0</span></div>
+          <div class="wrong-count"></div>
+        </div>
         <div class="buttons">
           <button class="btn-op btn-correct">正解</button>
           <button class="btn-op btn-wrong">誤答</button>
@@ -225,7 +309,7 @@
         pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
         p.correct++;
         checkFinishAndEliminate(p);
-        renderAll(true);
+        renderAll(true, p.idx);
       });
 
       btnW.addEventListener('click', ()=>{
@@ -233,7 +317,7 @@
         pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
         p.wrong++;
         checkFinishAndEliminate(p);
-        renderAll(true);
+        renderAll(true, p.idx);
       });
 
       players.push(p);
@@ -247,32 +331,31 @@
     const winTh = Math.max(1, parseInt(winInput.value || 1));
     const loseTh = Math.max(1, parseInt(loseInput.value || 1));
 
-    // elimination by wrong threshold
     if(!p.eliminated && p.wrong >= loseTh){
       p.eliminated = true;
       p.rank = 0;
     }
 
-    // assign rank when reaching win threshold (in order)
     if(!p.eliminated && p.rank === 0 && p.correct >= winTh){
       winners.push(p.idx);
       p.rank = winners.length;
     }
   }
 
-  function renderAll(animate=true){
+  function renderAll(animate=true, activeIdx = -1){
     players.forEach(p=>{
+      p.el.classList.remove('eliminated', 'winner');
+      
       if(p.eliminated){
         p.el.classList.add('eliminated');
-        p.correctNumEl.textContent = 'Lose';
+        p.correctNumEl.textContent = 'LOSE';
         p.wrongEl.textContent = p.wrong > 0 ? '×'.repeat(p.wrong) : '';
         p.btnC.disabled = true;
         p.btnW.disabled = true;
         p.nameEl.disabled = true;
       } else {
-        p.el.classList.remove('eliminated');
         if(p.rank > 0){
-          // show ordinal in points area (no extra badge)
+          p.el.classList.add('winner');
           p.correctNumEl.textContent = ordinalLabel(p.rank);
           p.btnC.disabled = true;
           p.btnW.disabled = true;
@@ -285,9 +368,11 @@
           p.nameEl.disabled = false;
         }
       }
-      if(animate){
-        p.correctNumEl.classList.add('num-animate');
-        setTimeout(()=>p.correctNumEl.classList.remove('num-animate'), 220);
+
+      if(animate && p.idx === activeIdx){
+        p.correctNumEl.classList.remove('pop-anim');
+        void p.correctNumEl.offsetWidth;
+        p.correctNumEl.classList.add('pop-anim');
       }
     });
 
@@ -301,7 +386,7 @@
     const idx = last.idx;
     const prev = last.prev;
     winners = (last.winners || []).slice();
-    // restore target
+    
     const p = players[idx];
     if(p){
       p.correct = prev.correct;
@@ -309,23 +394,23 @@
       p.eliminated = prev.eliminated;
       p.rank = prev.rank || 0;
     }
-    // restore winners -> reassign ranks based on winners array
+    
     players.forEach(pl => {
       const pos = winners.indexOf(pl.idx);
       pl.rank = pos === -1 ? (pl.rank>0 && pl.idx===idx ? 0 : pl.rank) : pos+1;
     });
-    // clean stray ranks
     players.forEach(pl => { if(winners.indexOf(pl.idx) === -1 && pl.rank>0 && pl.idx !== idx) pl.rank = 0; });
-    renderAll(true);
+    renderAll(true, idx);
   }
 
   function resetAll(){
     players.forEach((p,i)=>{
       p.correct = 0; p.wrong = 0; p.eliminated = false; p.rank = 0;
-      p.nameEl.value = `プレイヤー${i+1}`;
+      p.nameEl.value = `Player ${i+1}`;
       p.nameEl.disabled = false;
       p.btnC.disabled = false;
       p.btnW.disabled = false;
+      p.el.classList.remove('eliminated', 'winner');
     });
     historyStack = [];
     winners = [];
@@ -333,7 +418,6 @@
     updateUndoState();
   }
 
-  // handlers
   setupBtn.addEventListener('click', ()=>{
     const cnt = Math.max(1, Math.min(20, parseInt(countInput.value || 6)));
     createGrid(cnt);
@@ -342,9 +426,7 @@
   resetBtn.addEventListener('click', resetAll);
   undoBtn.addEventListener('click', undoGlobal);
 
-  // respond to threshold edits (re-evaluate)
   winInput.addEventListener('input', ()=> {
-    // assign ranks immediately for those who meet threshold
     players.forEach(p => {
       if(!p.eliminated && p.rank === 0 && p.correct >= parseInt(winInput.value || 1)){
         winners.push(p.idx);
@@ -353,6 +435,7 @@
     });
     renderAll(false);
   });
+  
   loseInput.addEventListener('input', ()=> {
     players.forEach(p => {
       if(!p.eliminated && p.wrong >= parseInt(loseInput.value || 1)) p.eliminated = true;
@@ -360,65 +443,8 @@
     renderAll(false);
   });
 
-  // helper to call createGrid and set columns
-  function createGrid(n){
-    setGridColumnsByCount(n);
-    // build
-    grid.innerHTML = '';
-    players = [];
-    historyStack = [];
-    winners = [];
-    setGridColumnsByCount(n);
-
-    for(let i=0;i<n;i++){
-      const col = document.createElement('div');
-      col.className = 'column';
-      col.innerHTML = `
-        <input class="name-input" value="プレイヤー${i+1}" />
-        <div class="correct-count"><span class="correct-num">0</span></div>
-        <div class="wrong-count"></div>
-        <div class="buttons">
-          <button class="btn-op btn-correct">正解</button>
-          <button class="btn-op btn-wrong">誤答</button>
-        </div>
-      `;
-      grid.appendChild(col);
-
-      const nameEl = col.querySelector('.name-input');
-      const correctNumEl = col.querySelector('.correct-num');
-      const wrongEl = col.querySelector('.wrong-count');
-      const btnC = col.querySelector('.btn-correct');
-      const btnW = col.querySelector('.btn-wrong');
-
-      const p = { idx:i, el:col, nameEl, correctNumEl, wrongEl, btnC, btnW, correct:0, wrong:0, eliminated:false, rank:0 };
-
-      btnC.addEventListener('click', ()=>{
-        if(p.eliminated || p.rank>0) return;
-        pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
-        p.correct++;
-        checkFinishAndEliminate(p);
-        renderAll(true);
-      });
-
-      btnW.addEventListener('click', ()=>{
-        if(p.eliminated || p.rank>0) return;
-        pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
-        p.wrong++;
-        checkFinishAndEliminate(p);
-        renderAll(true);
-      });
-
-      players.push(p);
-    }
-
-    renderAll(false);
-    updateUndoState();
-  }
-
-  // initial
   createGrid(Math.max(1, Math.min(20, parseInt(countInput.value || 6))));
-
-  // resize: keep columns = repeat(n, 1fr)
+  
   window.addEventListener('resize', ()=> {
     const cnt = players.length || Math.max(1, Math.min(20, parseInt(countInput.value || 6)));
     setGridColumnsByCount(cnt);
