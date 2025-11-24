@@ -1,345 +1,515 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <title>アタック風サバイバル</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>Attack Survival</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    :root{
-      --bg:#0b0b0b;
-      --panel:#003a66;
-      --card:#072631;
-      --ok:#33a853;
-      --danger:#d7263d;
-      --muted:#9aa7aa;
-      --elim-bg:#06283a; /* 深青（失格） */
-      --elim-text:#bfc8cc; /* 読める程度のグレー */
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-      background: linear-gradient(180deg, #071018, #071217 80%);
-      color:#eee;
-    }
-    .header{
-      display:flex; align-items:center; padding:12px 16px;
-      background: linear-gradient(180deg,var(--panel), #003051);
-    }
-    h1{ margin:0; font-size:20px; color:#fff; }
-
-    .settings{
-      display:flex; flex-wrap:wrap; gap:8px; padding:10px 12px;
-      background: linear-gradient(180deg,#002f4a,#00283f);
-      align-items:center;
-    }
-    .control{ display:flex; align-items:center; gap:8px; color:#fff; font-size:14px;
-      padding:6px 10px; border-radius:8px; background: rgba(255,255,255,0.02);
-    }
-    .control input[type=number]{ width:72px; padding:6px; border-radius:6px; border:none; background:transparent; color:#fff; text-align:center; }
-    .control label{ display:flex; gap:6px; align-items:center; }
-
-    .controls-right{ margin-left:auto; display:flex; gap:8px; }
-    button{
-      padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700;
-    }
-    #startBtn{ background:linear-gradient(180deg,var(--ok), #2b8f44); color:#062f07; }
-    #resetBtn{ background:linear-gradient(180deg,var(--danger), #b71b2b); color:#fff; }
-    #undoBtn{ background:linear-gradient(180deg,#9e9e9e,#757575); color:#fff; }
-
-    .players{ padding:14px; }
-    #playerGrid{
-      display:grid;
-      gap:12px;
-      width:100%;
-      align-items:start;
+    :root {
+      --bg-color: #0f172a;
+      --bg-gradient: radial-gradient(circle at 50% 10%, #1e293b 0%, #0f172a 100%);
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      
+      --color-blue: #3b82f6;
+      --color-green: #10b981;
+      --color-red: #ef4444;
+      --color-gold: #f59e0b;
+      --color-cyan: #06b6d4;
+      --color-crimson: #f43f5e;
+      
+      --font-family: "Hiragino Kaku Gothic ProN", "Meiryo", system-ui, sans-serif;
+      --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+      --shadow-glow: 0 0 15px rgba(244, 63, 94, 0.3);
     }
 
-    .player{
-      background: linear-gradient(180deg,var(--card), rgba(11,32,36,0.6));
-      border-radius:12px; padding:10px; min-height:160px; position:relative;
-      display:flex; flex-direction:column; justify-content:flex-start; align-items:center;
-      border:1px solid rgba(255,255,255,0.03);
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; font-family: var(--font-family); }
+    
+    body {
+      background: var(--bg-color);
+      background-image: var(--bg-gradient);
+      color: var(--text-main);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
     }
 
-    .player .number{ position:absolute; top:8px; right:10px; font-size:12px; color:var(--muted); }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding: 15px 20px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-soft);
+    }
+    
+    .title-group { display: flex; align-items: center; gap: 10px; }
+    .logo {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--color-crimson), var(--color-red));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 16px; color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    h1 { margin: 0; font-size: 20px; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
-    /* 縦書きの名前 */
-    .name-vertical{
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .control-group {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 6px;
+      border: 1px solid var(--card-border);
+    }
+    .control-group label { font-size: 12px; color: var(--text-muted); font-weight: bold; white-space: nowrap; }
+    .control-group input {
+      background: transparent; border: none; color: var(--text-main);
+      font-weight: bold; font-size: 16px; width: 40px; text-align: center;
+      border-bottom: 2px solid rgba(255,255,255,0.2);
+    }
+    .control-group input:focus { outline: none; border-color: var(--color-crimson); }
+
+    .btn-action {
+      border: none; padding: 8px 16px; border-radius: 6px;
+      font-weight: bold; cursor: pointer; color: white;
+      transition: all 0.2s; font-size: 13px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .btn-action:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-action:active { transform: translateY(0); }
+    
+    #setupBtn { background: var(--color-blue); }
+    #resetAll { background: var(--color-red); }
+    #undoGlobal { background: #64748b; }
+    #undoGlobal:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .scoreboard {
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+    }
+    #grid {
+      display: grid;
+      gap: 15px;
+      align-items: start;
+    }
+
+    .column {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 15px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-soft);
+    }
+    
+    .name-input {
       writing-mode: vertical-rl;
       text-orientation: upright;
-      border:none; background:transparent; color:#fff;
-      font-weight:700; font-size:24px; height:250px; width:36px;
-      padding:4px; margin-bottom:8px; outline:none; text-align:center;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 24px;
+      height: 240px;
+      width: 40px;
+      text-align: center;
+      letter-spacing: 2px;
+      margin-bottom: 5px;
+      transition: color 0.2s;
+    }
+    .name-input:focus { outline: none; color: var(--text-main); }
+
+    .score-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      width: 100%;
     }
 
-    .life{
-      font-size:30px; font-weight:800; color:#fff; text-align:center;
-      padding:8px 12px; border-radius:8px; min-width:84px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.02), transparent);
-      margin-bottom:8px;
+    .life-score {
+      font-size: 56px;
+      font-weight: 800;
+      color: var(--color-cyan);
+      line-height: 1;
+      text-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+      min-height: 60px;
+      display: flex; align-items: center; justify-content: center;
+      transition: color 0.3s;
     }
 
-    .wrong-count{ font-size:20px; color:#ffd3d3; min-height:28px; margin-bottom:8px; }
+    .life-score.danger { color: var(--color-red); text-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
 
-    .btn-row{ display:flex; gap:8px; justify-content:center; width:100%; }
-    .btn-row button{ flex:1; padding:8px 6px; border-radius:8px; font-weight:800; }
-
-    .btn-correct{ background:linear-gradient(180deg,var(--ok), #2b8f44); color:#062f07; }
-    .btn-wrong  { background:linear-gradient(180deg,var(--danger), #b71b2b); color:#fff; }
-
-    /* 失格スタイル（背景深青・文字は薄グレー） */
-    .player.eliminated{
-      background: var(--elim-bg);
-      color: var(--elim-text);
+    .wrong-count {
+      height: 24px;
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--color-red);
+      margin-top: 5px;
+      letter-spacing: 2px;
     }
-    .player.eliminated .name-vertical{ color: var(--elim-text); }
-    .player.eliminated .life{ color: var(--elim-text); background: transparent; }
-    .player.eliminated .wrong-count{ color: var(--elim-text); opacity:0.85; }
 
-    /* disabled */
-    .player button:disabled{ opacity:0.5; cursor:not-allowed; }
+    .buttons { display: flex; gap: 8px; width: 100%; }
+    .btn-op {
+      flex: 1; border: none; padding: 12px 0; border-radius: 8px;
+      cursor: pointer; font-weight: 900; font-size: 16px; color: rgba(0,0,0,0.6);
+      transition: transform 0.1s, filter 0.2s;
+    }
+    .btn-op:active { transform: scale(0.95); }
+    .btn-correct { background: var(--color-green); color: #064e3b; }
+    .btn-wrong { background: var(--color-red); color: #450a0a; }
 
-    @media (max-width:520px){
-      .name-vertical{ height:90px; width:32px; font-size:14px; }
-      .life{ font-size:18px; min-width:72px; }
+    .column.eliminated {
+      background: rgba(15, 23, 42, 0.95);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+    .column.eliminated .name-input { color: #334155; }
+    .column.eliminated .life-score { font-size: 24px; color: #475569; text-shadow: none; }
+    .column.eliminated .wrong-count { opacity: 0.5; }
+    .column.eliminated .btn-op { opacity: 0.2; cursor: not-allowed; pointer-events: none; }
+
+    .column.winner {
+      border-color: var(--color-gold);
+      box-shadow: 0 0 30px rgba(245, 158, 11, 0.2);
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.1), rgba(30, 41, 59, 0.8));
+    }
+    .column.winner .life-score {
+      color: var(--color-gold);
+      text-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+    }
+    .column.winner::after {
+      content: "WIN";
+      position: absolute;
+      top: -10px;
+      background: var(--color-gold);
+      color: #000;
+      font-weight: 900;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .status-bar {
+      margin-top: 15px;
+      padding: 10px;
+      text-align: center;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+    }
+
+    .pop-anim { animation: pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .shake-anim { animation: shake 0.3s ease-in-out; }
+    @keyframes pop { 0%{transform: scale(1);} 50%{transform: scale(1.3);} 100%{transform: scale(1);} }
+    @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-5px);} 75%{transform:translateX(5px);} }
+
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      header { flex-direction: column; align-items: stretch; gap: 10px; padding: 10px; }
+      .controls { justify-content: space-between; }
+      .name-input { height: 100px; font-size: 14px; width: 30px; letter-spacing: 0; }
+      .life-score { font-size: 36px; }
+      .btn-op { padding: 8px 0; font-size: 14px; }
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>アタック風サバイバル</h1>
+
+<header>
+  <div class="title-group">
+    <div class="logo">AS</div>
+    <h1>Attack Survival</h1>
   </div>
-
-  <div class="settings">
-    <div class="control">
-      <label>参加人数:
-        <input id="playersCount" type="number" min="2" max="10" value="6">
-      </label>
+  <div class="controls">
+    <div class="control-group">
+      <label>LIFE</label>
+      <input type="number" id="initLife" min="1" value="20">
     </div>
-
-    <div class="control">
-      <label>初期ライフ: <input id="initLife" type="number" min="1" value="20"></label>
+    <div class="control-group">
+      <label>相:減</label>
+      <input type="number" id="attackVal" min="0" value="1">
     </div>
-
-    <div class="control">
-      <label>正解時減少: <input id="deductOthers" type="number" min="0" value="1"></label>
+    <div class="control-group">
+      <label>自:加</label>
+      <input type="number" id="bonusVal" min="0" value="0">
     </div>
-
-    <div class="control">
-      <label>正解者加点: <input id="bonusCorrect" type="number" min="0" value="2"></label>
+    <div class="control-group">
+      <label>自:誤</label>
+      <input type="number" id="penaltyVal" min="0" value="2">
     </div>
-
-    <div class="control">
-      <label>誤答時減少: <input id="deductSelf" type="number" min="0" value="3"></label>
+    <div class="control-group">
+      <label>残り</label>
+      <input type="number" id="surviveVal" min="1" value="1">
     </div>
-
-    <div class="control">
-      <label>終了人数: <input id="minPlayers" type="number" min="1" value="2"></label>
+    <div class="control-group">
+      <label>人数</label>
+      <input type="number" id="playerCount" min="1" max="20" value="6">
     </div>
-
-    <div class="controls-right">
-      <button id="undoBtn" title="1手戻す">戻る</button>
-      <button id="resetBtn" title="初期化">リセット</button>
-      <button id="startBtn" title="ゲーム開始">開始</button>
-    </div>
+    
+    <div style="flex:1"></div>
+    
+    <button id="setupBtn" class="btn-action">開始</button>
+    <button id="resetAll" class="btn-action">リセット</button>
+    <button id="undoGlobal" class="btn-action">戻る</button>
   </div>
+</header>
 
-  <div class="players">
-    <div id="playerGrid"></div>
-  </div>
-
-  <div id="status" style="padding:12px 16px; font-weight:700; color:#fff;"></div>
+<div class="scoreboard">
+  <div id="grid" aria-label="scoreboard-grid"></div>
+</div>
+<div class="status-bar" id="statusBar">Ready</div>
 
 <script>
-  const MAX_PLAYERS = 10;
-  let players = [];
+(function(){
+  const grid = document.getElementById('grid');
+  const initInput = document.getElementById('initLife');
+  const attackInput = document.getElementById('attackVal');
+  const bonusInput = document.getElementById('bonusVal');
+  const penaltyInput = document.getElementById('penaltyVal');
+  const surviveInput = document.getElementById('surviveVal');
+  const countInput = document.getElementById('playerCount');
+  const statusBar = document.getElementById('statusBar');
+  
+  const setupBtn = document.getElementById('setupBtn');
+  const resetBtn = document.getElementById('resetAll');
+  const undoBtn = document.getElementById('undoGlobal');
+
+  let players = []; 
   let historyStack = [];
 
-  const playerGrid = document.getElementById('playerGrid');
-  const statusEl = document.getElementById('status');
-  const startBtn = document.getElementById('startBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const undoBtn = document.getElementById('undoBtn');
+  function setGridColumnsByCount(count){
+    grid.style.gridTemplateColumns = `repeat(${count}, 1fr)`;
+  }
 
-  startBtn.addEventListener('click', () => initGame(false));
-  resetBtn.addEventListener('click', () => initGame(true));
-  undoBtn.addEventListener('click', undoLast);
+  function pushHistory(){
+    historyStack.push(players.map(p => ({...p})));
+    if(historyStack.length > 500) historyStack.shift();
+    updateUndoState();
+  }
 
-  // 初期起動（デフォルトで参加人数6）
-  initGame();
+  function updateUndoState(){
+    undoBtn.disabled = historyStack.length === 0;
+  }
 
-  function initGame(isReset = false) {
-    const num = Math.min(MAX_PLAYERS, Math.max(2, parseInt(document.getElementById('playersCount').value || 6)));
-    const initLife = Math.max(1, parseInt(document.getElementById('initLife').value || 20));
-
-    // リセット履歴
-    historyStack = [];
+  function createGrid(count){
+    grid.innerHTML = '';
     players = [];
-    playerGrid.innerHTML = '';
+    historyStack = [];
+    setGridColumnsByCount(count);
 
-    // グリッド幅を参加人数に合わせる
-    playerGrid.style.gridTemplateColumns = `repeat(${num}, minmax(100px, 1fr))`;
+    const initialLife = parseInt(initInput.value || 10);
 
-    for (let i = 0; i < num; i++) {
-      const card = document.createElement('div');
-      card.className = 'player';
+    for(let i=0;i<count;i++){
+      const col = document.createElement('div');
+      col.className = 'column';
+      col.innerHTML = `
+        <input class="name-input" value="プレイヤー${i+1}" />
+        <div class="score-area">
+          <div class="life-score"><span class="life-num">${initialLife}</span></div>
+          <div class="wrong-count"></div>
+        </div>
+        <div class="buttons">
+          <button class="btn-op btn-correct">正解</button>
+          <button class="btn-op btn-wrong">誤答</button>
+        </div>
+      `;
+      grid.appendChild(col);
 
-      const number = document.createElement('div');
-      number.className = 'number'; number.textContent = `No.${i+1}`;
-      card.appendChild(number);
+      const nameEl = col.querySelector('.name-input');
+      const lifeNumEl = col.querySelector('.life-num');
+      const lifeScoreEl = col.querySelector('.life-score');
+      const wrongEl = col.querySelector('.wrong-count');
+      const btnC = col.querySelector('.btn-correct');
+      const btnW = col.querySelector('.btn-wrong');
 
-      // 縦書きの名前入力
-      const nameInput = document.createElement('input');
-      nameInput.type = 'text';
-      nameInput.placeholder = `プレイヤー${i+1}`;
-      nameInput.className = 'name-vertical';
-      card.appendChild(nameInput);
-
-      // Life 表示（ポイント欄）
-      const lifeEl = document.createElement('div');
-      lifeEl.className = 'life';
-      lifeEl.textContent = initLife;
-      card.appendChild(lifeEl);
-
-      // 誤答（×）のみ表示
-      const wrongEl = document.createElement('div');
-      wrongEl.className = 'wrong-count';
-      wrongEl.textContent = '';
-      card.appendChild(wrongEl);
-
-      // ボタン（正解・誤答のみ）
-      const btnRow = document.createElement('div');
-      btnRow.className = 'btn-row';
-      const btnC = document.createElement('button'); btnC.className = 'btn-correct'; btnC.textContent = '正解';
-      const btnW = document.createElement('button'); btnW.className = 'btn-wrong';   btnW.textContent = '誤答';
-      btnRow.append(btnC, btnW);
-      card.appendChild(btnRow);
-
-      playerGrid.appendChild(card);
-
-      const p = {
-        idx: i,
-        el: card,
-        inp: nameInput,
-        life: initLife,
-        wrongCount: 0,
-        active: true,
-        elLife: lifeEl,
-        elWrong: wrongEl,
-        btnC, btnW
+      const p = { 
+        idx:i, 
+        el:col, 
+        nameEl, 
+        lifeNumEl, 
+        lifeScoreEl, 
+        wrongEl, 
+        btnC, 
+        btnW, 
+        life: initialLife, 
+        wrong: 0, 
+        eliminated: false,
+        isWinner: false
       };
 
-      // イベント
-      btnC.addEventListener('click', () => handleCorrect(i));
-      btnW.addEventListener('click', () => handleWrong(i));
+      btnC.addEventListener('click', () => handleCorrect(p));
+      btnW.addEventListener('click', () => handleWrong(p));
 
       players.push(p);
     }
-
-    pushSnapshot(); // 初期状態を履歴に保存
-    updateAll();
-    updateStatus('ゲーム開始！残り ' + players.filter(p => p.active).length + ' 人');
-  }
-
-  // スナップショット（最小限の情報）
-  function makeSnapshot() {
-    return players.map(p => ({
-      name: p.inp.value,
-      life: p.life,
-      wrongCount: p.wrongCount,
-      active: p.active
-    }));
-  }
-  function pushSnapshot() {
-    historyStack.push(makeSnapshot());
-    if (historyStack.length > 200) historyStack.shift();
+    
+    renderAll(false);
     updateUndoState();
   }
 
-  function restoreSnapshot(snapshot) {
-    snapshot.forEach((s, i) => {
-      const p = players[i];
-      if (!p) return;
-      p.inp.value = s.name || '';
-      p.life = s.life;
-      p.wrongCount = s.wrongCount;
-      p.active = s.active;
-    });
-    updateAll(false);
-  }
+  function handleCorrect(actor){
+    if(actor.eliminated) return;
+    pushHistory();
+    
+    const attack = parseInt(attackInput.value || 0);
+    const bonus = parseInt(bonusInput.value || 0);
 
-  function updateUndoState() {
-    undoBtn.disabled = historyStack.length <= 1;
-  }
+    actor.life += bonus;
 
-  function handleCorrect(idx) {
-    const deductOthers = parseInt(document.getElementById('deductOthers').value || 1);
-    const bonusCorrect = parseInt(document.getElementById('bonusCorrect').value || 0);
-    pushSnapshot();
-    players.forEach((p, i) => {
-      if (i !== idx && p.active) p.life -= deductOthers;
-    });
-    if (players[idx].active) players[idx].life += bonusCorrect;
-    updateAll();
-  }
-
-  function handleWrong(idx) {
-    const deductSelf = parseInt(document.getElementById('deductSelf').value || 1);
-    pushSnapshot();
-    const p = players[idx];
-    if (!p.active) return;
-    p.life -= deductSelf;
-    p.wrongCount++;
-    updateAll();
-  }
-
-  function undoLast() {
-    if (historyStack.length <= 1) return;
-    historyStack.pop();
-    const prev = historyStack[historyStack.length - 1];
-    restoreSnapshot(prev);
-    updateStatus('1手戻しました');
-    updateUndoState();
-  }
-
-  function updateAll(checkEnd = true) {
     players.forEach(p => {
-      // 失格判定
-      if (p.life <= 0) p.active = false;
-
-      // UI 更新
-      if (!p.active) {
-        p.el.classList.add('eliminated');
-        p.elLife.textContent = 'Lose';
-        p.elWrong.textContent = ''; // 誤答は表示しない（Loseで十分）
-        p.inp.disabled = true;
-        p.btnC.disabled = true; p.btnW.disabled = true;
-      } else {
-        p.el.classList.remove('eliminated');
-        p.elLife.textContent = String(p.life);
-        p.elWrong.textContent = p.wrongCount > 0 ? '×'.repeat(p.wrongCount) : '';
-        p.inp.disabled = false;
-        p.btnC.disabled = false; p.btnW.disabled = false;
+      if(p.idx !== actor.idx && !p.eliminated){
+        p.life -= attack;
+        animateDamage(p);
       }
     });
-    if (checkEnd) checkEndCondition();
+    
+    checkStatus();
+    renderAll(true, actor.idx, 'correct');
+  }
+
+  function handleWrong(actor){
+    if(actor.eliminated) return;
+    pushHistory();
+    
+    const penalty = parseInt(penaltyInput.value || 0);
+    actor.life -= penalty;
+    actor.wrong++;
+    
+    checkStatus();
+    renderAll(true, actor.idx, 'wrong');
+  }
+
+  function animateDamage(p){
+    p.lifeScoreEl.classList.remove('shake-anim');
+    void p.lifeScoreEl.offsetWidth;
+    p.lifeScoreEl.classList.add('shake-anim');
+  }
+
+  function checkStatus(){
+    const surviveCount = parseInt(surviveInput.value || 1);
+    
+    players.forEach(p => {
+      if(!p.eliminated && p.life <= 0){
+        p.eliminated = true;
+        p.life = 0;
+      }
+    });
+
+    const survivors = players.filter(p => !p.eliminated);
+    if(survivors.length <= surviveCount){
+      survivors.forEach(p => p.isWinner = true);
+    } else {
+      players.forEach(p => p.isWinner = false);
+    }
+    
+    statusBar.textContent = `Survivor: ${survivors.length} / ${players.length}`;
+  }
+
+  function renderAll(animate=true, activeIdx = -1, type=''){
+    players.forEach(p=>{
+      p.el.classList.remove('eliminated', 'winner');
+      p.lifeScoreEl.classList.remove('danger');
+      
+      p.lifeNumEl.textContent = p.eliminated ? 'LOSE' : p.life;
+      p.wrongEl.textContent = p.wrong > 0 ? '×'.repeat(p.wrong) : '';
+
+      if(p.eliminated){
+        p.el.classList.add('eliminated');
+        p.btnC.disabled = true;
+        p.btnW.disabled = true;
+        p.nameEl.disabled = true;
+      } else {
+        if(p.isWinner){
+          p.el.classList.add('winner');
+        }
+        if(p.life <= 5) p.lifeScoreEl.classList.add('danger');
+
+        p.btnC.disabled = false;
+        p.btnW.disabled = false;
+        p.nameEl.disabled = false;
+      }
+
+      if(animate && p.idx === activeIdx){
+        if(type === 'correct'){
+          p.lifeScoreEl.classList.remove('pop-anim');
+          void p.lifeScoreEl.offsetWidth;
+          p.lifeScoreEl.classList.add('pop-anim');
+        } else if(type === 'wrong'){
+          animateDamage(p);
+        }
+      }
+    });
+
     updateUndoState();
   }
 
-  function checkEndCondition() {
-    const endNum = Math.max(1, parseInt(document.getElementById('minPlayers').value || 1));
-    const alive = players.filter(p => p.active).length;
-    if (alive <= endNum) {
-      updateStatus(`ゲームセット！残り ${alive} 人`);
-    } else {
-      updateStatus(`残り ${alive} 人`);
-    }
+  function undoGlobal(){
+    if(historyStack.length === 0) return;
+    const prev = historyStack.pop();
+    
+    players.forEach((p, i) => {
+      const state = prev[i];
+      p.life = state.life;
+      p.wrong = state.wrong;
+      p.eliminated = state.eliminated;
+      p.isWinner = state.isWinner;
+    });
+    
+    renderAll(false);
+    
+    const survivors = players.filter(p => !p.eliminated).length;
+    statusBar.textContent = `Survivor: ${survivors} / ${players.length}`;
   }
 
-  function updateStatus(msg) {
-    statusEl.textContent = msg;
+  function resetAll(){
+    const init = parseInt(initInput.value || 10);
+    players.forEach((p,i)=>{
+      p.life = init; p.wrong = 0; p.eliminated = false; p.isWinner = false;
+      p.nameEl.value = `Player ${i+1}`;
+      p.nameEl.disabled = false;
+      p.btnC.disabled = false;
+      p.btnW.disabled = false;
+    });
+    historyStack = [];
+    renderAll(false);
+    statusBar.textContent = `Survivor: ${players.length} / ${players.length}`;
+    updateUndoState();
   }
+
+  setupBtn.addEventListener('click', ()=>{
+    const cnt = Math.max(1, Math.min(20, parseInt(countInput.value || 6)));
+    createGrid(cnt);
+  });
+
+  resetBtn.addEventListener('click', resetAll);
+  undoBtn.addEventListener('click', undoGlobal);
+
+  createGrid(Math.max(1, Math.min(20, parseInt(countInput.value || 6))));
+  
+  window.addEventListener('resize', ()=> {
+    const cnt = players.length || Math.max(1, Math.min(20, parseInt(countInput.value || 6)));
+    setGridColumnsByCount(cnt);
+  });
+
+})();
 </script>
 </body>
 </html>
