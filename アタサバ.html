@@ -483,7 +483,7 @@
     const init = parseInt(initInput.value || 10);
     players.forEach((p,i)=>{
       p.life = init; p.wrong = 0; p.eliminated = false; p.isWinner = false;
-      p.nameEl.value = `Player ${i+1}`;
+      p.nameEl.value = `プレイヤー${i+1}`;
       p.nameEl.disabled = false;
       p.btnC.disabled = false;
       p.btnW.disabled = false;
