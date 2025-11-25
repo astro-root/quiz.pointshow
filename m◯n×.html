@@ -90,6 +90,8 @@
     #resetAll { background: var(--color-red); }
     #undoGlobal { background: #64748b; }
     #undoGlobal:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* 新しく追加するボタンは見た目を既存の戻るボタンに合わせる（UIの変化を最小限に）*/
+    #addPlayer { background: #64748b; }
 
     .scoreboard {
       flex: 1;
@@ -227,6 +229,7 @@
     </div>
     <div style="flex:1"></div>
     <button id="setupBtn" class="btn-action">開始</button>
+    <button id="addPlayer" class="btn-action">追加</button>
     <button id="resetAll" class="btn-action">リセット</button>
     <button id="undoGlobal" class="btn-action">戻る</button>
   </div>
@@ -245,6 +248,7 @@
   const setupBtn = document.getElementById('setupBtn');
   const resetBtn = document.getElementById('resetAll');
   const undoBtn = document.getElementById('undoGlobal');
+  const addBtn = document.getElementById('addPlayer');
 
   let players = []; 
   let historyStack = [];
@@ -273,6 +277,49 @@
     undoBtn.disabled = historyStack.length === 0;
   }
 
+  function createPlayerObject(i){
+    const col = document.createElement('div');
+    col.className = 'column';
+    col.innerHTML = `
+      <input class="name-input" value="プレイヤー${i+1}" />
+      <div class="score-area">
+        <div class="correct-count"><span class="correct-num">0</span></div>
+        <div class="wrong-count"></div>
+      </div>
+      <div class="buttons">
+        <button class="btn-op btn-correct">正解</button>
+        <button class="btn-op btn-wrong">誤答</button>
+      </div>
+    `;
+    grid.appendChild(col);
+
+    const nameEl = col.querySelector('.name-input');
+    const correctNumEl = col.querySelector('.correct-num');
+    const wrongEl = col.querySelector('.wrong-count');
+    const btnC = col.querySelector('.btn-correct');
+    const btnW = col.querySelector('.btn-wrong');
+
+    const p = { idx:i, el:col, nameEl, correctNumEl, wrongEl, btnC, btnW, correct:0, wrong:0, eliminated:false, rank:0 };
+
+    btnC.addEventListener('click', ()=>{
+      if(p.eliminated || p.rank>0) return;
+      pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
+      p.correct++;
+      checkFinishAndEliminate(p);
+      renderAll(true, p.idx);
+    });
+
+    btnW.addEventListener('click', ()=>{
+      if(p.eliminated || p.rank>0) return;
+      pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
+      p.wrong++;
+      checkFinishAndEliminate(p);
+      renderAll(true, p.idx);
+    });
+
+    return p;
+  }
+
   function createGrid(count){
     grid.innerHTML = '';
     players = [];
@@ -281,45 +328,7 @@
     setGridColumnsByCount(count);
 
     for(let i=0;i<count;i++){
-      const col = document.createElement('div');
-      col.className = 'column';
-      col.innerHTML = `
-        <input class="name-input" value="プレイヤー${i+1}" />
-        <div class="score-area">
-          <div class="correct-count"><span class="correct-num">0</span></div>
-          <div class="wrong-count"></div>
-        </div>
-        <div class="buttons">
-          <button class="btn-op btn-correct">正解</button>
-          <button class="btn-op btn-wrong">誤答</button>
-        </div>
-      `;
-      grid.appendChild(col);
-
-      const nameEl = col.querySelector('.name-input');
-      const correctNumEl = col.querySelector('.correct-num');
-      const wrongEl = col.querySelector('.wrong-count');
-      const btnC = col.querySelector('.btn-correct');
-      const btnW = col.querySelector('.btn-wrong');
-
-      const p = { idx:i, el:col, nameEl, correctNumEl, wrongEl, btnC, btnW, correct:0, wrong:0, eliminated:false, rank:0 };
-
-      btnC.addEventListener('click', ()=>{
-        if(p.eliminated || p.rank>0) return;
-        pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
-        p.correct++;
-        checkFinishAndEliminate(p);
-        renderAll(true, p.idx);
-      });
-
-      btnW.addEventListener('click', ()=>{
-        if(p.eliminated || p.rank>0) return;
-        pushHistory(p.idx, { correct:p.correct, wrong:p.wrong, eliminated:p.eliminated, rank:p.rank });
-        p.wrong++;
-        checkFinishAndEliminate(p);
-        renderAll(true, p.idx);
-      });
-
+      const p = createPlayerObject(i);
       players.push(p);
     }
 
@@ -418,6 +427,19 @@
     updateUndoState();
   }
 
+  function addPlayer(){
+    const currentCount = players.length;
+    const max = 20;
+    if(currentCount >= max) return;
+    const newIdx = currentCount;
+    setGridColumnsByCount(currentCount + 1);
+    const p = createPlayerObject(newIdx);
+    players.push(p);
+    countInput.value = players.length;
+    renderAll(false);
+    window.dispatchEvent(new Event('resize'));
+  }
+
   setupBtn.addEventListener('click', ()=>{
     const cnt = Math.max(1, Math.min(20, parseInt(countInput.value || 6)));
     createGrid(cnt);
@@ -425,6 +447,7 @@
 
   resetBtn.addEventListener('click', resetAll);
   undoBtn.addEventListener('click', undoGlobal);
+  addBtn.addEventListener('click', addPlayer);
 
   winInput.addEventListener('input', ()=> {
     players.forEach(p => {
