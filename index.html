@@ -16,106 +16,137 @@
     <style>
         :root {
             --bg-dark: #0f172a;
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --accent-blue: #38bdf8;
-            --text-main: #f1f5f9;
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.4);
+            --secondary: #818cf8;
+            --accent-pink: #f472b6;
+            --text-main: #f8fafc;
             --text-sub: #94a3b8;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --glass: blur(12px);
+            --card-bg: rgba(30, 41, 59, 0.6);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --glass: blur(16px) saturate(180%);
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         * { box-sizing: border-box; }
 
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            background: var(--bg-dark);
+            background-color: var(--bg-dark);
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.1) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(244, 114, 182, 0.1) 0%, transparent 20%);
+                radial-gradient(circle at 15% 25%, rgba(56, 189, 248, 0.12) 0%, transparent 25%),
+                radial-gradient(circle at 85% 75%, rgba(129, 140, 248, 0.12) 0%, transparent 25%),
+                radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 24px 24px;
             color: var(--text-main);
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            line-height: 1.6;
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
         }
 
         header {
             text-align: center;
-            padding: 60px 20px 40px;
-            animation: fadeInDown 0.8s ease-out;
+            padding: 80px 20px 50px;
+            animation: fadeInDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         h1 {
             margin: 0;
-            font-size: 2.2rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #38bdf8, #818cf8);
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 50%, var(--secondary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             display: inline-block;
-            letter-spacing: 0.05em;
+            letter-spacing: -0.02em;
+            text-shadow: 0 10px 30px rgba(56, 189, 248, 0.2);
         }
 
         .subtitle {
             color: var(--text-sub);
-            margin-top: 10px;
-            font-size: 0.95rem;
+            margin-top: 16px;
+            font-size: 1rem;
+            font-weight: 500;
         }
 
         .search-container {
-            max-width: 600px;
-            margin: 0 auto 40px;
+            max-width: 500px;
+            margin: 0 auto 50px;
             padding: 0 20px;
             position: relative;
+            z-index: 10;
+        }
+
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            color: var(--text-sub);
+            pointer-events: none;
+            width: 20px;
+            height: 20px;
         }
 
         .search-input {
             width: 100%;
-            padding: 15px 20px;
+            padding: 16px 20px 16px 52px;
             border-radius: 50px;
             border: 1px solid var(--card-border);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(15, 23, 42, 0.6);
             color: #fff;
             font-size: 1rem;
             outline: none;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             backdrop-filter: var(--glass);
+            box-shadow: var(--shadow-card);
+        }
+
+        .search-input::placeholder {
+            color: rgba(148, 163, 184, 0.6);
         }
 
         .search-input:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+            background: rgba(30, 41, 59, 0.8);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15), 0 0 20px var(--primary-glow);
         }
 
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
-            max-width: 1100px;
+            max-width: 1000px;
             margin: 0 auto 80px;
             padding: 0 20px;
-            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+            animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards;
         }
 
         .card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 25px;
+            border-radius: var(--radius-md);
+            padding: 24px;
             text-decoration: none;
             color: var(--text-main);
             display: flex;
             align-items: center;
             justify-content: space-between;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             backdrop-filter: var(--glass);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         .card::before {
@@ -124,46 +155,258 @@
             left: 0;
             top: 0;
             bottom: 0;
-            width: 4px;
-            background: var(--accent-blue);
-            transition: width 0.3s ease;
+            width: 3px;
+            background: var(--primary);
+            transition: width 0.3s ease, opacity 0.3s ease;
+            opacity: 0.7;
         }
 
         .card:hover {
-            transform: translateY(-5px);
-            background: rgba(40, 50, 70, 0.8);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
-            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-4px);
+            background: rgba(40, 50, 75, 0.8);
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
         }
 
         .card:hover::before {
-            width: 6px;
+            width: 100%;
+            opacity: 0.05;
         }
 
-        .card::after {
-            content: "→";
-            font-family: sans-serif;
-            font-weight: bold;
-            opacity: 0;
-            transform: translateX(-10px);
+        .card-icon-arrow {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transform: translateX(-5px);
+            opacity: 0.6;
             transition: all 0.3s ease;
-            color: var(--accent-blue);
-        }
-        .card:hover::after {
-            opacity: 1;
-            transform: translateX(0);
         }
 
-        .card[data-type="AQL"]::before { background: linear-gradient(to bottom, #ef4444, #b91c1c); }
-        .card[data-type="EQIDEN"]::before { background: linear-gradient(to bottom, #22c55e, #15803d); }
-        .card[data-type="Yellow"]::before { background: linear-gradient(to bottom, #eab308, #ca8a04); }
-        .card[data-type="Orange"]::before { background: linear-gradient(to bottom, #f97316, #c2410c); }
+        .card:hover .card-icon-arrow {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .card[data-type="AQL"] { border-left: 1px solid rgba(239, 68, 68, 0.3); }
+        .card[data-type="AQL"]::before { background: #ef4444; }
+        .card[data-type="AQL"] .card-icon-arrow { stroke: #ef4444; }
+
+        .card[data-type="EQIDEN"] { border-left: 1px solid rgba(34, 197, 94, 0.3); }
+        .card[data-type="EQIDEN"]::before { background: #22c55e; }
+        .card[data-type="EQIDEN"] .card-icon-arrow { stroke: #22c55e; }
+
+        .card[data-type="Yellow"] { border-left: 1px solid rgba(234, 179, 8, 0.3); }
+        .card[data-type="Yellow"]::before { background: #eab308; }
+        .card[data-type="Yellow"] .card-icon-arrow { stroke: #eab308; }
+
+        .card[data-type="Orange"] { border-left: 1px solid rgba(249, 115, 22, 0.3); }
+        .card[data-type="Orange"]::before { background: #f97316; }
+        .card[data-type="Orange"] .card-icon-arrow { stroke: #f97316; }
+
+        .content-area {
+            max-width: 840px;
+            margin: 0 auto 80px;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .section-header {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-header::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, var(--card-border), transparent);
+        }
+
+        .info-box {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .latest-update-wrapper {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(15, 23, 42, 0.2));
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            padding: 24px;
+            border-radius: var(--radius-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .latest-update-wrapper::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .badge-new {
+            background: var(--primary);
+            color: #0f172a;
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-weight: 800;
+            display: inline-block;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(56, 189, 248, 0.4);
+        }
+
+        .update-title {
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .timeline {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 7px;
+            width: 2px;
+            background: var(--card-border);
+        }
+
+        .timeline-item {
+            padding-left: 30px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .timeline-item:last-child { margin-bottom: 0; }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 16px;
+            height: 16px;
+            background: var(--bg-dark);
+            border: 2px solid var(--text-sub);
+            border-radius: 50%;
+            box-sizing: border-box;
+            transition: all 0.3s;
+        }
+
+        .timeline-item:hover::after {
+            border-color: var(--primary);
+            background: var(--primary-glow);
+        }
+
+        .timeline-date {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .timeline-content {
+            font-size: 0.95rem;
+            color: var(--text-sub);
+        }
+
+        .how-to-list {
+            margin: 0;
+            padding-left: 20px;
+            color: var(--text-sub);
+            font-size: 0.95rem;
+        }
+        
+        .how-to-list li {
+            margin-bottom: 10px;
+        }
+
+        .dev-profile {
+            display: flex;
+            align-items: flex-start;
+            gap: 24px;
+        }
+
+        .dev-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ddd, #999);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            background: linear-gradient(to bottom right, #38bdf8, #818cf8);
+            color: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .dev-info { flex: 1; }
+
+        .dev-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .dev-role {
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-family: 'Roboto Mono', monospace;
+            margin-bottom: 12px;
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .dev-bio p {
+            margin: 0 0 8px;
+            font-size: 0.95rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
 
         .action-area {
             text-align: center;
-            padding: 40px 20px;
+            padding: 60px 20px;
+            background: linear-gradient(to bottom, transparent, rgba(15, 23, 42, 0.8));
             border-top: 1px solid var(--card-border);
-            background: rgba(0,0,0,0.2);
+        }
+
+        .action-heading {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 10px;
         }
 
         .button-container {
@@ -171,7 +414,7 @@
             justify-content: center;
             gap: 20px;
             flex-wrap: wrap;
-            margin-top: 20px;
+            margin-top: 30px;
         }
 
         .action-btn {
@@ -179,108 +422,60 @@
             align-items: center;
             justify-content: center;
             text-decoration: none;
-            padding: 12px 28px;
+            padding: 14px 32px;
             border-radius: 50px;
-            font-weight: bold;
+            font-weight: 700;
             color: #fff;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-size: 0.95rem;
             position: relative;
             z-index: 1;
             overflow: hidden;
+            gap: 10px;
         }
 
         .btn-feedback {
-            background: linear-gradient(135deg, #ec4899, #be185d);
+            background: linear-gradient(135deg, #ec4899, #db2777);
             box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
         }
         
         .btn-x {
             background: #000;
-            border: 1px solid #333;
+            border: 1px solid rgba(255,255,255,0.2);
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
         .action-btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
             filter: brightness(1.1);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.4);
         }
 
-        .update-area {
-            max-width: 800px;
-            margin: 0 auto 60px;
-            padding: 0 20px;
-        }
-
-        .latest-box {
-            background: rgba(56, 189, 248, 0.05);
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-            margin-bottom: 40px;
-        }
-
-        .latest-badge {
-            background: var(--accent-blue);
-            color: #0f172a;
-            font-size: 0.7rem;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-weight: 800;
-        }
-
-        .history-title {
-            font-size: 0.9rem;
+        footer {
+            border-top: 1px solid var(--card-border);
+            padding: 30px 20px;
+            text-align: center;
             color: var(--text-sub);
-            margin-bottom: 15px;
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 10px;
+            font-size: 0.85rem;
+            background: rgba(15, 23, 42, 0.95);
         }
 
-        .history-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            font-size: 0.9rem;
-        }
-
-        .history-item {
-            display: flex;
-            padding: 8px 0;
-            color: var(--text-sub);
-        }
-        .history-date {
-            font-family: 'Roboto Mono', monospace;
-            margin-right: 20px;
-            color: var(--accent-blue);
-            opacity: 0.8;
-        }
+        footer div { margin-bottom: 8px; }
 
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
+            from { opacity: 0; transform: translateY(-30px); }
             to { opacity: 1; transform: translateY(0); }
         }
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         @media (max-width: 600px) {
-            h1 { font-size: 1.8rem; }
+            h1 { font-size: 2.2rem; }
             .grid-container { grid-template-columns: 1fr; }
-        }
-
-        footer {
-            border-top: 1px solid rgba(255,255,255,0.06);
-            padding: 14px 12px;
-            text-align: center;
-            color: var(--text-sub);
-            font-size: 0.9rem;
-            background: transparent;
+            .dev-profile { flex-direction: column; align-items: center; text-align: center; }
+            .how-to-list { padding-left: 0; list-style-position: inside; }
         }
     </style>
 </head>
@@ -288,114 +483,178 @@
 
     <header>
         <h1>Q-Score</h1>
-        <div class="subtitle">早押しクイズ得点表示ツール一覧</div>
+        <div class="subtitle">競技クイズ得点表示ツール</div>
     </header>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="ツール名で検索 (例: EQIDEN, up-down)">
+        <div class="search-wrapper">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="ツール名で検索 (例: EQIDEN, up-down...)">
+        </div>
     </div>
 
     <div class="grid-container" id="cardGrid">
-        <a href="https://astro-root.github.io/quiz.pointshow/フォロー.html" class="card" data-name="フォロー follow" target="_blank" rel="noopener noreferrer">フォロー</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/フォロー.html" class="card" data-name="フォロー follow" target="_blank" rel="noopener noreferrer">
+            <span>フォロー</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
         
-        <a href="https://astro-root.github.io/quiz.pointshow/AQL.html" class="card" data-type="AQL" data-name="AQL エーキューエル" target="_blank" rel="noopener noreferrer">AQL</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/AQL.html" class="card" data-type="AQL" data-name="AQL エーキューエル" target="_blank" rel="noopener noreferrer">
+            <span>AQL</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
         
-        <a href="https://astro-root.github.io/quiz.pointshow/EQIDEN.html" class="card" data-type="EQIDEN" data-name="EQIDEN エキデン 駅伝" target="_blank" rel="noopener noreferrer">EQIDEN</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/EQIDEN.html" class="card" data-type="EQIDEN" data-name="EQIDEN エキデン 駅伝" target="_blank" rel="noopener noreferrer">
+            <span>EQIDEN</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
         
-        <a href="https://astro-root.github.io/quiz.pointshow/Lucky Shot.html" class="card" data-name="Lucky Shot ラッキーショット" target="_blank" rel="noopener noreferrer">Lucky Shot</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/Lucky Shot.html" class="card" data-name="Lucky Shot ラッキーショット" target="_blank" rel="noopener noreferrer">
+            <span>Lucky Shot</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
         
-        <a href="https://astro-root.github.io/quiz.pointshow/NewYork.html" class="card" data-name="NewYork ニューヨーク" target="_blank" rel="noopener noreferrer">NewYork</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/NewYork.html" class="card" data-name="NewYork ニューヨーク" target="_blank" rel="noopener noreferrer">
+            <span>NewYork</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
         
-        <a href="https://astro-root.github.io/quiz.pointshow/TOMOE.html" class="card" data-name="TOMOE 巴" target="_blank" rel="noopener noreferrer">TOMOE</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/TOMOE.html" class="card" data-name="TOMOE 巴" target="_blank" rel="noopener noreferrer">
+            <span>TOMOE</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
         
-        <a href="https://astro-root.github.io/quiz.pointshow/by.html" class="card" data-name="by" target="_blank" rel="noopener noreferrer">by</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/by.html" class="card" data-name="by" target="_blank" rel="noopener noreferrer">
+            <span>by</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
         
-        <a href="https://astro-root.github.io/quiz.pointshow/m◯n×.html" class="card" data-name="m◯n× m○n×" target="_blank" rel="noopener noreferrer">m◯n×</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/m◯n×.html" class="card" data-name="m◯n× m○n×" target="_blank" rel="noopener noreferrer">
+            <span>m◯n×</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
         
-        <a href="https://astro-root.github.io/quiz.pointshow/up-down.html" class="card" data-name="up-down アップダウン" target="_blank" rel="noopener noreferrer">up-down</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/up-down.html" class="card" data-name="up-down アップダウン" target="_blank" rel="noopener noreferrer">
+            <span>up-down</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
         
-        <a href="https://astro-root.github.io/quiz.pointshow/アタサバ.html" class="card" data-name="アタック風サバイバル アタサバ" target="_blank" rel="noopener noreferrer">アタック風サバイバル</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/アタサバ.html" class="card" data-name="アタック風サバイバル アタサバ" target="_blank" rel="noopener noreferrer">
+            <span>アタック風サバイバル</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
         
-        <a href="https://astro-root.github.io/quiz.pointshow/アタック25.html" class="card" data-type="Yellow" data-name="アタック25 attack25" target="_blank" rel="noopener noreferrer">アタック25</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/アタック25.html" class="card" data-type="Yellow" data-name="アタック25 attack25" target="_blank" rel="noopener noreferrer">
+            <span>アタック25</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
         
-        <a href="https://astro-root.github.io/quiz.pointshow/連答付き.html" class="card" data-name="連答付き" target="_blank" rel="noopener noreferrer">連答付き</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/連答付き.html" class="card" data-name="連答付き" target="_blank" rel="noopener noreferrer">
+            <span>連答付き</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
         
-        <a href="https://astro-root.github.io/quiz.pointshow/timerace_timer.html" class="card" data-type="Orange" data-name="タイムレース用タイマー time race timer" target="_blank" rel="noopener noreferrer">タイムレース用タイマー</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/timerace_timer.html" class="card" data-type="Orange" data-name="タイムレース用タイマー time race timer" target="_blank" rel="noopener noreferrer">
+            <span>タイムレース用タイマー</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
         
-        <a href="https://astro-root.github.io/quiz.pointshow/Freeze.html" class="card" data-name="Freeze" target="_blank" rel="noopener noreferrer">Freeze</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/Freeze.html" class="card" data-name="Freeze" target="_blank" rel="noopener noreferrer">
+            <span>Freeze</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
 
-        <a href="https://astro-root.github.io/quiz.pointshow/Swedish.html" class="card" data-name="Swedish" target="_blank" rel="noopener noreferrer">Swedish</a>
+        <a href="https://astro-root.github.io/quiz.pointshow/Swedish.html" class="card" data-name="Swedish" target="_blank" rel="noopener noreferrer">
+            <span>Swedish</span>
+            <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
     </div>
 
-    <div class="update-area">
-        <div class="latest-box">
-            <span class="latest-badge">NEW</span>
-            <div style="font-size: 0.95rem;">
-                <strong style="color: #fff; display:block; margin-bottom:4px;">「Freeze」「Swedish」を追加</strong>
-                abc/EQIDENの3R Number10のコース「Freeze」と「Swedish」を作成しました。
+    <div class="content-area">
+        
+        <div class="latest-update-wrapper">
+            <span class="badge-new">Latest Update</span>
+            <div class="update-content">
+                <span class="update-title">デザイン更新</span>
+                <div style="color: var(--text-sub); font-size: 0.95rem;">
+                    サイトのデザインを大幅にリニューアルしました。(2025.11.27)
+                </div>
             </div>
         </div>
 
-        <div class="history-title">Update History</div>
-        <ul class="history-list">
-            <li class="history-item">
-                <span class="history-date">2025.11.24</span>
-                <span class="history-content">サイトの大幅変更</span>
-            </li>
-            <li class="history-item">
-                <span class="history-date">2025.11.21</span>
-                <span class="history-content">「連答付き」を更新</span>
-            </li>
-            <li class="history-item">
-                <span class="history-date">2025.11.21</span>
-                <span class="history-content">「by」を更新</span>
-            </li>
-        </ul>
-        <div class="history-title" style="margin-top:18px;">サイトの使い方</div>
-        <div class="latest-box" style="background: rgba(148, 163, 184, 0.03); border-color: rgba(148, 163, 184, 0.08);">
-            <div style="flex:1; font-size:0.95rem; color:var(--text-sub);">
-                <ol style="margin:0 0 0 18px; padding:0;">
-                    <li style="margin-bottom:8px;">ページ上部の検索バーにツール名やキーワードを入力してください。候補が絞り込まれます。</li>
-                    <li style="margin-bottom:8px;">使いたいツールのカードをクリックすると、新しいタブで該当ページが開きます。</li>
-                    <li style="margin-bottom:8px;">ブラウザのウィンドウサイズが小さい場合は、カードが縦並びに表示されます。レイアウトに影響はありません。</li>
-                    <li style="margin-bottom:8px;">不具合や改善要望があれば「フィードバックを送る」からご連絡ください。返信には時間を要する場合があります。</li>
+        <div>
+            <div class="section-header">Update History</div>
+            <div class="info-box">
+                <ul class="timeline">
+                    <li class="timeline-item">
+                        <span class="timeline-date">2025.11.25</span>
+                        <span class="timeline-content">「Freeze」「Swedish」を追加</span>
+                    </li>
+                    <li class="timeline-item">
+                        <span class="timeline-date">2025.11.24</span>
+                        <span class="timeline-content">サイトのデザインを大幅にリニューアル</span>
+                    </li>
+                    <li class="timeline-item">
+                        <span class="timeline-date">2025.11.21</span>
+                        <span class="timeline-content">「連答付き」の機能を更新</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-header">How to Use</div>
+            <div class="info-box">
+                <ol class="how-to-list">
+                    <li>検索バーにツール名やキーワードを入力して絞り込みます。</li>
+                    <li>カードをクリックすると、新しいタブで得点表示ツールが開きます。</li>
+                    <li>ウィンドウサイズに合わせてレイアウトは自動で調整されます。</li>
+                    <li>不具合・ご要望はページ下部のフォームよりご連絡ください。</li>
                 </ol>
             </div>
         </div>
 
-        <div class="history-title" style="margin-top:18px;">開発者プロフィール</div>
-        <div class="latest-box" style="background: rgba(255, 255, 255, 0.02); border-color: rgba(255, 255, 255, 0.04);">
-            <div style="flex:1; font-size:0.95rem; color:var(--text-sub);">
-                <p style="margin:0 0 8px 0; color:var(--text-main);"><strong>開発者：るーと(@astro_root)</strong></p>
-                <p style="margin:0 0 8px 0;">M1QC所属 / 高校2年</p>
-                <p style="margin:0;">個人で早押しクイズの得点表示を作成している。
-                <p style="margin:0;">得意ジャンルは理系全般（殊に物理学、天文学）</p>
-                <p style="margin:0;">苦手ジャンルは歴史。</p>
-                <p style="margin:0;">天文学に精通しており、日本物理学会にも入会している。また、個人で高校生を対象とした天文学コミュニティ「AstroHigh」も運営している。</p>
-                <p style="margin:0;">シンガーソングライターの『ユイカ』と歌い手のまふまふが推し。</p>
+        <div>
+            <div class="section-header">Developer</div>
+            <div class="info-box">
+                <div class="dev-profile">
+                    <img src="https://github.com/astro-root.png" alt="るーと" class="dev-avatar">
+                    <div class="dev-info">
+                        <div class="dev-name">るーと (@astro_root)</div>
+                        <div class="dev-role">M1QC / High School Student / Developer</div>
+                        <div class="dev-bio">
+                            <p>個人で早押しクイズの得点表示ツールを開発。</p>
+                            <p>得意ジャンルは理系全般（特に物理学・天文学）、苦手ジャンルは歴史。</p>
+                            <p>日本物理学会学生会友。高校生向け天文学コミュニティ「AstroHigh」運営。</p>
+                            <p>推し：『ユイカ』 / まふまふ</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="action-area">
-        <div style="color: var(--text-sub); font-size: 0.9rem;">開発者への連絡・ご要望</div>
-        <div style="color: var(--text-sub); font-size:0.9rem; margin-top:6px;">掲載内容や得点表示の動作に不具合・問題があればご報告いただけると助かります。</div>
+        <div class="action-heading">フィードバック・お問い合わせ</div>
+        <div style="color: var(--text-sub); font-size:0.95rem;">ツールの動作不良や改善要望はこちらからお願いします</div>
 
         <div class="button-container">
             <a href="https://forms.gle/7f9EYXkzycTQPBHr6" target="_blank" rel="noopener noreferrer" class="action-btn btn-feedback">
-                ✉️ フィードバックを送る
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                フィードバックを送る
             </a>
             <a href="https://x.com/astro_root" target="_blank" rel="noopener noreferrer" class="action-btn btn-x">
-                𝕏 @astro_root
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                @astro_root
             </a>
         </div>
     </div>
 
     <footer>
         <div style="max-width:1100px;margin:0 auto;">
-            <div>©astro_root</div>
-            <div style="margin-top:6px;color:var(--text-sub);font-size:0.85rem;">UIの改良を目的に、表示レイアウトや文章作成の一部にAIを利用しています。最終調整および管理は開発者自身が行っております。</div>
-            <div style="margin-top:6px;color:var(--text-sub);font-size:0.85rem;">Last Update:2025/11/25 12:07</div>
+            <div>&copy; 2025 astro_root</div>
+            <div style="opacity: 0.7;">UI Design enhanced with AI. Managed by Developer.</div>
+            <div style="opacity: 0.7;">Last Update: 2025/11/27 15:45</div>
         </div>
     </footer>
 
