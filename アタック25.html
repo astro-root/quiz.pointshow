@@ -17,13 +17,10 @@ header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:c
 h1{font-size:24px;margin:0;font-weight:800}
 .flag{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.02);font-size:13px;color:var(--muted)}
 
-/* boardCard を縦に伸ばして右側の side と高さを合わせやすくする */
 .boardCard{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));padding:12px;border-radius:12px;display:flex;flex-direction:column;justify-content:space-between;align-items:stretch}
 
-/* ボード（正方形セル） */
 .board{display:grid;grid-template-columns:repeat(5, var(--cell-size));grid-auto-rows: var(--cell-size);gap:var(--gap);justify-content:center;padding:8px;background:var(--panel);border-radius:10px}
 
-/* マス */
 .cell{width:var(--cell-size);height:var(--cell-size);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:45px;color:#ffffff;border:2px solid rgba(255,255,255,0.4);position:relative;cursor:pointer;user-select:none;overflow:hidden;transition:background-color 200ms, transform 140ms, box-shadow 140ms;}
 .cell.empty{background:linear-gradient(180deg,#0d0f11,#0b0c0e);color:var(--muted);border:1px solid rgba(255,255,255,0.03)}
 .cell.p1{background:linear-gradient(180deg,#ff8b8c,#ff4d4f);color:#fff;border:2px solid rgba(255,77,79,0.22)}
@@ -32,14 +29,12 @@ h1{font-size:24px;margin:0;font-weight:800}
 .cell.p4{background:linear-gradient(180deg,#a5f5c8,#38d98a);color:#01210a;border:2px solid rgba(75,224,138,0.2)}
 .cell .num{position:relative;z-index:2}
 
-/* 左上オーナーバッジ */
 .ownerBadge{position:absolute;left:10px;top:10px;padding:6px;border-radius:6px;font-weight:800;font-size:14px;z-index:4;color:#000;background:rgba(255,255,255,0.9)}
 .ownerBadge.p1{background:var(--p1);color:#fff}
 .ownerBadge.p2{background:var(--p2);color:#fff}
 .ownerBadge.p3{background:var(--p3);color:#000}
 .ownerBadge.p4{background:var(--p4);color:#00280f}
 
-/* 候補マス（取れる）をはっきり強調 */
 .cell.candidate-allowed{outline:5px solid rgba(255,255,255,0.06);transform:translateY(-4px);box-shadow:0 22px 44px rgba(0,0,0,0.6)}
 .cell.cand-p1::after,.cell.cand-p2::after,.cell.cand-p3::after,.cell.cand-p4::after{content:"";position:absolute;inset:0;border-radius:12px;z-index:1;opacity:var(--cand-opacity)}
 .cell.cand-p1::after{background:var(--p1)}
@@ -49,7 +44,6 @@ h1{font-size:24px;margin:0;font-weight:800}
 .candMark{position:absolute;right:10px;top:10px;width:26px;height:26px;border-radius:999px;z-index:5;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff}
 .candMark.p1{background:var(--p1)} .candMark.p2{background:var(--p2)} .candMark.p3{background:#000;color:#fff} .candMark.p4{background:var(--p4)}
 
-/* 反転アニメ */
 .flipping{animation:flipAnim 350ms ease-in-out;}
 @keyframes flipAnim{
   0% { transform: rotateY(0deg) scale(1); filter:brightness(1); }
@@ -57,26 +51,20 @@ h1{font-size:24px;margin:0;font-weight:800}
   100% { transform: rotateY(0deg) scale(1); filter:brightness(1); }
 }
 
-/* 右側 UI をボードの高さに合わせる（stretch） */
 .side{display:flex;flex-direction:column;gap:12px;align-self:stretch;justify-content:space-between}
-/* playerCard を縦にフィットさせるため各カードは通常サイズ、最後のカードを下に来るように配置 */
-/* 縦を少し縮めるため padding を小さく調整 */
 .playerCard{background:var(--card);padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;gap:6px}
 .playerTop{display:flex;justify-content:space-between;align-items:center}
 .playerInput{background:transparent;border:1px dashed rgba(255,255,255,0.04);color:#fff;padding:6px;border-radius:8px;font-size:28px;width:160px}
 .scoreBig{font-size:36px;font-weight:900}
 .metaSmall{color:var(--muted);font-size:13px}
 
-/* 誤答 & Skip を見やすく大きくするためのスタイル */
 .playerStats{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:4px}
 .playerStats .stat{display:flex;flex-direction:column;align-items:flex-start}
 .playerStats .stat .label{font-size:13px;color:var(--muted);font-weight:700}
 .playerStats .stat .value{font-size:18px;font-weight:900;color:#ffffff;margin-top:4px}
 
-/* 下のボタン行（注記を削除したのでボタンだけ右寄せ） */
 .boardControls{display:flex;justify-content:flex-end;gap:12px;align-items:center;margin-top:8px}
 
-/* ボタン等 */
 .btns{display:flex;gap:8px}
 button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:#fff;cursor:pointer;font-weight:700}
 button.primary{background:linear-gradient(90deg,#2563eb,#3b82f6);border:none}
@@ -88,7 +76,7 @@ button.primary{background:linear-gradient(90deg,#2563eb,#3b82f6);border:none}
 <body>
   <div class="wrap">
     <header>
-      <h1>Final Round：Attack25</h1>
+      <h1>アタック25</h1>
       <div style="display:flex;gap:8px;align-items:center">
         <div class="flag" id="remaining">残り: 25</div>
         <div class="flag" id="attackFlag">アタック: OFF</div>
@@ -155,12 +143,10 @@ button.primary{background:linear-gradient(90deg,#2563eb,#3b82f6);border:none}
         </div>
       </div>
 
-      <!-- 右下の進行ブロックは削除しました -->
     </aside>
   </div>
 
 <script>
-/* 既存ロジックを改修して要望を反映 */
 const OWNER_EMPTY = 0;
 let owners = Array(25).fill(0);
 let wrongCount = [0,0,0,0,0];
@@ -168,8 +154,8 @@ let skipTurns = [0,0,0,0,0];
 let currentCorrectPlayer = 0;
 let attackActive = false;
 let attackOwner = 0;
-let attackUsed = false; // アタックは1度だけ
-let mode = 'normal'; // 'normal' | 'choosePanel' | 'attackDelete'
+let attackUsed = false;
+let mode = 'normal';
 let actionStack = [];
 const deltas = [[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1],[-1,-1]];
 const boardEl = document.getElementById('board');
@@ -297,7 +283,6 @@ function highlightCandidates(){
 
 function refreshAttackActiveFlag(){
   const rem = remainingPanels();
-  // アタックは applyPlaceWithFlip の中で発火させるため、ここでは終端条件のみ処理
   if(rem === 0){
     attackActive = false;
     mode = 'normal';
@@ -319,22 +304,19 @@ function applyPlaceWithFlip(panelIdx, player){
       const rem = remainingPanels();
       refreshAttackActiveFlag();
 
-      // アタック発動条件：残りがちょうど5枚になったとき、かつまだ使われていない
       if(rem === 5 && !attackUsed){
-        attackUsed = true; // 一度だけ発動させるためフラグを立てる
+        attackUsed = true;
         attackActive = true;
         attackOwner = player;
         mode = 'attackDelete';
         renderBoard();
         updateUI();
-        alert(`${ownerLabelFor(attackOwner)} のアタックチャンス：盤上の既存パネルを選んで消去してください。`);
+        alert(`${ownerLabelFor(attackOwner)} のアタックチャンス！パネル1枚選んでください。`);
       } else {
-        // 通常時
         if(rem === 0){
           attackActive = false;
           mode = 'normal';
         } else {
-          // attackActive は攻撃が未発動である限り false のまま
         }
       }
       resolve();
@@ -370,14 +352,11 @@ async function selectPlayer(player){
 function markWrong(player){
   pushState();
   wrongCount[player] = (wrongCount[player] || 0) + 1;
-  // 通算誤答数分休みにする
   skipTurns[player] = wrongCount[player];
-  // 他プレイヤーのスキップを減らす（次のターン経過を想定）
   decrementSkipsExcept(player);
   renderBoard(); updateUI();
 }
 
-/* アタック：選んだ既存パネルを消去する処理 */
 async function doAttackDeleteAt(idx){
   if(owners[idx] === OWNER_EMPTY){ alert('空きパネルは消せません'); return; }
   if(!attackOwner || attackOwner === 0){ alert('交換対象のプレイヤーが未設定です'); return; }
@@ -408,13 +387,11 @@ async function onCellClick(e){
     await doAttackDeleteAt(idx);
     return;
   } else {
-    // 通常モードは無反応
   }
 }
 
 function nextQuestion(){ pushState(); for(let p=1;p<=4;p++) if(skipTurns[p] > 0) skipTurns[p]--; renderBoard(); refreshAttackActiveFlag(); updateUI(); }
 
-/* スルー：自分のスキップを1減らす（スキップが0なら不可） */
 function skipReduce(player){
   if(skipTurns[player] > 0){
     pushState();
