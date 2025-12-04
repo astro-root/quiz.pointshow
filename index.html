@@ -2,10 +2,11 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="google-site-verification" content="MBkPO1_tms9bHeuGx3iGoau82omOc5BhXZqGXEoOZqk" />    
+    <meta name="google-site-verification" content="MBkPO1_tms9bHeuGx3iGoau82omOc5BhXZqGXEoOZqk">    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="「他のどのサイトよりも使いやすい」早押しクイズの得点表示ツールです。">
-    <meta name="keywords" content="クイズ,早押し,早押しクイズ,得点表示,クイズ大会">
+    <meta name="description" content="『他のどのサイトよりも使いやすい』早押しクイズ得点表示ツール「Q-Score」。インストール不要で、多様なルールに対応。シンプルで直感的な操作性で、クイズ大会やサークル活動を強力にサポートします。">
+    <meta property="og:description" content="ブラウザで使える無料の早押しクイズ得点表示ツール「Q-Score」。インストール不要で、多様なルールに対応。">
+    <meta name="keywords" content="クイズ,早押し,早押しクイズ,得点表示,クイズ大会,スコアボード,Q-Score,無料">
     <title>Q-Score | 早押しクイズ得点表示一覧</title>
     <link rel="icon" href="https://astro-root.github.io/quiz.pointshow/favicon.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,9 +29,7 @@
             --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.2);
             --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
         }
-
         * { box-sizing: border-box; }
-
         body {
             font-family: 'Noto Sans JP', sans-serif;
             background-color: var(--bg-dark);
@@ -46,7 +45,6 @@
             -webkit-font-smoothing: antialiased;
             position: relative;
         }
-
         body::before {
             content: "";
             position: fixed;
@@ -55,13 +53,11 @@
             z-index: -1;
             pointer-events: none;
         }
-
         header {
             text-align: center;
             padding: 100px 20px 60px;
             position: relative;
         }
-
         h1 {
             margin: 0;
             font-size: 3.5rem;
@@ -74,12 +70,10 @@
             filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.3));
             animation: textGlow 3s infinite alternate;
         }
-
         @keyframes textGlow {
             from { filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.2)); }
             to { filter: drop-shadow(0 0 25px rgba(56, 189, 248, 0.5)); }
         }
-
         .subtitle {
             color: var(--text-sub);
             margin-top: 12px;
@@ -87,7 +81,6 @@
             font-weight: 500;
             letter-spacing: 0.05em;
         }
-
         .search-container {
             max-width: 600px;
             margin: 0 auto 60px;
@@ -96,13 +89,11 @@
             top: 20px;
             z-index: 100;
         }
-
         .search-wrapper {
             position: relative;
             display: flex;
             align-items: center;
         }
-
         .search-icon {
             position: absolute;
             left: 24px;
@@ -112,7 +103,6 @@
             height: 20px;
             transition: color 0.3s;
         }
-
         .search-input {
             width: 100%;
             padding: 18px 24px 18px 56px;
@@ -126,35 +116,29 @@
             backdrop-filter: blur(12px);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
-
         .search-input::placeholder {
             color: rgba(148, 163, 184, 0.6);
         }
-
         .search-input:focus {
             background: rgba(30, 41, 59, 0.9);
             border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15), 0 8px 30px rgba(0,0,0,0.3);
             transform: translateY(-2px);
         }
-
         .search-input:focus + .search-icon {
             color: var(--primary);
         }
-
         .container-width {
             max-width: 1100px;
             margin: 0 auto;
             padding: 0 20px;
         }
-
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 24px;
             margin-bottom: 100px;
         }
-
         .card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -174,7 +158,6 @@
             animation: fadeInUp 0.6s var(--transition-smooth) forwards;
             min-height: 120px;
         }
-
         .card::before {
             content: "";
             position: absolute;
@@ -185,19 +168,16 @@
             opacity: 0.8;
             box-shadow: 2px 0 10px var(--primary-glow);
         }
-
         .card:hover {
             transform: translateY(-6px) scale(1.01);
             background: rgba(40, 50, 80, 0.6);
             border-color: rgba(56, 189, 248, 0.4);
             box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.1);
         }
-
         .card:hover::before {
             width: 100%;
             opacity: 0.1;
         }
-
         .card-content {
             flex: 1;
             padding-right: 16px;
@@ -205,14 +185,12 @@
             flex-direction: column;
             gap: 6px;
         }
-
         .card-title {
             font-weight: 700;
             font-size: 1.15rem;
             color: #fff;
             display: block;
         }
-
         .card-desc {
             font-size: 0.85rem;
             color: var(--text-sub);
@@ -220,7 +198,6 @@
             line-height: 1.5;
             display: block;
         }
-
         .card-icon-arrow {
             width: 24px;
             height: 24px;
@@ -234,29 +211,24 @@
             transition: all 0.3s var(--transition-smooth);
             flex-shrink: 0;
         }
-
         .card:hover .card-icon-arrow {
             transform: translateX(0);
             opacity: 1;
         }
-
         .card[data-type="AQL"] { --theme-color: #ef4444; }
         .card[data-type="EQIDEN"] { --theme-color: #22c55e; }
         .card[data-type="Yellow"] { --theme-color: #eab308; }
         .card[data-type="Orange"] { --theme-color: #f97316; }
-
         .card[data-type] { border-left: 1px solid rgba(255, 255, 255, 0.05); }
         .card[data-type]::before { 
             background: var(--theme-color); 
             box-shadow: 2px 0 10px rgba(0,0,0,0.2);
         }
         .card[data-type] .card-icon-arrow { stroke: var(--theme-color); }
-        
         .card[data-type]:hover {
             border-color: var(--theme-color);
             box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 20px var(--theme-color);
         }
-
         .content-area {
             max-width: 860px;
             margin: 0 auto 80px;
@@ -265,7 +237,6 @@
             flex-direction: column;
             gap: 60px;
         }
-
         .section-header {
             font-size: 1.25rem;
             color: var(--text-main);
@@ -275,14 +246,12 @@
             align-items: center;
             gap: 16px;
         }
-        
         .section-header::after {
             content: "";
             flex: 1;
             height: 1px;
             background: linear-gradient(to right, var(--card-border), transparent);
         }
-
         .info-box {
             background: rgba(15, 23, 42, 0.4);
             border: 1px solid var(--card-border);
@@ -291,7 +260,6 @@
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-
         .latest-update-wrapper {
             background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(15, 23, 42, 0.4));
             border: 1px solid rgba(56, 189, 248, 0.3);
@@ -301,7 +269,6 @@
             overflow: hidden;
             box-shadow: 0 10px 30px -5px rgba(56, 189, 248, 0.15);
         }
-
         .latest-update-wrapper::before {
             content: "";
             position: absolute;
@@ -309,7 +276,6 @@
             background: var(--primary);
             box-shadow: 4px 0 15px var(--primary-glow);
         }
-
         .badge-new {
             background: var(--primary);
             color: #0f172a;
@@ -323,7 +289,6 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
-
         .update-title {
             color: #fff;
             font-weight: 700;
@@ -331,14 +296,12 @@
             margin-bottom: 8px;
             display: block;
         }
-
         .timeline {
             list-style: none;
             padding: 0;
             margin: 0;
             position: relative;
         }
-
         .timeline::before {
             content: '';
             position: absolute;
@@ -346,15 +309,12 @@
             width: 2px;
             background: var(--card-border);
         }
-
         .timeline-item {
             padding-left: 36px;
             position: relative;
             margin-bottom: 24px;
         }
-
         .timeline-item:last-child { margin-bottom: 0; }
-
         .timeline-item::after {
             content: '';
             position: absolute;
@@ -366,13 +326,11 @@
             transition: all 0.3s;
             z-index: 2;
         }
-
         .timeline-item:hover::after {
             border-color: var(--primary);
             background: var(--primary);
             box-shadow: 0 0 10px var(--primary-glow);
         }
-
         .timeline-date {
             font-family: 'Roboto Mono', monospace;
             font-size: 0.9rem;
@@ -380,30 +338,25 @@
             margin-bottom: 6px;
             display: block;
         }
-
         .how-to-list {
             margin: 0;
             padding-left: 20px;
             color: var(--text-sub);
             font-size: 1rem;
         }
-        
         .how-to-list li {
             margin-bottom: 12px;
             padding-left: 8px;
         }
-        
         .how-to-list li::marker {
             color: var(--primary);
             font-weight: bold;
         }
-
         .dev-profile {
             display: flex;
             align-items: flex-start;
             gap: 32px;
         }
-
         .dev-avatar {
             width: 90px;
             height: 90px;
@@ -416,16 +369,13 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             border: 3px solid rgba(255,255,255,0.1);
         }
-
         .dev-info { flex: 1; }
-
         .dev-name {
             font-size: 1.4rem;
             font-weight: 700;
             color: #fff;
             margin-bottom: 6px;
         }
-
         .dev-role {
             font-size: 0.85rem;
             color: var(--primary);
@@ -437,14 +387,12 @@
             border-radius: 6px;
             border: 1px solid rgba(56, 189, 248, 0.2);
         }
-
         .dev-bio p {
             margin: 0 0 10px;
             font-size: 1rem;
             color: var(--text-sub);
             line-height: 1.7;
         }
-
         .action-area {
             text-align: center;
             padding: 80px 20px;
@@ -452,14 +400,12 @@
             border-top: 1px solid var(--card-border);
             position: relative;
         }
-
         .action-heading {
             font-size: 1.5rem;
             font-weight: 800;
             margin-bottom: 12px;
             color: #fff;
         }
-
         .button-container {
             display: flex;
             justify-content: center;
@@ -467,7 +413,6 @@
             flex-wrap: wrap;
             margin-top: 40px;
         }
-
         .action-btn {
             display: inline-flex;
             align-items: center;
@@ -484,28 +429,23 @@
             overflow: hidden;
             gap: 12px;
         }
-
         .btn-feedback {
             background: linear-gradient(135deg, #ec4899, #db2777);
             box-shadow: 0 10px 20px rgba(236, 72, 153, 0.25);
         }
-        
         .btn-x {
             background: #000;
             border: 1px solid rgba(255,255,255,0.2);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
-
         .action-btn:hover {
             transform: translateY(-4px);
             filter: brightness(1.1);
             box-shadow: 0 15px 30px rgba(0,0,0,0.4);
         }
-
         .action-btn:active {
             transform: translateY(-1px);
         }
-
         footer {
             border-top: 1px solid var(--card-border);
             padding: 40px 20px;
@@ -514,7 +454,6 @@
             font-size: 0.85rem;
             background: #0b1121;
         }
-
         .no-results {
             grid-column: 1 / -1;
             text-align: center;
@@ -523,7 +462,6 @@
             font-weight: 500;
             display: none;
         }
-
         @keyframes fadeInDown {
             from { opacity: 0; transform: translateY(-30px); }
             to { opacity: 1; transform: translateY(0); }
@@ -532,7 +470,6 @@
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         @media (max-width: 600px) {
             h1 { font-size: 2.5rem; }
             header { padding-top: 60px; }
@@ -550,19 +487,16 @@
     </style>
 </head>
 <body>
-
     <header>
         <h1>Q-Score</h1>
         <div class="subtitle">早押しクイズ得点表示一覧</div>
     </header>
-
     <div class="search-container">
         <div class="search-wrapper">
             <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input type="text" id="searchInput" class="search-input" placeholder="ルール名で検索 (例: EQIDEN, up-down...)">
         </div>
     </div>
-
     <div class="container-width">
         <div class="grid-container" id="cardGrid">
             <a href="https://astro-root.github.io/quiz.pointshow/m◯n×.html" class="card" data-name="m◯n× m○n×" target="_blank" rel="noopener noreferrer">
@@ -572,7 +506,6 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <a href="https://astro-root.github.io/quiz.pointshow/連答付き.html" class="card" data-name="連答付き" target="_blank" rel="noopener noreferrer">
                 <div class="card-content">
                     <span class="card-title">連答付き</span>
@@ -580,7 +513,6 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <a href="https://astro-root.github.io/quiz.pointshow/up-down.html" class="card" data-name="up-down アップダウン" target="_blank" rel="noopener noreferrer">
                 <div class="card-content">
                     <span class="card-title">up-down</span>
@@ -588,7 +520,6 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <a href="https://astro-root.github.io/quiz.pointshow/by.html" class="card" data-name="by" target="_blank" rel="noopener noreferrer">
                 <div class="card-content">
                     <span class="card-title">by</span>
@@ -596,7 +527,6 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <a href="https://astro-root.github.io/quiz.pointshow/Freeze.html" class="card" data-name="Freeze" target="_blank" rel="noopener noreferrer">
                 <div class="card-content">
                     <span class="card-title">Freeze</span>
@@ -604,7 +534,6 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <a href="https://astro-root.github.io/quiz.pointshow/Swedish.html" class="card" data-name="Swedish" target="_blank" rel="noopener noreferrer">
                 <div class="card-content">
                     <span class="card-title">Swedish</span>
@@ -612,7 +541,6 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <a href="https://astro-root.github.io/quiz.pointshow/AQL.html" class="card" data-type="AQL" data-name="AQL エーキューエル" target="_blank" rel="noopener noreferrer">
                 <div class="card-content">
                     <span class="card-title">AQL</span>
@@ -620,7 +548,6 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <a href="https://astro-root.github.io/quiz.pointshow/アタサバ.html" class="card" data-name="アタック風サバイバル アタサバ" target="_blank" rel="noopener noreferrer">
                 <div class="card-content">
                     <span class="card-title">アタック風サバイバル</span>
@@ -628,7 +555,6 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <a href="https://astro-root.github.io/quiz.pointshow/NewYork.html" class="card" data-name="NewYork ニューヨーク" target="_blank" rel="noopener noreferrer">
                 <div class="card-content">
                     <span class="card-title">NewYork</span>
@@ -636,7 +562,6 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <a href="https://astro-root.github.io/quiz.pointshow/EQIDEN.html" class="card" data-type="EQIDEN" data-name="EQIDEN エキデン 駅伝" target="_blank" rel="noopener noreferrer">
                 <div class="card-content">
                     <span class="card-title">EQIDEN</span>
@@ -644,7 +569,6 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <a href="https://astro-root.github.io/quiz.pointshow/Lucky Shot.html" class="card" data-name="Lucky Shot ラッキーショット" target="_blank" rel="noopener noreferrer">
                 <div class="card-content">
                     <span class="card-title">Lucky Shot</span>
@@ -652,7 +576,6 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <a href="https://astro-root.github.io/quiz.pointshow/フォロー.html" class="card" data-name="フォロー follow" target="_blank" rel="noopener noreferrer">
                 <div class="card-content">
                     <span class="card-title">フォロー</span>
@@ -660,7 +583,6 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <a href="https://astro-root.github.io/quiz.pointshow/timerace_timer.html" class="card" data-type="Orange" data-name="タイムレース用タイマー time race timer" target="_blank" rel="noopener noreferrer">
                 <div class="card-content">
                     <span class="card-title">タイムレース用タイマー</span>
@@ -668,7 +590,6 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <a href="https://astro-root.github.io/quiz.pointshow/アタック25.html" class="card" data-type="Yellow" data-name="アタック25 attack25" target="_blank" rel="noopener noreferrer">
                 <div class="card-content">
                     <span class="card-title">アタック25</span>
@@ -676,7 +597,6 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <a href="https://astro-root.github.io/quiz.pointshow/TOMOE.html" class="card" data-name="TOMOE 巴" target="_blank" rel="noopener noreferrer">
                 <div class="card-content">
                     <span class="card-title">TOMOE</span>
@@ -684,14 +604,11 @@
                 </div>
                 <svg class="card-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-
             <div class="no-results" id="noResults">
                 条件に一致するルールが見つかりませんでした。
             </div>
         </div>
-
         <div class="content-area">
-            
             <div class="latest-update-wrapper">
                 <span class="badge-new">Latest Update</span>
                 <div class="update-content">
@@ -701,7 +618,6 @@
                     </div>
                 </div>
             </div>
-
             <div>
                 <div class="section-header">Update History</div>
                 <div class="info-box">
@@ -721,7 +637,6 @@
                     </ul>
                 </div>
             </div>
-
             <div>
                 <div class="section-header">How to Use</div>
                 <div class="info-box">
@@ -733,7 +648,6 @@
                     </ol>
                 </div>
             </div>
-
             <div>
                 <div class="section-header">Developer</div>
                 <div class="info-box">
@@ -754,11 +668,9 @@
             </div>
         </div>
     </div>
-
     <div class="action-area">
         <div class="action-heading">フィードバック・お問い合わせ</div>
         <div style="color: var(--text-sub); font-size:1rem;">ツールの動作不良や改善要望はこちらからお願いします</div>
-
         <div class="button-container">
             <a href="https://forms.gle/7f9EYXkzycTQPBHr6" target="_blank" rel="noopener noreferrer" class="action-btn btn-feedback">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
@@ -770,7 +682,6 @@
             </a>
         </div>
     </div>
-
     <footer>
         <div style="max-width:1100px;margin:0 auto;">
             <div style="margin-bottom:8px;">&copy; 2025 astro_root</div>
@@ -778,20 +689,16 @@
             <div style="opacity: 0.7;">Last Update: 2025/12/2 13:33</div>
         </div>
     </footer>
-
     <script>
         const searchInput = document.getElementById('searchInput');
         const cards = document.querySelectorAll('.card');
         const noResults = document.getElementById('noResults');
-
         cards.forEach((card, index) => {
             card.style.animationDelay = `${index * 0.05}s`;
         });
-
         searchInput.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             let visibleCount = 0;
-
             cards.forEach(card => {
                 const name = card.querySelector('.card-title').innerText.toLowerCase();
                 const desc = card.querySelector('.card-desc').innerText.toLowerCase();
@@ -806,7 +713,6 @@
                     card.style.display = 'none';
                 }
             });
-
             if (visibleCount === 0) {
                 noResults.style.display = 'block';
             } else {
@@ -814,6 +720,5 @@
             }
         });
     </script>
-
 </body>
 </html>
