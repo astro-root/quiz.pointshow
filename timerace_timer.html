@@ -18,7 +18,6 @@
             user-select: none;
         }
 
-        /* タイムアップ時の激しい点滅 */
         @keyframes timeUpFlash {
             0% { background-color: #ff0000; }
             50% { background-color: #500000; }
@@ -35,7 +34,6 @@
             font-size: 1.2rem;
         }
 
-        /* 入力エリア */
         .input-area {
             display: flex;
             align-items: center;
@@ -48,7 +46,7 @@
         .input-area.hidden {
             opacity: 0;
             pointer-events: none;
-            position: absolute; /* レイアウトが崩れないように浮かす */
+            position: absolute;
         }
 
         input[type="number"] {
@@ -70,7 +68,6 @@
             line-height: 1;
         }
 
-        /* 残り10秒以下で黄色くする（音は鳴らさない） */
         #timer-display.warning {
             color: #ffeb3b;
         }
@@ -98,7 +95,6 @@
         #startStopBtn.running { background-color: #ff9f43; color: #fff; }
         #resetBtn { background-color: #57606f; color: #fff; }
 
-        /* 設定再表示ボタン */
         .show-settings-btn {
             margin-top: 30px;
             background: transparent;
@@ -112,7 +108,7 @@
 </head>
 <body>
 
-    <h1>Countdown Timer</h1>
+    <h1>Quiz Timer</h1>
 
     <div class="input-area" id="inputArea">
         <input type="number" id="inputMin" value="3" min="0" max="99"> 分
@@ -142,7 +138,6 @@
         const inputSec = document.getElementById('inputSec');
         const inputArea = document.getElementById('inputArea');
 
-        // 初期化
         updateDisplayFromInput();
 
         inputMin.addEventListener('change', updateDisplayFromInput);
@@ -158,17 +153,14 @@
 
         function showSettings() {
             inputArea.classList.remove('hidden');
-            if(isRunning) toggleTimer(); // 設定変更時は止める
-        }
+            if(isRunning) toggleTimer();
 
-        // 音声機能の準備
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
         }
 
-        // 単発の音を鳴らす
         function playSound(freq, duration, type = 'square') {
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
@@ -183,13 +175,9 @@
             osc.stop(audioCtx.currentTime + duration);
         }
 
-        // 終了音（ピピピ！）
         function playTimeUpSound() {
-            // ピッ
             playSound(880, 0.1, 'square');
-            // ピッ（0.2秒後）
             setTimeout(() => playSound(880, 0.1, 'square'), 200);
-            // ピッ（0.4秒後）
             setTimeout(() => playSound(880, 0.3, 'square'), 400);
         }
 
@@ -209,7 +197,7 @@
                     let s = parseInt(inputSec.value) || 0;
                     totalTimeMs = (m * 60 + s) * 1000;
                     if(totalTimeMs <= 0) return;
-                    inputArea.classList.add('hidden'); // スタートしたら設定を隠す
+                    inputArea.classList.add('hidden');
                 }
 
                 endTime = Date.now() + totalTimeMs;
@@ -223,7 +211,6 @@
         function updateTimer() {
             const remaining = endTime - Date.now();
             
-            // --- タイムアップ処理 ---
             if (remaining <= 0) {
                 clearInterval(timerInterval);
                 display.textContent = "00:00";
@@ -231,23 +218,21 @@
                 startStopBtn.textContent = 'START';
                 startStopBtn.classList.remove('running');
                 
-                document.body.classList.add('time-up'); // 画面点滅
-                playTimeUpSound(); // ピピピ音
+                document.body.classList.add('time-up');
+                playTimeUpSound();
                 return;
             }
 
-            // --- 表示更新 ---
             const totalSeconds = Math.ceil(remaining / 1000);
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
 
             display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-            // --- 色の変更だけ行う（音は鳴らさない） ---
             if (lastSecond !== totalSeconds) {
                 lastSecond = totalSeconds;
                 if (totalSeconds <= 10) {
-                     display.classList.add('warning'); // 黄色くするだけ
+                     display.classList.add('warning');
                 }
             }
         }
